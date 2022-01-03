@@ -21,6 +21,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
     - name: Set up JDK 11
       uses: actions/setup-java@v1
       with:
@@ -29,7 +31,9 @@ jobs:
     - name: Cache Maven packages
       uses: actions/cache@v2
       with:
-        path: ~/.m2
+        path: |
+         ~/.m2
+         ~/.sonar/cache
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml', '**/*.yml') }}
         restore-keys: ${{ runner.os }}-m2-
 
@@ -44,9 +48,17 @@ jobs:
       if: ${{ always() && github.event_name == 'pull_request' && steps.mvnTest.outcome == 'success' }}
       working-directory: ${{ env.workdir }}
 
-    - name: Build with Maven, analyzed with SonarCloud
-      run: mvn verify
+    - name: Build with Maven, analysed with SonarCloud
+      run: >
+       mvn verify
+       org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
+       -Dsonar.organization=francescoscandiffio-github
+       -Dsonar.host.url=https://sonarcloud.io
+       -Dsonar.projectKey=FrancescoScandiffio_shop-totem
       working-directory: ${{ env.workdir }}
+      env: 
+       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
 
     - name: Generate JUnit Report
       run: mvn surefire-report:report-only site:site -DgenerateReports=false
