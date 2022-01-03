@@ -33,18 +33,36 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml', '**/*.yml') }}
         restore-keys: ${{ runner.os }}-m2-
 
-    - name: Build with Maven
+    - name: Run test 
+      id: mvnTest
+      run: mvn test
+      working-directory: ${{ env.workdir }}
+              
+    - name: Run mutation test on pull_request
+      id: pitest
+      run: mvn org.pitest:pitest-maven:mutationCoverage
+      if: ${{ always() && github.event_name == 'pull_request' && steps.mvnTest.outcome == 'success' }}
+      working-directory: ${{ env.workdir }}
+
+    - name: Build with Maven, analyzed with SonarCloud
       run: mvn verify
       working-directory: ${{ env.workdir }}
 
     - name: Generate JUnit Report
       run: mvn surefire-report:report-only site:site -DgenerateReports=false
-      if: ${{ failure() }}
+      if: ${{ always() && (steps.mvnTest.outcome == 'failure') }}
       working-directory: ${{ env.workdir }}
 
     - name: Archive JUnit Report
       uses: actions/upload-artifact@v2
-      if: ${{ failure() }}      
+      if: ${{ always() && (steps.mvnTest.outcome == 'failure') }}
       with:
         name: surefire-report-jdk-11
         path: '**/target/site'
+        
+    - name: Archive Pitest Report
+      uses: actions/upload-artifact@v2
+      if: ${{ always() && (steps.pitest.outcome == 'failure') }}
+      with:
+        name: pitest-report-jdk-11
+        path: '**/target/pit-reports'
