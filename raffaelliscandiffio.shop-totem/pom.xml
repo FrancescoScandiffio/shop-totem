@@ -15,6 +15,9 @@
 		<junit.jupiter.version>5.8.1</junit.jupiter.version>
 		<assertj.core.version>3.21.0</assertj.core.version>
 
+		<sonar.junit.reportPaths>
+			${project.build.directory}/surefire-reports
+		</sonar.junit.reportPaths>
 	</properties>
 
 	<dependencies>
@@ -97,6 +100,11 @@
 							</goals>
 						</execution>
 					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.sonarsource.scanner.maven</groupId>
+					<artifactId>sonar-maven-plugin</artifactId>
+					<version>3.9.1.2184</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
