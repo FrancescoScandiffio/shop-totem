@@ -5,6 +5,13 @@ public class OrderItem {
 	private Product product;
 	private int quantity;
 
+	/**
+	 * Constructs a new OrderItem with the specified product and quantity. 
+	 * @param product the product to be purchased
+	 * @param quantity the quantity to be purchased
+	 * @throws NullPointerException if the specified product is null
+	 * @throws IllegalArgumentException if the specified quantity is non-positive
+	 */
 	public OrderItem(Product product, int quantity) {
 		if (product == null)
 			throw new NullPointerException("Null product");
@@ -13,11 +20,26 @@ public class OrderItem {
 		this.quantity = quantity;
 	}
 
+	/**
+	 * Increase the quantity by the specified amount.
+	 * @param amount the amount to be added to the current quantity
+	 * @throws IllegalArgumentException if the specified amount is non-positive
+	 */
 	public void increaseQuantity(int amount) {
 		handleNonPositiveQuantity(amount);
 		this.quantity += amount;
 	}
 
+	/**
+	 * Decrease the current quantity by the specified amount.
+	 * @param amount the amount to be removed from the current quantity
+	 * @throws IllegalArgumentException in the following three cases:
+	 *  <ul>
+	 *  	<li> if the specified amount is non-positive </li>
+	 *  	<li> if the specified amount is equal to the current quantity</li>
+	 *  	<li> if the specified amount is greater than the current quantity</li>
+	 *  </ul>  
+	 */
 	public void decreaseQuantity(int amount) {
 		handleNonPositiveQuantity(amount);
 		if (amount >= this.quantity)
@@ -26,10 +48,18 @@ public class OrderItem {
 		this.quantity -= amount;
 	}
 
+	/**
+	 * Returns the current quantity
+	 * @return the current quantity
+	 */
 	public int getQuantity() {
 		return quantity;
 	}
 
+	/**
+	 * Returns the product
+	 * @return the product
+	 */
 	public Product getProduct() {
 		return product;
 	}
