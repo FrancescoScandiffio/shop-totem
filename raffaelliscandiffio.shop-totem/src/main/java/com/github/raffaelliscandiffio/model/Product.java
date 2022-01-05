@@ -3,17 +3,20 @@ package com.github.raffaelliscandiffio.model;
 public class Product {
 
 	private final String name;
-	private double currentPrice;
+	private final double price;
 	private int availableQuantity;
 
-	public Product(String name, double currentPrice, int availableQuantity) {
+	public Product(String name, double price, int availableQuantity) {
 
 		if (!(name != null && !name.trim().isEmpty())) {
 			throw new IllegalArgumentException("Null or empty name is not allowed");
 		}
 		this.name = name;
 
-		setCurrentPriceValidation(currentPrice);
+		if (price < 0) {
+			throw new IllegalArgumentException("Negative price: " + price);
+		}
+		this.price = price;
 
 		setAvailableQuantityValidation(availableQuantity);
 	}
@@ -25,15 +28,9 @@ public class Product {
 		this.availableQuantity = availableQuantity;
 	}
 
-	private void setCurrentPriceValidation(double currentPrice) {
-		if (currentPrice < 0) {
-			throw new IllegalArgumentException("Negative current price: " + currentPrice);
-		}
-		this.currentPrice = currentPrice;
-	}
 
-	public double getCurrentPrice() {
-		return currentPrice;
+	public double getPrice() {
+		return price;
 	}
 
 	public int getAvailableQuantity() {
@@ -44,10 +41,7 @@ public class Product {
 		return name;
 	}
 
-	public void setCurrentPrice(double currentPrice) {
-		setCurrentPriceValidation(currentPrice);
-	}
-
+	
 	public void setAvailableQuantity(int availableQuantity) {
 		setAvailableQuantityValidation(availableQuantity);
 	}
@@ -55,11 +49,11 @@ public class Product {
 	// used for test only
 	Product() {
 		this.name = "";
+		this.price = 1.0;
 	}
 
 	// used for test only
-	void initProduct(double currentPrice, int availableQuantity) {
-		this.currentPrice = currentPrice;
+	void initAvailableQuantity(int availableQuantity) {
 		this.availableQuantity = availableQuantity;
 	}
 

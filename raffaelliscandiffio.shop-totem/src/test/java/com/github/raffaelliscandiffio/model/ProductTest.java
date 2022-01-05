@@ -19,7 +19,6 @@ class ProductTest {
 	private static final double POSITIVE_PRICE = 3;
 	private static final double NEGATIVE_PRICE = -3;
 	private static final int INITIAL_QUANTITY = 7;
-	private static final double INITIAL_PRICE = 8;
 	private static final String NAME = "name";
 
 	
@@ -36,20 +35,20 @@ class ProductTest {
 
 			@Test
 			@DisplayName("Product can be initialized with name not null nor empty, non negative price and quantity")
-			void testConstructorWhenNameNotNullOrEmptyCurrentPricePositiveAvailableQuantityPositiveShouldBeAllowed() {
+			void testConstructorWhenNameNotNullOrEmptyPricePositiveAvailableQuantityPositiveShouldBeAllowed() {
 				
 				product = new Product(NAME, POSITIVE_PRICE, POSITIVE_QUANTITY);
 				assertThat(product.getName()).isEqualTo(NAME);
-				assertThat(product.getCurrentPrice()).isEqualTo(POSITIVE_PRICE);
+				assertThat(product.getPrice()).isEqualTo(POSITIVE_PRICE);
 				assertThat(product.getAvailableQuantity()).isEqualTo(POSITIVE_QUANTITY);
 			}
 			
 			@Test
-			@DisplayName("Current price can be initialized to zero")
-			void testConstructorWhenCurrentPriceIsZeroShouldBeAllowed() {
+			@DisplayName("Price can be initialized to zero")
+			void testConstructorWhenPriceIsZeroShouldBeAllowed() {
 				
 				product = new Product(NAME, ZERO, POSITIVE_QUANTITY);
-				assertThat(product.getCurrentPrice()).isZero();
+				assertThat(product.getPrice()).isZero();
 			}
 			
 			
@@ -78,11 +77,11 @@ class ProductTest {
 			}
 			
 			@Test
-			@DisplayName("Current price can't be set to negative number")
-			void testConstructorWhenCurrentPriceIsNegativeShouldThrow() {
+			@DisplayName("Price can't be set to negative number")
+			void testConstructorWhenPriceIsNegativeShouldThrow() {
 
 				assertThatThrownBy(() -> new Product(NAME, NEGATIVE_PRICE, POSITIVE_QUANTITY)).isInstanceOf(IllegalArgumentException.class)
-						.hasMessage("Negative current price: "+NEGATIVE_PRICE);
+						.hasMessage("Negative price: "+NEGATIVE_PRICE);
 			}
 			
 			@Test
@@ -104,39 +103,9 @@ class ProductTest {
 		@BeforeEach
 		void setup() {
 			product = new Product();
-			product.initProduct(INITIAL_PRICE, INITIAL_QUANTITY);
+			product.initAvailableQuantity(INITIAL_QUANTITY);
 		}
 		
-		@Nested 
-		@DisplayName("setCurrentPrice tests") 
-		class SetCurrentPriceTests {
-			
-			@Test
-			@DisplayName("Current price can be set to positive number")
-			void testSetCurrentPriceWhenCurrentPriceIsPositiveShouldBeAllowed() {
-				product.setCurrentPrice(POSITIVE_PRICE);
-				assertThat(product.getCurrentPrice()).isEqualTo(POSITIVE_PRICE);
-			}
-			
-			@Test
-			@DisplayName("Current price can be set to zero")
-			void testSetCurrentPriceWhenCurrentPriceIsZeroShouldNotThrow() {
-				
-				product.setCurrentPrice(ZERO);
-				assertThat(product.getCurrentPrice()).isZero();
-			}
-			
-			@Test
-			@DisplayName("Current price can't be set to negative number")
-			void testSetCurrentPriceWhenCurrentPriceIsNegativeShouldThrow() {
-				
-				assertThatThrownBy(() -> product.setCurrentPrice(NEGATIVE_PRICE)).isInstanceOf(IllegalArgumentException.class)
-						.hasMessage("Negative current price: "+NEGATIVE_PRICE);
-				
-				assertThat(product.getCurrentPrice()).isEqualTo(INITIAL_PRICE);
-			}	
-			
-		}
 		@Nested 
 		@DisplayName("setAvailableQuantity tests") 
 		class SetAvailableQuantityTests {
