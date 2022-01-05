@@ -13,17 +13,17 @@ public class OrderItem {
 		this.quantity = quantity;
 	}
 
-	public void increaseQuantity(int quantity) {
-		handleNonPositiveQuantity(quantity);
-		this.quantity += quantity;
+	public void increaseQuantity(int amount) {
+		handleNonPositiveQuantity(amount);
+		this.quantity += amount;
 	}
 
-	public void decreaseQuantity(int quantity) {
-		handleNonPositiveQuantity(quantity);
-		if (quantity >= this.quantity)
+	public void decreaseQuantity(int amount) {
+		handleNonPositiveQuantity(amount);
+		if (amount >= this.quantity)
 			throw new IllegalArgumentException(String.format(
-					"Decrease quantity (%d) must be less than available quantity (%d)", quantity, this.quantity));
-		this.quantity -= quantity;
+					"Decrease quantity (%d) must be less than available quantity (%d)", amount, this.quantity));
+		this.quantity -= amount;
 	}
 
 	public int getQuantity() {
@@ -39,8 +39,10 @@ public class OrderItem {
 			throw new IllegalArgumentException(String.format("Non-positive quantity: (%d)", quantity));
 	}
 
-	// Package-private constructor for testing
-	OrderItem(int quantity) {
+	// Package-private methods for testing
+	OrderItem() {}
+	
+	void setQuantity(int quantity) {
 		this.quantity = quantity;
 	}
 
