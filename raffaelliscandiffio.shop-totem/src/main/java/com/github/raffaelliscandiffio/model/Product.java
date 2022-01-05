@@ -5,6 +5,8 @@ public class Product {
 	private final String name;
 	private final double price;
 	private int availableQuantity;
+	private long id;
+	private static long lastId = 0;
 
 	public Product(String name, double price, int availableQuantity) {
 
@@ -19,6 +21,8 @@ public class Product {
 		this.price = price;
 
 		setAvailableQuantityValidation(availableQuantity);
+		
+		this.id = ++lastId;
 	}
 
 	private void setAvailableQuantityValidation(int availableQuantity) {
@@ -39,6 +43,10 @@ public class Product {
 
 	public String getName() {
 		return name;
+	}
+	
+	public long getId() {
+		return id;
 	}
 
 	

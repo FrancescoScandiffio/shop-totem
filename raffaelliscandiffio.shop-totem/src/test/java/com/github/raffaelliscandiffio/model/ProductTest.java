@@ -32,6 +32,20 @@ class ProductTest {
 			
 			
 			private Product product;
+			
+			@Test
+			@DisplayName("An incremental id is automatically generated")
+			void testIdsAreIncremental() {
+				assertThat(new Product(NAME, POSITIVE_PRICE, POSITIVE_QUANTITY).getId())
+					.isLessThan(new Product(NAME, POSITIVE_PRICE, POSITIVE_QUANTITY).getId());
+			}
+			
+			@Test
+			@DisplayName("A positive number is automatically assigned as id")
+			void testIdIsAutomaticallyAssignedAsPositiveNumber() {
+				product = new Product(NAME, POSITIVE_PRICE, POSITIVE_QUANTITY);
+				assertThat(product.getId()).isPositive();
+			}
 
 			@Test
 			@DisplayName("Product can be initialized with name not null nor empty, non negative price and quantity")
