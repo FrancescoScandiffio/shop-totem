@@ -1,5 +1,6 @@
 package com.github.raffaelliscandiffio.model;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -7,6 +8,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.byLessThan;
+
+import org.assertj.core.api.SoftAssertions;
 
 @DisplayName("Tests for OrderItem")
 class OrderItemTest {
@@ -15,13 +19,23 @@ class OrderItemTest {
 	private static final int NEGATIVE_QUANTITY = -5;
 	private static final int POSITIVE_QUANTITY = 3;
 	private static final int GREATER_POSITIVE_QUANTITY = 25;
+	private static final double PRICE = 7.0;
+	private static final double EPSILON = 0.001;
 
+	private SoftAssertions softly;
+	private Product product;
+
+	@BeforeEach
+	void setup() {
+		softly = new SoftAssertions();
+		product = new Product("name", PRICE, POSITIVE_QUANTITY);;
+	}
+	
+	
 	@Nested
 	@DisplayName("Test constructor")
-	class ConstructorTests {
-
-		private Product product = new Product();
-
+	class ConstructorTests {		
+			
 		@Nested
 		@DisplayName("Exceptional cases")
 		class ExceptionalCases {
@@ -59,8 +73,11 @@ class OrderItemTest {
 			@DisplayName("New OrderItem")
 			void testConstructorWhenProductIsNotNullAndQuantityIsPositiveShouldInitialise() {
 				OrderItem item = new OrderItem(product, POSITIVE_QUANTITY);
-				assertThat(item.getProduct()).isEqualTo(product);
-				assertThat(item.getQuantity()).isEqualTo(POSITIVE_QUANTITY);
+				
+				softly.assertThat(item.getProduct()).isEqualTo(product);
+				softly.assertThat(item.getQuantity()).isEqualTo(POSITIVE_QUANTITY);
+				softly.assertThat(item.getSubTotal()).isCloseTo(POSITIVE_QUANTITY * product.getPrice(), byLessThan(EPSILON));
+				softly.assertAll();
 			}
 		}
 	}
@@ -70,10 +87,13 @@ class OrderItemTest {
 	class ChangeQuantityMethods {
 
 		private OrderItem item;
-
+		
 		@BeforeEach
 		void setup() {
 			item = new OrderItem();
+			item.setProduct(product);
+			item.setQuantity(POSITIVE_QUANTITY);
+			item.setSubTotal(PRICE * POSITIVE_QUANTITY);
 		}
 
 		@Nested
@@ -87,23 +107,25 @@ class OrderItemTest {
 				@Test
 				@DisplayName("Don't increase quantity if the given value is negative")
 				void testIncreaseQuantityWhenAmountIsNegativeShouldThrow() {
-					item.setQuantity(POSITIVE_QUANTITY);
 
 					assertThatThrownBy(() -> item.increaseQuantity(NEGATIVE_QUANTITY))
 						.isInstanceOf(IllegalArgumentException.class)
 						.hasMessage(String.format("Non-positive quantity: (%d)", NEGATIVE_QUANTITY));
-					assertThat(item.getQuantity()).isEqualTo(POSITIVE_QUANTITY);
+					softly.assertThat(item.getQuantity()).isEqualTo(POSITIVE_QUANTITY);
+					softly.assertThat(item.getSubTotal()).isCloseTo(POSITIVE_QUANTITY * product.getPrice(), byLessThan(EPSILON));
+					softly.assertAll();
 				}
 
 				@Test
 				@DisplayName("Don't increase quantity if the given value is zero")
 				void testIncreaseQuantityWhenAmountIsZeroShouldThrow() {
-					item.setQuantity(POSITIVE_QUANTITY);
 
 					assertThatThrownBy(() -> item.increaseQuantity(ZERO))
 						.isInstanceOf(IllegalArgumentException.class)
 						.hasMessage(String.format("Non-positive quantity: (%d)", ZERO));
-					assertThat(item.getQuantity()).isEqualTo(POSITIVE_QUANTITY);
+					softly.assertThat(item.getQuantity()).isEqualTo(POSITIVE_QUANTITY);
+					softly.assertThat(item.getSubTotal()).isCloseTo(POSITIVE_QUANTITY * product.getPrice(), byLessThan(EPSILON));
+					softly.assertAll();
 				}
 
 			}
@@ -115,10 +137,12 @@ class OrderItemTest {
 				@Test
 				@DisplayName("Increase quantity")
 				void testIncreaseQuantity() {
-					item.setQuantity(POSITIVE_QUANTITY);
 
 					item.increaseQuantity(GREATER_POSITIVE_QUANTITY);
-					assertThat(item.getQuantity()).isEqualTo(POSITIVE_QUANTITY + GREATER_POSITIVE_QUANTITY);
+					softly.assertThat(item.getQuantity()).isEqualTo(POSITIVE_QUANTITY + GREATER_POSITIVE_QUANTITY);
+					softly.assertThat(item.getSubTotal()).isCloseTo(
+							(POSITIVE_QUANTITY + GREATER_POSITIVE_QUANTITY) * product.getPrice(), byLessThan(EPSILON));
+					softly.assertAll();
 				}
 			}
 		}
@@ -134,48 +158,51 @@ class OrderItemTest {
 				@Test
 				@DisplayName("Don't decrease quantity if the given value is negative")
 				void testDecreaseQuantityWhenAmountIsNegativeShouldThrow() {
-					item.setQuantity(POSITIVE_QUANTITY);
 
 					assertThatThrownBy(() -> item.decreaseQuantity(NEGATIVE_QUANTITY))
 						.isInstanceOf(IllegalArgumentException.class)
 						.hasMessage(String.format("Non-positive quantity: (%d)", NEGATIVE_QUANTITY));
-					assertThat(item.getQuantity()).isEqualTo(POSITIVE_QUANTITY);
-
+					softly.assertThat(item.getQuantity()).isEqualTo(POSITIVE_QUANTITY);
+					softly.assertThat(item.getSubTotal()).isCloseTo(POSITIVE_QUANTITY * product.getPrice(), byLessThan(EPSILON));
+					softly.assertAll();
 				}
 
 				@Test
 				@DisplayName("Don't decrease quantity if the given value is zero")
 				void testDecreaseQuantityWhenAmountIsZeroShouldThrow() {
-					item.setQuantity(POSITIVE_QUANTITY);
 
 					assertThatThrownBy(() -> item.decreaseQuantity(ZERO))
 						.isInstanceOf(IllegalArgumentException.class)
 						.hasMessage(String.format("Non-positive quantity: (%d)", ZERO));
-					assertThat(item.getQuantity()).isEqualTo(POSITIVE_QUANTITY);
+					softly.assertThat(item.getQuantity()).isEqualTo(POSITIVE_QUANTITY);
+					softly.assertThat(item.getSubTotal()).isCloseTo(POSITIVE_QUANTITY * product.getPrice(), byLessThan(EPSILON));
+					softly.assertAll();
 				}
 
 				@Test
 				@DisplayName("Don't decrease quantity if the given value is greater than the available quantity")
 				void testDecreaseQuantityWhenAmountGreaterThanAvailableShouldThrow() {
-					item.setQuantity(POSITIVE_QUANTITY);
 
 					assertThatThrownBy(() -> item.decreaseQuantity(GREATER_POSITIVE_QUANTITY))
 						.isInstanceOf(IllegalArgumentException.class)
 						.hasMessage(String.format("Decrease quantity (%d) must be less than available quantity (%d)",
 								GREATER_POSITIVE_QUANTITY, POSITIVE_QUANTITY));
-					assertThat(item.getQuantity()).isEqualTo(POSITIVE_QUANTITY);
+					softly.assertThat(item.getQuantity()).isEqualTo(POSITIVE_QUANTITY);
+					softly.assertThat(item.getSubTotal()).isCloseTo(POSITIVE_QUANTITY * product.getPrice(), byLessThan(EPSILON));
+					softly.assertAll();
 				}
 
 				@Test
 				@DisplayName("Don't decrease quantity if the given value is equal to the available quantity")
 				void testDecreaseQuantityWhenAmountEqualToAvailableShouldThrow() {
-					item.setQuantity(POSITIVE_QUANTITY);
 
 					assertThatThrownBy(() -> item.decreaseQuantity(POSITIVE_QUANTITY))
 							.isInstanceOf(IllegalArgumentException.class)
 							.hasMessage(String.format("Decrease quantity (%d) must be less than available quantity (%d)",
 									POSITIVE_QUANTITY, POSITIVE_QUANTITY));
-					assertThat(item.getQuantity()).isEqualTo(POSITIVE_QUANTITY);
+					softly.assertThat(item.getQuantity()).isEqualTo(POSITIVE_QUANTITY);
+					softly.assertThat(item.getSubTotal()).isCloseTo(POSITIVE_QUANTITY * product.getPrice(), byLessThan(EPSILON));
+					softly.assertAll();
 				}
 			}
 
@@ -189,7 +216,9 @@ class OrderItemTest {
 					item.setQuantity(GREATER_POSITIVE_QUANTITY);
 
 					item.decreaseQuantity(POSITIVE_QUANTITY);
-					assertThat(item.getQuantity()).isEqualTo(GREATER_POSITIVE_QUANTITY - POSITIVE_QUANTITY);
+					softly.assertThat(item.getQuantity()).isEqualTo(GREATER_POSITIVE_QUANTITY - POSITIVE_QUANTITY);
+					softly.assertThat(item.getSubTotal()).isCloseTo( (GREATER_POSITIVE_QUANTITY - POSITIVE_QUANTITY) * product.getPrice(), byLessThan(EPSILON));
+					softly.assertAll();
 				}
 			}
 		}
