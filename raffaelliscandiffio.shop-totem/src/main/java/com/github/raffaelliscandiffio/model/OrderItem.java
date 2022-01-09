@@ -56,10 +56,6 @@ public class OrderItem {
 
 	}
 
-	private void updateSubTotal() {
-		this.subTotal = this.quantity * product.getPrice();
-	}
-
 	/**
 	 * Returns the current quantity
 	 * 
@@ -92,6 +88,10 @@ public class OrderItem {
 			throw new IllegalArgumentException(String.format("Non-positive quantity: (%d)", quantity));
 	}
 	
+	private void updateSubTotal() {
+		this.subTotal = this.quantity * product.getPrice();
+	}
+	
 	// Package-private methods for testing
 	
 	OrderItem(){}
@@ -104,7 +104,7 @@ public class OrderItem {
 		this.subTotal = subTotal;
 	}
 
-	public void setProduct(Product product) {
+	void setProduct(Product product) {
 		this.product = product;
 	}
 	
