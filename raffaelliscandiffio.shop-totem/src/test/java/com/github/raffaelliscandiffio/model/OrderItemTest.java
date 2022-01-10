@@ -35,6 +35,27 @@ class OrderItemTest {
 	class ConstructorTests {		
 			
 		@Nested
+		@DisplayName("Id generation")
+		class IdGenerationTest{
+			
+			@Test
+			@DisplayName("A positive number is automatically assigned as id")
+			void testIdIsAutomaticallyAssignedAsPositiveNumber() {
+				OrderItem item = new OrderItem(product, POSITIVE_QUANTITY);
+				assertThat(item.getId()).isPositive();
+			}
+			
+			@Test
+			@DisplayName("An incremental id is automatically generated")
+			void testIdsAreIncremental() {
+				assertThat(new OrderItem(product, POSITIVE_QUANTITY).getId())
+					.isLessThan(new OrderItem(product, POSITIVE_QUANTITY).getId());
+			}
+			
+
+		}
+		
+		@Nested
 		@DisplayName("Exceptional cases")
 		class ExceptionalCases {
 
@@ -203,7 +224,6 @@ class OrderItemTest {
 					softly.assertAll();
 				}
 			}
-
 			@Nested
 			@DisplayName("Happy case")
 			class HappyCase {
