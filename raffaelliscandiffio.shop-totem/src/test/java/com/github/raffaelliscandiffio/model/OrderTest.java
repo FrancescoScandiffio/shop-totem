@@ -48,7 +48,6 @@ class OrderTest {
 		product = new Product("name", PRICE, QUANTITY);
 	}
 
-	
 	@Nested
 	@DisplayName("Test 'insertItem'")
 	class InsertItemTest {
@@ -157,6 +156,37 @@ class OrderTest {
 					.hasMessage(String.format("Item with id (%s) not found", ITEM_ID));
 
 		}
+	}
+
+	@Nested
+	@DisplayName("Test 'decreaseItem'")
+	class DecreaseItemTest {
+
+		@Test
+		@DisplayName("Decrease item quantity when item exists")
+		void testDecreaseItemWhenItemIsFoundShouldDecreaseQuantity() {
+			OrderItem otherItem = mock(OrderItem.class);
+			when(item.getId()).thenReturn(ITEM_ID);
+			when(otherItem.getId()).thenReturn(ITEM_ID + 1);
+			items.add(otherItem);
+			items.add(item);
+
+			order.decreaseItem(ITEM_ID, QUANTITY);
+
+			verify(item, times(1)).decreaseQuantity(QUANTITY);
+			verify(otherItem, never()).decreaseQuantity(anyInt());
+			verifyNoMoreInteractions(item, otherItem);
+
+		}
+
+		@Test
+		@DisplayName("Throw exception when the specified item does not exist")
+		void testDecreaseItemWhenItemNotFoundShouldThrow() {
+
+			assertThatThrownBy(() -> order.decreaseItem(ITEM_ID, QUANTITY)).isInstanceOf(NoSuchElementException.class)
+					.hasMessage(String.format("Item with id (%s) not found", ITEM_ID));
+		}
+
 	}
 
 }

@@ -35,11 +35,21 @@ public class Order {
 	 * @return the removed item
 	 */
 	public OrderItem popItemById(long itemId){
-		OrderItem item = items.stream().filter(obj -> obj.getId() == itemId).findFirst()
-				.orElseThrow(() -> new NoSuchElementException(String.format("Item with id (%s) not found", itemId)));
+		OrderItem item = findItemById(itemId);
 		items.remove(item);
 		return item;
 
+	}
+	
+	public void decreaseItem(long itemId, int quantity) throws IllegalArgumentException {
+		OrderItem item = findItemById(itemId);
+		item.decreaseQuantity(quantity);
+
+	}
+
+	private OrderItem findItemById(long itemId) {
+		return items.stream().filter(obj -> obj.getId() == itemId).findFirst()
+				.orElseThrow(() -> new NoSuchElementException(String.format("Item with id (%s) not found", itemId)));
 	}
 
 }
