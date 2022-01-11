@@ -2,6 +2,7 @@ package com.github.raffaelliscandiffio.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.assertj.core.api.SoftAssertions;
 
@@ -30,6 +32,7 @@ class OrderTest {
 	private static final int QUANTITY = 3;
 	private static final int GREATER_QUANTITY = 15;
 	private static final double PRICE = 5.0;
+	private static final long ITEM_ID = 1;
 
 	private Product product;
 	private Order order;
@@ -45,6 +48,7 @@ class OrderTest {
 		product = new Product("name", PRICE, QUANTITY);
 	}
 
+	
 	@Nested
 	@DisplayName("Test 'insertItem'")
 	class InsertItemTest {
@@ -53,6 +57,7 @@ class OrderTest {
 		@DisplayName("Construct a new OrderItem and add it to the list when the list is empty")
 		void testInsertItemWhenListIsEmptyShouldInsertNewOrderItem() {
 			SoftAssertions softly = new SoftAssertions();
+
 			order.insertItem(product, QUANTITY);
 			softly.assertThat(items).hasSize(1).extracting("product").contains(product);
 			softly.assertThat(items).extracting("quantity").contains(QUANTITY);
@@ -122,6 +127,36 @@ class OrderTest {
 			softly.assertAll();
 		}
 
+	}
+
+	@Nested
+	@DisplayName("Test 'popItemById'")
+	class PopItemByIdTest {
+
+		@Test
+		@DisplayName("Remove the specified item from the order")
+		void testPopItemByIdWhenItemIsFoundShouldRemoveFromOrder() {
+			SoftAssertions softly = new SoftAssertions();
+			OrderItem otherItem = mock(OrderItem.class);
+			when(item.getId()).thenReturn(ITEM_ID);
+			when(otherItem.getId()).thenReturn(ITEM_ID + 1);
+			items.add(otherItem);
+			items.add(item);
+
+			OrderItem result = order.popItemById(ITEM_ID);
+			softly.assertThat(result).isEqualTo(item);
+			softly.assertThat(items).hasSize(1).containsOnly(otherItem);
+			softly.assertAll();
+		}
+
+		@Test
+		@DisplayName("Throw exception when the specified item does not exist")
+		void testPopItemByIdWhenItemNotFoundShouldThrow() {
+
+			assertThatThrownBy(() -> order.popItemById(ITEM_ID)).isInstanceOf(NoSuchElementException.class)
+					.hasMessage(String.format("Item with id (%s) not found", ITEM_ID));
+
+		}
 	}
 
 }
