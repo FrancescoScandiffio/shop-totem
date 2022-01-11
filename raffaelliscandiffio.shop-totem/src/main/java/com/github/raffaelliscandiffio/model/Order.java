@@ -41,6 +41,13 @@ public class Order {
 
 	}
 	
+	/**
+	 * Decrease the quantity of the specified item
+	 * @param itemId the item whose quantity has to be decreased
+	 * @param quantity the quantity to be removed
+	 * @throws IllegalArgumentException if quantity is non-positive
+	 * @throws NoSuchElementException if the requested item is not found
+	 */
 	public void decreaseItem(long itemId, int quantity) throws IllegalArgumentException {
 		OrderItem item = findItemById(itemId);
 		item.decreaseQuantity(quantity);
