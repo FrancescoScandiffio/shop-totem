@@ -28,6 +28,12 @@ public class Order {
 			item.increaseQuantity(quantity);
 	}
 
+	/**
+	 * Remove the specified item from order
+	 * @param itemId the id of the item to be removed
+	 * @throws NoSuchElementException if the requested item is not found
+	 * @return the removed item
+	 */
 	public OrderItem popItemById(long itemId){
 		OrderItem item = items.stream().filter(obj -> obj.getId() == itemId).findFirst()
 				.orElseThrow(() -> new NoSuchElementException(String.format("Item with id (%s) not found", itemId)));
