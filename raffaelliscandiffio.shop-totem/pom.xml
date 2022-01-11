@@ -85,8 +85,6 @@
 						<targetTests>
 							<param>*model.Order*</param>
 						</targetTests>
-						<excludedTestClasses>*model.OrderItem*</excludedTestClasses>
-						<excludedClasses>*model.OrderItem*</excludedClasses>
 						<mutators>
 							<mutator>STRONGER</mutator>
 						</mutators>
