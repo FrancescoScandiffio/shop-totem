@@ -22,6 +22,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -36,12 +37,14 @@ class OrderTest {
 	private Product product;
 	private Order order;
 	private List<OrderItem> items;
+	private SoftAssertions softly;
 
 	@Mock
 	private OrderItem item;
 
 	@BeforeEach
 	void setup() {
+		softly = new SoftAssertions();
 		items = new ArrayList<OrderItem>();
 		order = new Order(items);
 		product = getNewProduct();
@@ -54,11 +57,11 @@ class OrderTest {
 		@Test
 		@DisplayName("Construct a new OrderItem and add it to the list when the list is empty")
 		void testInsertItemWhenListIsEmptyShouldInsertNewOrderItem() {
-			SoftAssertions softly = new SoftAssertions();
-
-			order.insertItem(product, QUANTITY);
-			softly.assertThat(items).hasSize(1).extracting("product").contains(product);
-			softly.assertThat(items).extracting("quantity").contains(QUANTITY);
+			OrderItem returned = order.insertItem(product, QUANTITY);	
+			softly.assertThat(returned).isNotNull();
+			softly.assertThat(items).containsOnly(returned);
+			softly.assertThat(items).extracting(OrderItem::getProduct).contains(product);
+			softly.assertThat(items).extracting(OrderItem::getQuantity).contains(QUANTITY);
 			softly.assertAll();
 		}
 
@@ -68,23 +71,26 @@ class OrderTest {
 			when(item.getProduct()).thenReturn(product);
 			items.add(item);
 
-			order.insertItem(product, QUANTITY);
-			assertThat(items).hasSize(1);
+			OrderItem returned = order.insertItem(product, QUANTITY);
+			softly.assertThat(returned).isEqualTo(item);
+			softly.assertThat(items).containsOnly(item);
 			verify(item, times(1)).increaseQuantity(QUANTITY);
 			verifyNoMoreInteractions(item);
+			softly.assertAll();
 		}
 
 		@Test
 		@DisplayName("Add new OrderItem to list when another item with different product is present")
 		void testInsertItemWhenOneItemWithDifferentProductIsPresentShouldInsertNewOrderItem() {
-			SoftAssertions softly = new SoftAssertions();
 			when(item.getProduct()).thenReturn(getNewProduct());
 			items.add(item);
 
-			order.insertItem(product, GREATER_QUANTITY);
-			softly.assertThat(items).hasSize(2);
-			softly.assertThat(items).extracting("product").contains(product);
-			softly.assertThat(items).extracting("quantity").contains(GREATER_QUANTITY);
+			OrderItem returned = order.insertItem(product, GREATER_QUANTITY);
+			softly.assertThat(returned).isNotNull();
+			softly.assertThat(returned).isNotSameAs(item);
+			softly.assertThat(items).hasSize(2).contains(returned);
+			softly.assertThat(items).extracting(OrderItem::getProduct).contains(product);
+			softly.assertThat(items).extracting(OrderItem::getQuantity).contains(GREATER_QUANTITY);
 			softly.assertAll();
 			verify(item, never()).increaseQuantity(anyInt());
 		}
@@ -98,8 +104,10 @@ class OrderTest {
 			items.add(otherItem);
 			items.add(item);
 
-			order.insertItem(product, QUANTITY);
-			assertThat(items).containsOnly(item, otherItem);
+			OrderItem returned = order.insertItem(product, QUANTITY);
+			softly.assertThat(returned).isEqualTo(item);
+			softly.assertThat(items).containsOnly(item, otherItem);
+			softly.assertAll();
 			verify(otherItem, never()).increaseQuantity(anyInt());
 			verify(item, times(1)).increaseQuantity(QUANTITY);
 			verifyNoMoreInteractions(item, otherItem);
@@ -109,19 +117,23 @@ class OrderTest {
 		@Test
 		@DisplayName("Insert new OrderItem when multiple items are present but the given product is not found")
 		void testInsertItemWhenMultipleItemsArePresentAndGivenProductIsNotFoundShouldInsertNewOrderItem() {
-			SoftAssertions softly = new SoftAssertions();
 			OrderItem otherItem = mock(OrderItem.class);
 			when(item.getProduct()).thenReturn(getNewProduct());
 			when(otherItem.getProduct()).thenReturn(getNewProduct());
 			items.add(item);
 			items.add(otherItem);
 
-			order.insertItem(product, QUANTITY);
+			OrderItem returned = order.insertItem(product, QUANTITY);
 			verify(item, never()).increaseQuantity(anyInt());
 			verify(otherItem, never()).increaseQuantity(anyInt());
 			verifyNoMoreInteractions(item, otherItem);
-			softly.assertThat(items).hasSize(3).extracting("product").contains(product);
-			softly.assertThat(items).extracting("quantity").contains(QUANTITY);
+			softly.assertThat(returned).isNotNull();
+			softly.assertThat(returned).isNotSameAs(item);
+			softly.assertThat(returned).isNotSameAs(otherItem);
+			softly.assertThat(items).containsOnly(item,otherItem,returned);
+
+			softly.assertThat(items).extracting(OrderItem::getProduct).contains(product);
+			softly.assertThat(items).extracting(OrderItem::getQuantity).contains(QUANTITY);
 			softly.assertAll();
 		}
 
@@ -134,7 +146,6 @@ class OrderTest {
 		@Test
 		@DisplayName("Remove the specified item from the order")
 		void testPopItemByIdWhenItemIsFoundShouldRemoveFromOrder() {
-			SoftAssertions softly = new SoftAssertions();
 			OrderItem otherItem = mock(OrderItem.class);
 			when(item.getId()).thenReturn(ITEM_ID);
 			when(otherItem.getId()).thenReturn(ITEM_ID + 1);
@@ -171,7 +182,6 @@ class OrderTest {
 			items.add(item);
 
 			order.decreaseItem(ITEM_ID, QUANTITY);
-
 			verify(item, times(1)).decreaseQuantity(QUANTITY);
 			verify(otherItem, never()).decreaseQuantity(anyInt());
 			verifyNoMoreInteractions(item, otherItem);
