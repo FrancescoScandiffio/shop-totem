@@ -225,6 +225,7 @@ class OrderItemTest {
 					softly.assertAll();
 				}
 			}
+
 			@Nested
 			@DisplayName("Happy case")
 			class HappyCase {
