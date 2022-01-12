@@ -79,12 +79,6 @@
 						</dependency>
 					</dependencies>
 					<configuration>
-						<targetClasses>
-							<param>*model.Order*</param>
-						</targetClasses>
-						<targetTests>
-							<param>*model.Order*</param>
-						</targetTests>
 						<mutators>
 							<mutator>STRONGER</mutator>
 						</mutators>
@@ -97,10 +91,6 @@
 					<artifactId>jacoco-maven-plugin</artifactId>
 					<version>0.8.7</version>
 					<configuration>
-						<excludes>
-							<!-- todo excludes model classes -->
-							<!-- <exclude>**/model/*.*</exclude> -->
-						</excludes>
 					</configuration>
 					<executions>
 						<execution>

@@ -31,7 +31,6 @@ class OrderTest {
 
 	private static final int QUANTITY = 3;
 	private static final int GREATER_QUANTITY = 15;
-	private static final double PRICE = 5.0;
 	private static final long ITEM_ID = 1;
 
 	private Product product;
@@ -45,7 +44,7 @@ class OrderTest {
 	void setup() {
 		items = new ArrayList<OrderItem>();
 		order = new Order(items);
-		product = new Product("name", PRICE, QUANTITY);
+		product = getNewProduct();
 	}
 
 	@Nested
@@ -79,7 +78,7 @@ class OrderTest {
 		@DisplayName("Add new OrderItem to list when another item with different product is present")
 		void testInsertItemWhenOneItemWithDifferentProductIsPresentShouldInsertNewOrderItem() {
 			SoftAssertions softly = new SoftAssertions();
-			when(item.getProduct()).thenReturn(new Product("name", PRICE, QUANTITY));
+			when(item.getProduct()).thenReturn(getNewProduct());
 			items.add(item);
 
 			order.insertItem(product, GREATER_QUANTITY);
@@ -95,7 +94,7 @@ class OrderTest {
 		void testInsertItemWhenMultipleItemsArePresentAndGivenProductIsFoundShouldIncreaseItemQuantity() {
 			OrderItem otherItem = mock(OrderItem.class);
 			when(item.getProduct()).thenReturn(product);
-			when(otherItem.getProduct()).thenReturn(new Product("name", PRICE, QUANTITY));
+			when(otherItem.getProduct()).thenReturn(getNewProduct());
 			items.add(otherItem);
 			items.add(item);
 
@@ -112,8 +111,8 @@ class OrderTest {
 		void testInsertItemWhenMultipleItemsArePresentAndGivenProductIsNotFoundShouldInsertNewOrderItem() {
 			SoftAssertions softly = new SoftAssertions();
 			OrderItem otherItem = mock(OrderItem.class);
-			when(item.getProduct()).thenReturn(new Product("name", PRICE, QUANTITY));
-			when(otherItem.getProduct()).thenReturn(new Product("name_2", PRICE, QUANTITY));
+			when(item.getProduct()).thenReturn(getNewProduct());
+			when(otherItem.getProduct()).thenReturn(getNewProduct());
 			items.add(item);
 			items.add(otherItem);
 
@@ -187,6 +186,11 @@ class OrderTest {
 					.hasMessage(String.format("Item with id (%s) not found", ITEM_ID));
 		}
 
+	}
+	
+	//Utility method to construct new product for test
+	private Product getNewProduct(){
+		return new Product("name",3.0);	
 	}
 
 }
