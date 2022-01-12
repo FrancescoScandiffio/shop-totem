@@ -5,6 +5,8 @@ public class OrderItem {
 	private Product product;
 	private int quantity;
 	private double subTotal;
+	private long id;
+	private static long lastId = 0;
 
 	/**
 	 * Constructs a new OrderItem with the specified product and quantity.
@@ -21,6 +23,7 @@ public class OrderItem {
 		this.product = product;
 		this.quantity = quantity;
 		updateSubTotal();
+		this.id = ++lastId;
 	}
 
 	/**
@@ -56,6 +59,17 @@ public class OrderItem {
 
 	}
 
+	private void updateSubTotal() {
+		this.subTotal = this.quantity * product.getPrice();
+	}
+	
+	private void handleNonPositiveQuantity(int quantity) {
+		if (quantity <= 0)
+			throw new IllegalArgumentException(String.format("Non-positive quantity: (%d)", quantity));
+	}
+	
+	//Getters and setters
+	
 	/**
 	 * Returns the current quantity
 	 * 
@@ -83,14 +97,16 @@ public class OrderItem {
 		return subTotal;
 	}
 
-	private void handleNonPositiveQuantity(int quantity) {
-		if (quantity <= 0)
-			throw new IllegalArgumentException(String.format("Non-positive quantity: (%d)", quantity));
+	/**
+	 * Returns the id of the item
+	 * 
+	 * @return id
+	 */
+	public long getId() {
+		return id;
 	}
-	
-	private void updateSubTotal() {
-		this.subTotal = this.quantity * product.getPrice();
-	}
+
+
 	
 	// Package-private methods for testing
 	
