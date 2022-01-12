@@ -79,6 +79,12 @@
 						</dependency>
 					</dependencies>
 					<configuration>
+						<targetClasses>
+							<param>*model.Order*</param>
+						</targetClasses>
+						<targetTests>
+							<param>*model.Order*</param>
+						</targetTests>
 						<mutators>
 							<mutator>STRONGER</mutator>
 						</mutators>
