@@ -5,7 +5,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.byLessThan;
 
@@ -27,7 +26,7 @@ class OrderItemTest {
 	@BeforeEach
 	void setup() {
 		softly = new SoftAssertions();
-		product = new Product("name", PRICE, POSITIVE_QUANTITY);;
+		product = new Product("name", PRICE);
 	}
 	
 	
