@@ -6,7 +6,6 @@ public class OrderItem {
 	private int quantity;
 	private double subTotal;
 	private long id;
-	
 	private static long lastId = 0;
 
 	/**
