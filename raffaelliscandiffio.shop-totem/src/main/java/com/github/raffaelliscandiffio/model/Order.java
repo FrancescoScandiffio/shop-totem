@@ -53,9 +53,10 @@ public class Order {
 	 * @throws IllegalArgumentException if quantity is non-positive
 	 * @throws NoSuchElementException   if the requested item is not found
 	 */
-	public void decreaseItem(long itemId, int quantity) throws IllegalArgumentException {
+	public OrderItem decreaseItem(long itemId, int quantity) throws IllegalArgumentException {
 		OrderItem item = findItemById(itemId);
 		item.decreaseQuantity(quantity);
+		return item;
 
 	}
 

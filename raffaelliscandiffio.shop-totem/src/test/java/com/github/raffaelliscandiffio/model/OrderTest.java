@@ -181,7 +181,8 @@ class OrderTest {
 			items.add(otherItem);
 			items.add(item);
 
-			order.decreaseItem(ITEM_ID, QUANTITY);
+			OrderItem returned = order.decreaseItem(ITEM_ID, QUANTITY);
+			assertThat(returned).isEqualTo(item);
 			verify(item, times(1)).decreaseQuantity(QUANTITY);
 			verify(otherItem, never()).decreaseQuantity(anyInt());
 			verifyNoMoreInteractions(item, otherItem);
