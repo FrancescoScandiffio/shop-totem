@@ -16,6 +16,11 @@
 		<assertj.core.version>3.21.0</assertj.core.version>
 		<mockito.version>4.2.0</mockito.version>
 
+		<sonar.coverage.exclusions>
+			**/view/TotemView.java,
+			**/controller/PurchaseBroker.java,
+		</sonar.coverage.exclusions>
+
 		<sonar.junit.reportPaths>
 			${project.build.directory}/surefire-reports
 		</sonar.junit.reportPaths>
@@ -80,10 +85,18 @@
 					</dependencies>
 					<configuration>
 						<targetClasses>
+							<param>*model.Product*</param>
+							<param>*model.Stock*</param>
+							<param>*model.OrderItem*</param>
 							<param>*model.Order*</param>
+							<param>*controller.TotemController*</param>
 						</targetClasses>
 						<targetTests>
+							<param>*model.Product*</param>
+							<param>*model.Stock*</param>
+							<param>*model.OrderItem*</param>
 							<param>*model.Order*</param>
+							<param>*controller.TotemController*</param>
 						</targetTests>
 						<mutators>
 							<mutator>STRONGER</mutator>
@@ -97,6 +110,10 @@
 					<artifactId>jacoco-maven-plugin</artifactId>
 					<version>0.8.7</version>
 					<configuration>
+						<excludes>
+							<exclude>**/view/TotemView.class</exclude>
+							<exclude>**/controller/PurchaseBroker.class</exclude>
+						</excludes>
 					</configuration>
 					<executions>
 						<execution>
