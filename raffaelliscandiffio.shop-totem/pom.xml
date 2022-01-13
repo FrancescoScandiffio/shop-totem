@@ -85,17 +85,9 @@
 					</dependencies>
 					<configuration>
 						<targetClasses>
-							<param>*model.Product*</param>
-							<param>*model.Stock*</param>
-							<param>*model.OrderItem*</param>
-							<param>*model.Order*</param>
 							<param>*controller.TotemController*</param>
 						</targetClasses>
 						<targetTests>
-							<param>*model.Product*</param>
-							<param>*model.Stock*</param>
-							<param>*model.OrderItem*</param>
-							<param>*model.Order*</param>
 							<param>*controller.TotemController*</param>
 						</targetTests>
 						<mutators>
