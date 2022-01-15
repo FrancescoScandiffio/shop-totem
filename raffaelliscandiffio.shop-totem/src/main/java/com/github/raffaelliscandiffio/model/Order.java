@@ -3,7 +3,6 @@ package com.github.raffaelliscandiffio.model;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-
 public class Order {
 
 	private List<OrderItem> items;
@@ -17,8 +16,8 @@ public class Order {
 	 * If the product is already binded to an item, increase its quantity.
 	 * 
 	 * @param product the product to be added to the order
-	 * @param the quantity of product to be added to the order
-	 * @throws NullPointerException if product is null
+	 * @param the     quantity of product to be added to the order
+	 * @throws NullPointerException     if product is null
 	 * @throws IllegalArgumentException if quantity is non-positive
 	 * @return OrderItem - the newly inserted or modified item
 	 */
@@ -52,7 +51,11 @@ public class Order {
 	 * 
 	 * @param itemId   the item whose quantity has to be decreased
 	 * @param quantity the quantity to be removed
-	 * @throws IllegalArgumentException if quantity is non-positive
+	 * @throws IllegalArgumentException in the following cases:
+	 *                                  <ul>
+	 *                                  <li>if quantity is non-positive</li>
+	 *                                  <li>if quantity is equal or greater than the
+	 *                                  available quantity</li>
 	 * @throws NoSuchElementException   if the requested item is not found
 	 * @return OrderItem - the modified item
 	 */
