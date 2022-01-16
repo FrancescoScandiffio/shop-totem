@@ -86,9 +86,11 @@
 					<configuration>
 						<targetClasses>
 							<param>*controller.TotemController*</param>
+							<param>*model.Order*</param>
 						</targetClasses>
 						<targetTests>
 							<param>*controller.TotemController*</param>
+							<param>*model.Order*</param>
 						</targetTests>
 						<mutators>
 							<mutator>STRONGER</mutator>
