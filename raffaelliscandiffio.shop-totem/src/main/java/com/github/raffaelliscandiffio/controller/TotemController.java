@@ -121,4 +121,9 @@ public class TotemController {
 		this.firstLoading = firstLoading;
 	}
 
+	public void openCart() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
