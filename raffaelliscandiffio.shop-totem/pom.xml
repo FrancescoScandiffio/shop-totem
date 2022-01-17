@@ -19,6 +19,7 @@
 		<sonar.coverage.exclusions>
 			**/view/TotemView.java,
 			**/controller/PurchaseBroker.java,
+			**/model/Order.java
 		</sonar.coverage.exclusions>
 
 		<sonar.junit.reportPaths>
@@ -85,11 +86,9 @@
 					</dependencies>
 					<configuration>
 						<targetClasses>
-							<param>*controller.TotemController*</param>
 							<param>*model.Order*</param>
 						</targetClasses>
 						<targetTests>
-							<param>*controller.TotemController*</param>
 							<param>*model.Order*</param>
 						</targetTests>
 						<mutators>
@@ -107,6 +106,7 @@
 						<excludes>
 							<exclude>**/view/TotemView.class</exclude>
 							<exclude>**/controller/PurchaseBroker.class</exclude>
+							<exclude>**/model/Order.class</exclude>
 						</excludes>
 					</configuration>
 					<executions>

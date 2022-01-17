@@ -1,6 +1,7 @@
 package com.github.raffaelliscandiffio.controller;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import com.github.raffaelliscandiffio.model.Order;
@@ -13,17 +14,26 @@ public class TotemController {
 	private PurchaseBroker broker;
 	private TotemView totemView;
 	private Order order;
+	private boolean firstLoading;
 
 	public TotemController(PurchaseBroker broker, TotemView totemView) {
 		this.broker = broker;
 		this.totemView = totemView;
+		this.firstLoading = true;
 	}
 
 	public void startShopping() {
 		if (order == null)
 			order = new Order(new ArrayList<>());
+		if (firstLoading) {
+			totemView.showAllProducts(broker.retrieveProducts());
+			firstLoading = false;
+		}
 		totemView.showShopping();
-		totemView.showAllProducts(broker.retrieveProducts());
+	}
+
+	public void openShopping() {
+		totemView.showShopping();
 	}
 
 	public void buyProduct(Product product, int requested) {
@@ -82,6 +92,19 @@ public class TotemController {
 		}
 	}
 
+	// TODO after returnProduct is implemented: check if a try-catch is needed here
+	public void cancelShopping() {
+		List<OrderItem> items = order.getItems();
+		if (!items.isEmpty()) {
+			order.clear();
+			totemView.clearCart();
+			for (OrderItem item : items) {
+				broker.returnProduct(item.getProduct().getId(), item.getQuantity());
+			}
+		}
+		totemView.showWelcome();
+	}
+
 	Order getOrder() {
 		return this.order;
 	}
@@ -89,4 +112,13 @@ public class TotemController {
 	void setOrder(Order order) {
 		this.order = order;
 	}
+
+	boolean isFirstLoading() {
+		return firstLoading;
+	}
+
+	void setFirstLoading(boolean firstLoading) {
+		this.firstLoading = firstLoading;
+	}
+
 }
