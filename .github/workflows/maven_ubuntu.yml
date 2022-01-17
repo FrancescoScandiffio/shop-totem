@@ -39,7 +39,7 @@ jobs:
 
     - name: Run test 
       id: mvnTest
-      run: mvn test
+      run: xvfb-run mvn test
       working-directory: ${{ env.workdir }}
               
     - name: Run mutation test on pull_request
@@ -50,7 +50,7 @@ jobs:
 
     - name: Build with Maven, analysed with SonarCloud
       run: >
-       mvn verify
+       xvfb-run mvn verify
        org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
        -Dsonar.organization=francescoscandiffio-github
        -Dsonar.host.url=https://sonarcloud.io
