@@ -78,9 +78,24 @@ public class Order {
 
 	}
 
+	/**
+	 * Removes all the elements from items list. The list will be empty after this
+	 * call returns.
+	 */
+	public void clear() {
+		items.clear();
+	}
+
 	private OrderItem findItemById(long itemId) {
 		return items.stream().filter(obj -> obj.getId() == itemId).findFirst()
 				.orElseThrow(() -> new NoSuchElementException(String.format("Item with id (%s) not found", itemId)));
+	}
+
+	/**
+	 * @return the items
+	 */
+	public List<OrderItem> getItems() {
+		return items;
 	}
 
 }

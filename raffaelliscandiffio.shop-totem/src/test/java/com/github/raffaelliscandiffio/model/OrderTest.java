@@ -224,6 +224,20 @@ class OrderTest {
 
 	}
 
+	@Nested
+	@DisplayName("Test 'clear'")
+	class ClearTest {
+
+		@Test
+		@DisplayName("Clear the list of items")
+		void testClear() {
+			items.add(item);
+			order.clear();
+			assertThat(items).isEmpty();
+		}
+
+	}
+
 	// Utility method to construct new product for test
 	private Product getNewProduct() {
 		return new Product("name", 3.0);
