@@ -1,6 +1,7 @@
 package com.github.raffaelliscandiffio.controller;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -13,6 +14,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -46,38 +48,59 @@ class TotemControllerTest {
 	private static final int GREATER_QUANTITY = 5;
 
 	@Nested
-	@DisplayName("Tests for 'startShopping'")
+	@DisplayName("Test 'startShopping'")
 	class StartShoppingTest {
 
 		@Test
-		@DisplayName("Setup an empty order and show shopping view")
-		void testStartShopping() {
+		@DisplayName("Setup an empty order, load all products and show the shopping view")
+		void testStartShoppingWhenIsFirstLoading() {
+			SoftAssertions softly = new SoftAssertions();
 			List<Product> allProducts = asList(new Product("pizza", 2.5));
 			when(broker.retrieveProducts()).thenReturn(allProducts);
 			totemController.startShopping();
-			assertThat(totemController.getOrder()).isNotNull();
+			softly.assertThat(totemController.getOrder()).isNotNull();
+			softly.assertThat(totemController.isFirstLoading()).isFalse();
+			softly.assertAll();
 			InOrder inOrder = inOrder(totemView);
-			inOrder.verify(totemView).showShopping();
 			inOrder.verify(totemView).showAllProducts(allProducts);
+			inOrder.verify(totemView).showShopping();
 		}
 
 		@Test
-		@DisplayName("Show shopping view after another shopping session has been cancelled")
-		void testStartShoppingWhenOrderAlreadyExists() {
-			List<Product> allProducts = asList(new Product("pizza", 2.5));
-			when(broker.retrieveProducts()).thenReturn(allProducts);
+		@DisplayName("Do not reload products after the first call")
+		void testStartShoppingWhenFirstLoadingIsFalse() {
+			totemController.setFirstLoading(false);
+			totemController.startShopping();
+			verify(totemView).showShopping();
+			verifyNoMoreInteractions(broker, totemView);
+
+		}
+
+		@Test
+		@DisplayName("Do not replace the order when order is not null")
+		void testStartShoppingWhenOrderIsNotNull() {
 			totemController.setOrder(order);
 			totemController.startShopping();
 			assertThat(totemController.getOrder()).isEqualTo(order);
-			InOrder inOrder = inOrder(totemView);
-			inOrder.verify(totemView).showShopping();
-			inOrder.verify(totemView).showAllProducts(allProducts);
+
 		}
 
 	}
 
 	@Nested
-	@DisplayName("Tests for 'buyProduct'")
+	@DisplayName("Test 'openShopping'")
+	class OpenShoppingTest {
+
+		@Test
+		@DisplayName("Show the shopping view")
+		void testOpenShopping() {
+			totemController.openShopping();
+			verify(totemView).showShopping();
+		}
+	}
+
+	@Nested
+	@DisplayName("Test 'buyProduct'")
 	class BuyProductTest {
 
 		@Test
@@ -184,7 +207,7 @@ class TotemControllerTest {
 	}
 
 	@Nested
-	@DisplayName("Tests for 'removeItem'")
+	@DisplayName("Test 'removeItem'")
 	class RemoveItemTest {
 
 		@Test
@@ -192,6 +215,7 @@ class TotemControllerTest {
 		void testRemoveItem() {
 			Product product = new Product("pizza", 2.5);
 			OrderItem item = new OrderItem(product, QUANTITY);
+			when(order.popItemById(item.getId())).thenReturn(item);
 			totemController.setOrder(order);
 			totemController.removeItem(item);
 			InOrder inOrder = inOrder(broker, order, totemView);
@@ -215,7 +239,7 @@ class TotemControllerTest {
 	}
 
 	@Nested
-	@DisplayName("Tests for 'returnProduct'")
+	@DisplayName("Test 'returnProduct'")
 	class ReturnProductTest {
 
 		@Test
@@ -255,6 +279,55 @@ class TotemControllerTest {
 			totemController.returnProduct(existingItem, GREATER_QUANTITY);
 			verify(totemView).showErrorMessage(exceptionMessage);
 			verifyNoMoreInteractions(order, broker, totemView);
+		}
+
+	}
+
+	@Nested
+	@DisplayName("Test 'cancelShopping'")
+	class CancelShoppingTest {
+
+		@Test
+		@DisplayName("Cancel shopping when no item is present")
+		void testCancelShoppingWhenNoItemsArePresent() {
+			totemController.setOrder(order);
+			when(order.getItems()).thenReturn(emptyList());
+			totemController.cancelShopping();
+			verify(totemView).showWelcome();
+			verifyNoMoreInteractions(broker, order, totemView);
+		}
+
+		@Test
+		@DisplayName("Cancel shopping when one item is present")
+		void testCancelShoppingWhenOneItemIsPresent() {
+			Product product = new Product("foo", 1);
+			OrderItem item = new OrderItem(product, QUANTITY);
+			totemController.setOrder(order);
+			when(order.getItems()).thenReturn(asList(item));
+			totemController.cancelShopping();
+			verify(order).clear();
+			verify(broker).returnProduct(product.getId(), QUANTITY);
+			verify(totemView).clearCart();
+			verify(totemView).showWelcome();
+
+		}
+
+		@Test
+		@DisplayName("Cancel shopping when multiple items are present")
+		void testCancelShoppingWhenSeveralItemArePresent() {
+			Product product = new Product("foo", 1);
+			Product product_2 = new Product("foo", 1);
+			OrderItem item = new OrderItem(product, QUANTITY);
+			OrderItem item_2 = new OrderItem(product_2, QUANTITY);
+
+			totemController.setOrder(order);
+			when(order.getItems()).thenReturn(asList(item, item_2));
+			totemController.cancelShopping();
+			verify(order).clear();
+			verify(broker).returnProduct(product.getId(), QUANTITY);
+			verify(broker).returnProduct(product_2.getId(), QUANTITY);
+			verify(totemView).clearCart();
+			verify(totemView).showWelcome();
 		}
 
 	}

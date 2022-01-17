@@ -30,4 +30,6 @@ public interface TotemView {
 	void showErrorProductNotFound(String msg, Product product);
 
 	void showErrorMessage(String msg);
+
+	void clearCart();
 }

@@ -85,11 +85,9 @@
 					</dependencies>
 					<configuration>
 						<targetClasses>
-							<param>*controller.TotemController*</param>
 							<param>*model.Order*</param>
 						</targetClasses>
 						<targetTests>
-							<param>*controller.TotemController*</param>
 							<param>*model.Order*</param>
 						</targetTests>
 						<mutators>
@@ -107,6 +105,7 @@
 						<excludes>
 							<exclude>**/view/TotemView.class</exclude>
 							<exclude>**/controller/PurchaseBroker.class</exclude>
+							<exclude>**/model/Order.class</exclude>
 						</excludes>
 					</configuration>
 					<executions>
