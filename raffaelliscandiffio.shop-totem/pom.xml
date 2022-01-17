@@ -19,7 +19,11 @@
 
 		<sonar.coverage.exclusions>
 			**/view/TotemView.java,
+			**/view/swing/TotemSwingView.java,
+			**/utils/GUITestExtension.java,
 			**/controller/PurchaseBroker.java,
+			**/controller/TotemController.java,
+			**/model/Order.java,
 		</sonar.coverage.exclusions>
 
 		<sonar.junit.reportPaths>
@@ -92,10 +96,10 @@
 					</dependencies>
 					<configuration>
 						<targetClasses>
-							<param>*model.Order*</param>
+							<param>*model.Product*</param>
 						</targetClasses>
 						<targetTests>
-							<param>*model.Order*</param>
+							<param>*model.Product*</param>
 						</targetTests>
 						<mutators>
 							<mutator>STRONGER</mutator>
@@ -110,9 +114,11 @@
 					<version>0.8.7</version>
 					<configuration>
 						<excludes>
-							<exclude>**/view/TotemView.class</exclude>
+							<exclude>**/utils/GUITestExtension.class</exclude>
 							<exclude>**/controller/PurchaseBroker.class</exclude>
+							<exclude>**/controller/TotemController.class</exclude>
 							<exclude>**/model/Order.class</exclude>
+							<exclude>**/view/swing/TotemSwingView.class</exclude>
 						</excludes>
 					</configuration>
 					<executions>
