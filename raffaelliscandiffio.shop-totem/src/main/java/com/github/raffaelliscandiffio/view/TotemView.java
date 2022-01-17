@@ -32,4 +32,6 @@ public interface TotemView {
 	void showErrorMessage(String msg);
 
 	void clearCart();
+
+	void showCart();
 }
