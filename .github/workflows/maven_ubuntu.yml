@@ -55,10 +55,14 @@ jobs:
        -Dsonar.organization=francescoscandiffio-github
        -Dsonar.host.url=https://sonarcloud.io
        -Dsonar.projectKey=FrancescoScandiffio_shop-totem
+       -DrepoToken=$COVERALLS_REPO_TOKEN
+       -DpullRequest=${{ github.event.pull_request.number }}
+       coveralls:report
       working-directory: ${{ env.workdir }}
       env: 
        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
+       COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
 
     - name: Generate JUnit Report
       run: mvn surefire-report:report-only site:site -DgenerateReports=false
