@@ -52,6 +52,7 @@ jobs:
       run: >
        mvn verify
        org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
+       -DskipUTs=true
        -Dsonar.organization=francescoscandiffio-github
        -Dsonar.host.url=https://sonarcloud.io
        -Dsonar.projectKey=FrancescoScandiffio_shop-totem
