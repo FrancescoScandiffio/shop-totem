@@ -7,6 +7,7 @@ import java.util.NoSuchElementException;
 import com.github.raffaelliscandiffio.model.Order;
 import com.github.raffaelliscandiffio.model.OrderItem;
 import com.github.raffaelliscandiffio.model.Product;
+import com.github.raffaelliscandiffio.repository.OrderRepository;
 import com.github.raffaelliscandiffio.view.TotemView;
 
 public class TotemController {
@@ -15,11 +16,13 @@ public class TotemController {
 	private TotemView totemView;
 	private Order order;
 	private boolean firstLoading;
+	private OrderRepository orderRepository;
 
-	public TotemController(PurchaseBroker broker, TotemView totemView) {
+	public TotemController(PurchaseBroker broker, TotemView totemView, OrderRepository orderRepository) {
 		this.broker = broker;
 		this.totemView = totemView;
 		this.firstLoading = true;
+		this.orderRepository = orderRepository;
 	}
 
 	public void startShopping() {
@@ -34,6 +37,10 @@ public class TotemController {
 
 	public void openShopping() {
 		totemView.showShopping();
+	}
+
+	public void openOrder() {
+		totemView.showOrder();
 	}
 
 	public void buyProduct(Product product, int requested) {
@@ -97,12 +104,24 @@ public class TotemController {
 		List<OrderItem> items = order.getItems();
 		if (!items.isEmpty()) {
 			order.clear();
-			totemView.clearCart();
+			totemView.clearOrderList();
 			for (OrderItem item : items) {
 				broker.returnProduct(item.getProduct().getId(), item.getQuantity());
 			}
 		}
 		totemView.showWelcome();
+	}
+
+	public void confirmOrder() {
+		if (order.getItems().isEmpty()) {
+			totemView.showErrorEmptyOrder("Cannot confirm an empty order");
+			return;
+		}
+
+		orderRepository.save(order);
+		totemView.showGoodbye();
+		totemView.clearOrderList();
+		order = null;
 	}
 
 	Order getOrder() {
