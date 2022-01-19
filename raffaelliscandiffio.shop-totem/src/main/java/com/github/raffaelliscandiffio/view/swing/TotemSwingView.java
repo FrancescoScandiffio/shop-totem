@@ -19,7 +19,7 @@ public class TotemSwingView extends JFrame implements TotemView {
 	private ShoppingPanel shoppingPane;
 	private CartPanel cartPane;
 
-	private TotemController totemController;
+	private transient TotemController totemController;
 	private CardLayout layout;
 
 	public void setTotemController(TotemController totemController) {
