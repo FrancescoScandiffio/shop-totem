@@ -50,7 +50,7 @@ jobs:
 
     - name: Build with Maven, analysed with SonarCloud
       run: >
-       xvfb-run mvn verify
+       mvn verify
        org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
        -DskipUTs=true
        -Dsonar.organization=francescoscandiffio-github
