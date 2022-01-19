@@ -78,3 +78,10 @@ jobs:
       with:
         name: pitest-report-jdk-11
         path: '**/target/pit-reports'
+    
+    - name: Archive Screenshots
+      uses: actions/upload-artifact@v2
+      if: ${{ failure() }}      
+      with:
+        name: screenshots
+        path: '**/failed-gui-tests'
