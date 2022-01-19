@@ -25,12 +25,28 @@
 			**/view/swing/TotemSwingView.java,
 			**/controller/PurchaseBroker.java,
 			**/utils/GUITestExtension.java,
-			**/controller/TotemController.java,
 		</sonar.coverage.exclusions>
 
 		<sonar.junit.reportPaths>
 			${project.build.directory}/surefire-reports
 		</sonar.junit.reportPaths>
+
+		<sonar.issue.ignore.multicriteria>e1,e2</sonar.issue.ignore.multicriteria>
+		<!-- disable rule on naming convention -->
+		<sonar.issue.ignore.multicriteria.e1.ruleKey>
+			java:S117
+		</sonar.issue.ignore.multicriteria.e1.ruleKey>
+		<sonar.issue.ignore.multicriteria.e1.resourceKey>
+			**/view/*.java
+		</sonar.issue.ignore.multicriteria.e1.resourceKey>
+
+		<!-- disable rule on missing assertion -->
+		<sonar.issue.ignore.multicriteria.e2.ruleKey>
+			java:S2699
+		</sonar.issue.ignore.multicriteria.e2.ruleKey>
+		<sonar.issue.ignore.multicriteria.e2.resourceKey>
+			**/view/*Test.java
+		</sonar.issue.ignore.multicriteria.e2.resourceKey>
 	</properties>
 
 	<dependencies>
@@ -98,11 +114,9 @@
 					</dependencies>
 					<configuration>
 						<targetClasses>
-							<param>*model.Order*</param>
 							<param>*controller.TotemController*</param>
 						</targetClasses>
 						<targetTests>
-							<param>*model.Order*</param>
 							<param>*controller.TotemController*</param>
 						</targetTests>
 						<mutators>
@@ -132,7 +146,6 @@
 							<exclude>**/view/TotemView.class</exclude>
 							<exclude>**/controller/PurchaseBroker.class</exclude>
 							<exclude>**/utils/GUITestExtension.class</exclude>
-							<exclude>**/controller/TotemController.class</exclude>
 							<exclude>**/view/swing/TotemSwingView.class</exclude>
 						</excludes>
 					</configuration>
