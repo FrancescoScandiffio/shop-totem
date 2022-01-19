@@ -3,6 +3,8 @@ package com.github.raffaelliscandiffio.model;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import com.github.raffaellicsandiffio.utils.ExcludeGeneratedFromCoverage;
+
 public class Order {
 
 	private List<OrderItem> items;
@@ -94,6 +96,7 @@ public class Order {
 	/**
 	 * @return the items
 	 */
+	@ExcludeGeneratedFromCoverage
 	public List<OrderItem> getItems() {
 		return items;
 	}
