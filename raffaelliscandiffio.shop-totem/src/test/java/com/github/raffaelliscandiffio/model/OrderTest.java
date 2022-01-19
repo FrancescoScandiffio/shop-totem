@@ -1,19 +1,7 @@
 package com.github.raffaelliscandiffio.model;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
-import org.assertj.core.api.SoftAssertions;
-
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -22,7 +10,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
 
+import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -57,7 +54,7 @@ class OrderTest {
 		@Test
 		@DisplayName("Construct a new OrderItem and add it to the list when the list is empty")
 		void testInsertItemWhenListIsEmptyShouldInsertNewOrderItem() {
-			OrderItem returned = order.insertItem(product, QUANTITY);	
+			OrderItem returned = order.insertItem(product, QUANTITY);
 			softly.assertThat(returned).isNotNull();
 			softly.assertThat(items).containsOnly(returned);
 			softly.assertThat(items).extracting(OrderItem::getProduct).contains(product);
@@ -130,7 +127,7 @@ class OrderTest {
 			softly.assertThat(returned).isNotNull();
 			softly.assertThat(returned).isNotSameAs(item);
 			softly.assertThat(returned).isNotSameAs(otherItem);
-			softly.assertThat(items).containsOnly(item,otherItem,returned);
+			softly.assertThat(items).containsOnly(item, otherItem, returned);
 
 			softly.assertThat(items).extracting(OrderItem::getProduct).contains(product);
 			softly.assertThat(items).extracting(OrderItem::getQuantity).contains(QUANTITY);
@@ -198,10 +195,52 @@ class OrderTest {
 		}
 
 	}
-	
-	//Utility method to construct new product for test
-	private Product getNewProduct(){
-		return new Product("name",3.0);	
+
+	@Nested
+	@DisplayName("Test 'findItemByProductId'")
+	class FindByProductTest {
+
+		@Test
+		@DisplayName("Return the item when the product is found")
+		void testFindItemByProductIdWhenProductIsFound() {
+			OrderItem otherItem = mock(OrderItem.class);
+			when(otherItem.getProduct()).thenReturn(getNewProduct());
+			when(item.getProduct()).thenReturn(product);
+			items.add(otherItem);
+			items.add(item);
+
+			OrderItem itemReturned = order.findItemByProductId(product.getId());
+			assertThat(itemReturned).isEqualTo(item);
+		}
+
+		@Test
+		@DisplayName("Return null when the product is not found")
+		void testFindItemByProductIdWhenProductIsNotFoundShouldReturnNull() {
+			OrderItem itemReturned = order.findItemByProductId(product.getId());
+			items.add(item);
+			assertThat(itemReturned).isNull();
+
+		}
+
+	}
+
+	@Nested
+	@DisplayName("Test 'clear'")
+	class ClearTest {
+
+		@Test
+		@DisplayName("Clear the list of items")
+		void testClear() {
+			items.add(item);
+			order.clear();
+			assertThat(items).isEmpty();
+		}
+
+	}
+
+	// Utility method to construct new product for test
+	private Product getNewProduct() {
+		return new Product("name", 3.0);
 	}
 
 }

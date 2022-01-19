@@ -19,6 +19,11 @@
 		<assertj.core.version>3.21.0</assertj.core.version>
 		<mockito.version>4.2.0</mockito.version>
 
+		<sonar.coverage.exclusions>
+			**/view/TotemView.java,
+			**/controller/PurchaseBroker.java,
+		</sonar.coverage.exclusions>
+
 		<sonar.junit.reportPaths>
 			${project.build.directory}/surefire-reports
 		</sonar.junit.reportPaths>
@@ -84,12 +89,25 @@
 					<configuration>
 						<targetClasses>
 							<param>*model.Order*</param>
+							<param>*controller.TotemController*</param>
 						</targetClasses>
 						<targetTests>
 							<param>*model.Order*</param>
+							<param>*controller.TotemController*</param>
 						</targetTests>
 						<mutators>
-							<mutator>STRONGER</mutator>
+							<mutator>CONDITIONALS_BOUNDARY</mutator>
+							<mutator>EXPERIMENTAL_SWITCH</mutator>
+							<mutator>INCREMENTS</mutator>
+							<mutator>INVERT_NEGS</mutator>
+							<mutator>MATH</mutator>
+							<mutator>NULL_RETURNS</mutator>
+							<mutator>PRIMITIVE_RETURNS</mutator>
+							<mutator>REMOVE_CONDITIONALS_EQUAL_ELSE</mutator>
+							<mutator>REMOVE_CONDITIONALS_EQUAL_IF</mutator>
+							<mutator>REMOVE_CONDITIONALS_ORDER_ELSE</mutator>
+							<mutator>REMOVE_CONDITIONALS_ORDER_IF</mutator>
+							<mutator>VOID_METHOD_CALLS</mutator>
 						</mutators>
 						<mutationThreshold>100</mutationThreshold>
 					</configuration>
@@ -100,6 +118,10 @@
 					<artifactId>jacoco-maven-plugin</artifactId>
 					<version>0.8.7</version>
 					<configuration>
+						<excludes>
+							<exclude>**/view/TotemView.class</exclude>
+							<exclude>**/controller/PurchaseBroker.class</exclude>
+						</excludes>
 					</configuration>
 					<executions>
 						<execution>
