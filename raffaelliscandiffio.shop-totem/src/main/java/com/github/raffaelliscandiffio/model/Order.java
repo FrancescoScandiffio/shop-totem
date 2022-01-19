@@ -3,7 +3,7 @@ package com.github.raffaelliscandiffio.model;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import com.github.raffaellicsandiffio.utils.ExcludeGeneratedFromCoverage;
+import com.github.raffaelliscandiffio.utils.ExcludeGeneratedFromCoverage;
 
 public class Order {
 

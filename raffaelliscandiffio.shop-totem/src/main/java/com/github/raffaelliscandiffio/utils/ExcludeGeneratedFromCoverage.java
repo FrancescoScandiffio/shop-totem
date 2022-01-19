@@ -1,4 +1,4 @@
-package com.github.raffaellicsandiffio.utils;
+package com.github.raffaelliscandiffio.utils;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

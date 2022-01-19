@@ -39,7 +39,7 @@ jobs:
 
     - name: Run test 
       id: mvnTest
-      run: mvn test
+      run: xvfb-run mvn test
       working-directory: ${{ env.workdir }}
               
     - name: Run mutation test on pull_request
@@ -83,3 +83,10 @@ jobs:
       with:
         name: pitest-report-jdk-11
         path: '**/target/pit-reports'
+    
+    - name: Archive Screenshots
+      uses: actions/upload-artifact@v2
+      if: ${{ failure() }}      
+      with:
+        name: screenshots
+        path: '**/failed-gui-tests'
