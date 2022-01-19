@@ -87,10 +87,6 @@ public class TotemSwingView extends JFrame implements TotemView {
 				openShoppingAction();
 			} 
 		});
-
-		layout.show(getContentPane(), "layout");
-		pack();
-		setLocationRelativeTo(null);
 		
 	}
 
