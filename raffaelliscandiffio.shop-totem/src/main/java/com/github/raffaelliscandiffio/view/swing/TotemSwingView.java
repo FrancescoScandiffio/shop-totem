@@ -206,4 +206,28 @@ public class TotemSwingView extends JFrame implements TotemView {
 		
 	}
 
+	@Override
+	public void clearOrderList() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void showGoodbye() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void showErrorEmptyOrder(String msg) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void showOrder() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

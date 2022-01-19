@@ -27,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.github.raffaelliscandiffio.model.Order;
 import com.github.raffaelliscandiffio.model.OrderItem;
 import com.github.raffaelliscandiffio.model.Product;
+import com.github.raffaelliscandiffio.repository.OrderRepository;
 import com.github.raffaelliscandiffio.view.TotemView;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +35,9 @@ class TotemControllerTest {
 
 	@Mock
 	private PurchaseBroker broker;
+
+	@Mock
+	private OrderRepository orderRepository;
 
 	@Mock
 	private TotemView totemView;
@@ -88,7 +92,7 @@ class TotemControllerTest {
 	}
 
 	@Nested
-	@DisplayName("Test 'openShopping'")
+	@DisplayName("Test change view methods")
 	class OpenShoppingTest {
 
 		@Test
@@ -96,6 +100,13 @@ class TotemControllerTest {
 		void testOpenShopping() {
 			totemController.openShopping();
 			verify(totemView).showShopping();
+		}
+
+		@Test
+		@DisplayName("Show the order view")
+		void testOpenOrder() {
+			totemController.openOrder();
+			verify(totemView).showOrder();
 		}
 	}
 
@@ -175,7 +186,7 @@ class TotemControllerTest {
 		}
 
 		@Test
-		@DisplayName("Show message when requested quantity is available")
+		@DisplayName("Show confirm message when requested quantity is available")
 		void testBuyProductWhenRequestedQuantityIsAvailable() {
 			Product product = new Product("pizza", 2.5);
 			OrderItem itemToAdd = new OrderItem(product, QUANTITY);
@@ -307,7 +318,7 @@ class TotemControllerTest {
 			totemController.cancelShopping();
 			verify(order).clear();
 			verify(broker).returnProduct(product.getId(), QUANTITY);
-			verify(totemView).clearCart();
+			verify(totemView).clearOrderList();
 			verify(totemView).showWelcome();
 
 		}
@@ -326,8 +337,39 @@ class TotemControllerTest {
 			verify(order).clear();
 			verify(broker).returnProduct(product.getId(), QUANTITY);
 			verify(broker).returnProduct(product_2.getId(), QUANTITY);
-			verify(totemView).clearCart();
+			verify(totemView).clearOrderList();
 			verify(totemView).showWelcome();
+		}
+
+	}
+
+	@Nested
+	@DisplayName("Test 'confirmOrder'")
+	class ConfirmOrderTest {
+
+		@Test
+		@DisplayName("Reset the order view, save the items and show goodbye view")
+		void testConfirmOrderWhenOrderIsNotEmpty() {
+			Product product = new Product("foo", 1);
+			OrderItem item = new OrderItem(product, QUANTITY);
+			totemController.setOrder(order);
+			when(order.getItems()).thenReturn(asList(item));
+			totemController.confirmOrder();
+			InOrder inOrder = inOrder(totemView, orderRepository);
+			inOrder.verify(orderRepository).save(order);
+			inOrder.verify(totemView).showGoodbye();
+			inOrder.verify(totemView).clearOrderList();
+			assertThat(totemController.getOrder()).isNull();
+		}
+
+		@Test
+		@DisplayName("Don't save order and show error when order is empty")
+		void testConfirmOrderWhenOrderIsEmpty() {
+			totemController.setOrder(order);
+			when(order.getItems()).thenReturn(emptyList());
+			totemController.confirmOrder();
+			verify(totemView).showErrorEmptyOrder("Cannot confirm an empty order");
+			verifyNoMoreInteractions(totemView, order, orderRepository);
 		}
 
 	}
