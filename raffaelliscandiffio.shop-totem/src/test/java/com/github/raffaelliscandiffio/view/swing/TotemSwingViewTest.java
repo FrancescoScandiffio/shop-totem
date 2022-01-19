@@ -96,7 +96,7 @@ class TotemSwingViewTest {
 		@DisplayName("ShowCart should replace any panel with cart panel")
 		void testShowCartShouldChangePanelToCartPanel() {
 
-			GuiActionRunner.execute(() -> totemSwingView.showCart());
+			GuiActionRunner.execute(() -> totemSwingView.showOrder());
 
 			assertThat(totemSwingView.getWelcomePane().isShowing()).isFalse();
 			assertThat(totemSwingView.getCartPane().isShowing()).isTrue();
@@ -195,7 +195,7 @@ class TotemSwingViewTest {
 
 			window.button(JButtonMatcher.withText("Cart")).click();
 
-			verify(totemController).openCart();
+			verify(totemController).openOrder();
 		}
 
 		@Test
@@ -439,7 +439,7 @@ class TotemSwingViewTest {
 
 		@BeforeEach
 		void setup() {
-			GuiActionRunner.execute(() -> totemSwingView.showCart());
+			GuiActionRunner.execute(() -> totemSwingView.showOrder());
 		}
 
 		@Test
@@ -497,15 +497,15 @@ class TotemSwingViewTest {
 
 		@Test
 		@GUITest
-		@DisplayName("Clear Cart removes all order items from cart list")
-		void testClearCartEmptiesCartList() {
+		@DisplayName("Clear Order List removes all order items from cart list")
+		void testClearOrderListEmptiesCartList() {
 
 			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
 					.addElement(new OrderItem(new Product("Product1", 2), 5)));
 			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
 					.addElement(new OrderItem(new Product("Product2", 3), 4)));
 
-			GuiActionRunner.execute(() -> totemSwingView.clearCart());
+			GuiActionRunner.execute(() -> totemSwingView.clearOrderList());
 			
 			String[] listContents = window.list("cartList").contents();
 			assertThat(listContents).isEmpty();

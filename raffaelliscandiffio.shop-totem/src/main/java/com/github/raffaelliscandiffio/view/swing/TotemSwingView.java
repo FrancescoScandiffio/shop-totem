@@ -103,7 +103,7 @@ public class TotemSwingView extends JFrame implements TotemView {
 	}
 
 	private void openCartAction() {
-		this.totemController.openCart();
+		this.totemController.openOrder();
 	}
 
 	private void buyProductAction() {
@@ -139,7 +139,7 @@ public class TotemSwingView extends JFrame implements TotemView {
 	}
 
 	@Override
-	public void showCart() {
+	public void showOrder() {
 		changePane("cart");
 	}
 
@@ -184,7 +184,7 @@ public class TotemSwingView extends JFrame implements TotemView {
 	}
 
 	@Override
-	public void clearCart() {
+	public void clearOrderList() {
 		getCartPane().getListOrderItemsModel().clear();
 	}
 
@@ -207,12 +207,6 @@ public class TotemSwingView extends JFrame implements TotemView {
 	}
 
 	@Override
-	public void clearOrderList() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public void showGoodbye() {
 		// TODO Auto-generated method stub
 		
@@ -224,10 +218,5 @@ public class TotemSwingView extends JFrame implements TotemView {
 		
 	}
 
-	@Override
-	public void showOrder() {
-		// TODO Auto-generated method stub
-		
-	}
 
 }

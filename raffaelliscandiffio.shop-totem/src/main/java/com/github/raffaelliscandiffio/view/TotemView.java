@@ -38,8 +38,4 @@ public interface TotemView {
 	void showErrorEmptyOrder(String msg);
 
 	void showOrder();
-
-	void showCart();
-
-	void clearCart();
 }

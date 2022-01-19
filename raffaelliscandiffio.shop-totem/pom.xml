@@ -99,9 +99,11 @@
 					<configuration>
 						<targetClasses>
 							<param>*model.Order*</param>
+							<param>*controller.TotemController*</param>
 						</targetClasses>
 						<targetTests>
 							<param>*model.Order*</param>
+							<param>*controller.TotemController*</param>
 						</targetTests>
 						<mutators>
 							<mutator>CONDITIONALS_BOUNDARY</mutator>
