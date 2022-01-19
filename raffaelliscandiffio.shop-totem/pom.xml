@@ -37,7 +37,7 @@
 			java:S117
 		</sonar.issue.ignore.multicriteria.e1.ruleKey>
 		<sonar.issue.ignore.multicriteria.e1.resourceKey>
-			**/view/*.java
+			**/swing/*
 		</sonar.issue.ignore.multicriteria.e1.resourceKey>
 
 		<!-- disable rule on missing assertion -->
@@ -45,7 +45,7 @@
 			java:S2699
 		</sonar.issue.ignore.multicriteria.e2.ruleKey>
 		<sonar.issue.ignore.multicriteria.e2.resourceKey>
-			**/view/*Test.java
+			**/swing/*Test*
 		</sonar.issue.ignore.multicriteria.e2.resourceKey>
 	</properties>
 
