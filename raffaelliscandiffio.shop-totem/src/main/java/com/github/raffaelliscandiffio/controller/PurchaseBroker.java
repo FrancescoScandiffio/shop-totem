@@ -3,6 +3,10 @@ package com.github.raffaelliscandiffio.controller;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.model.Stock;
 import com.github.raffaelliscandiffio.repository.ProductRepository;
@@ -11,6 +15,7 @@ import com.github.raffaelliscandiffio.repository.StockRepository;
 
 public class PurchaseBroker {
 	
+	private static final Logger LOGGER = LogManager.getLogger(PurchaseBroker.class);
 	private ProductRepository productRepository;
 	private StockRepository stockRepository;
 	
@@ -29,7 +34,7 @@ public class PurchaseBroker {
 		try {
 			stock = stockRepository.findById(productId);
 		}catch(NoSuchElementException e){
-			// TODO LOGGER
+			LOGGER.log(Level.ERROR, String.format("Stock with id %d not found", productId), e);
 			return 0;
 		}
 		int stockAvailableQuantity = stock.getAvailableQuantity();
@@ -57,7 +62,7 @@ public class PurchaseBroker {
 			productRepository.findById(productId);
 			return true;
 		}catch(NoSuchElementException e){
-			// TODO LOGGER
+			LOGGER.log(Level.WARN, String.format("Product with id %d not found", productId), e);
 			return false;
 		}
 	}
