@@ -21,8 +21,6 @@
 		<assertj.swing.version>3.17.1</assertj.swing.version>
 
 		<sonar.coverage.exclusions>
-			**/view/TotemView.java,
-			**/view/swing/TotemSwingView.java,
 			**/controller/PurchaseBroker.java,
 			**/utils/GUITestExtension.java,
 		</sonar.coverage.exclusions>
@@ -143,10 +141,8 @@
 					<version>0.8.7</version>
 					<configuration>
 						<excludes>
-							<exclude>**/view/TotemView.class</exclude>
 							<exclude>**/controller/PurchaseBroker.class</exclude>
 							<exclude>**/utils/GUITestExtension.class</exclude>
-							<exclude>**/view/swing/TotemSwingView.class</exclude>
 						</excludes>
 					</configuration>
 					<executions>
