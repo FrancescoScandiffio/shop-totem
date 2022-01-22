@@ -18,6 +18,8 @@ import javax.swing.JSpinner;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -81,6 +83,25 @@ public class CartPanel extends JPanel {
 		add(scrollPane, gbc_scrollPane);
 
 		listOrderItemsModel = new DefaultListModel<>();
+		listOrderItemsModel.addListDataListener(new ListDataListener() {
+
+			@Override
+			public void intervalRemoved(ListDataEvent e) {
+				btnCheckout.setEnabled(!listOrderItemsModel.isEmpty());
+			}
+
+			@Override
+			public void intervalAdded(ListDataEvent e) {
+				btnCheckout.setEnabled(true);
+			}
+
+			@Override
+			public void contentsChanged(ListDataEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+		});
 		listOrderItems = new JList<>(listOrderItemsModel);
 		listOrderItems.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {

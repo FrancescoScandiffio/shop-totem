@@ -447,6 +447,36 @@ class TotemSwingViewTest {
 
 		@Test
 		@GUITest
+		@DisplayName("Button 'Checkout' should be enabled when an item is added to the cart list")
+		void testCheckoutButtonShouldBeEnabledWhenAnItemIsAddedToCartList() {
+			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+					.addElement(new OrderItem(new Product("Product1", 3), 5)));
+			window.button(JButtonMatcher.withText("Checkout")).requireEnabled();
+		}
+
+		@Test
+		@GUITest
+		@DisplayName("Button 'Checkout' should be disabled when the cart list is empty")
+		void testCheckoutButtonShouldBeDisabledWhenCartListIsEmpty() {
+			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel().clear());
+			window.button(JButtonMatcher.withText("Checkout")).requireDisabled();
+		}
+
+		@Test
+		@GUITest
+		@DisplayName("Button 'Checkout' should be enabled when several items are present and one is removed")
+		void testCheckoutButtonShouldBeEnabledWhenSeveralItemsArePresentAndOneIsRemoved() {
+			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+					.addElement(new OrderItem(new Product("Product1", 3), 5)));
+			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+					.addElement(new OrderItem(new Product("Product2", 3), 5)));
+			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel().removeElementAt(0));
+			window.button(JButtonMatcher.withText("Checkout")).requireEnabled();
+
+		}
+
+		@Test
+		@GUITest
 		@DisplayName("Method 'itemAdded' should add the received OrderItem element to the cart list")
 		void testItemAddedShouldAddTheOrderItemToTheCartList() {
 			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
