@@ -434,6 +434,19 @@ class TotemSwingViewTest {
 
 		@Test
 		@GUITest
+		@DisplayName("Button 'Remove selected' should be enabled only when an OrderItem is selected")
+		void testRemoveSelectedButtonShouldBeEnabledOnlyWhenAnOrderItemIsSelected() {
+			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+					.addElement(new OrderItem(new Product("Product1", 3), 5)));
+			window.list("cartList").selectItem(0);
+			JButtonFixture buttonAdd = window.button(JButtonMatcher.withText("Remove selected"));
+			buttonAdd.requireEnabled();
+			window.list("cartList").clearSelection();
+			buttonAdd.requireDisabled();
+		}
+
+		@Test
+		@GUITest
 		@DisplayName("Method 'itemAdded' should add the received OrderItem element to the cart list")
 		void testItemAddedShouldAddTheOrderItemToTheCartList() {
 			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
