@@ -240,7 +240,7 @@ class OrderTest {
 
 	// Utility method to construct new product for test
 	private Product getNewProduct() {
-		return new Product("name", 3.0);
+		return new Product(1, "name", 3.0);
 	}
 
 }

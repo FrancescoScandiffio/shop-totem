@@ -1,6 +1,8 @@
 package com.github.raffaelliscandiffio.model;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -9,20 +11,19 @@ import org.junit.jupiter.api.Test;
 @DisplayName("Tests for Stock")
 class StockTest {
 	
-	private static final int ZERO = 0;
 	private static final int POSITIVE_QUANTITY = 2;
 	private static final int NEGATIVE_QUANTITY = -2;
 	private static final int INITIAL_QUANTITY = 7;
 
 	@Nested 
-	@DisplayName("Constructor tests") 
-	class ConstructorTests {
+	@DisplayName("Constructor test") 
+	class ConstructorTest {
 		
 		private Product product;
 		
 		@BeforeEach
 		void setup() {
-			product = new Product();
+			product = new Product(1, "pasta", 2);
 		}
 		
 		@Nested 
@@ -43,7 +44,7 @@ class StockTest {
 			@Test
 			@DisplayName("Available quantity can be initialized to zero")
 			void testConstructorWhenAvailableQuantityIsZeroShouldBeAllowed() {
-				stock = new Stock(product, ZERO);
+				stock = new Stock(product, 0);
 				
 				assertThat(stock.getAvailableQuantity()).isZero();
 			}
@@ -54,7 +55,7 @@ class StockTest {
 		class ErrorCases {
 			
 			@Test
-			@DisplayName("Product can't be set to null")
+			@DisplayName("Product can't be null")
 			void testConstructorWhenProductIsNullShouldThrow() {
 
 				assertThatThrownBy(() -> new Stock(null, POSITIVE_QUANTITY)).isInstanceOf(NullPointerException.class)
@@ -62,7 +63,7 @@ class StockTest {
 			}
 			
 			@Test
-			@DisplayName("Available quantity can't be set to negative number")
+			@DisplayName("Available quantity can't be a negative number")
 			void testConstructorWhenAvailableQuantityIsNegativeShouldThrow() {
 
 				assertThatThrownBy(() -> new Stock(product, NEGATIVE_QUANTITY)).isInstanceOf(IllegalArgumentException.class)
@@ -73,7 +74,7 @@ class StockTest {
 	
 	@Nested 
 	@DisplayName("Methods tests") 
-	class MethodsTests {
+	class MethodsTest {
 		
 		private Stock stock;
 		
@@ -84,8 +85,8 @@ class StockTest {
 		}
 		
 		@Nested 
-		@DisplayName("setAvailableQuantity tests") 
-		class SetAvailableQuantityTests {
+		@DisplayName("setAvailableQuantity test") 
+		class SetAvailableQuantityTest {
 			
 			@Test
 			@DisplayName("Available quantity can't be set to negative number")
@@ -101,7 +102,7 @@ class StockTest {
 			@DisplayName("Available quantity can be set to zero")
 			void testSetAvailableQuantityWhenAvailableQuantityIsZeroShouldBeAllowed() {
 					
-				stock.setAvailableQuantity(ZERO);
+				stock.setAvailableQuantity(0);
 				assertThat(stock.getAvailableQuantity()).isZero();
 			}
 			

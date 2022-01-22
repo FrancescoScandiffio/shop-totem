@@ -10,7 +10,7 @@ public class Stock {
 	 * @param product object
 	 * @param availableQuantity of the product
 	 * @throws NullPointerException if the specified product is null
-	 * @throws IllegalArgumentException if the specified product is null and quantity is negative 
+	 * @throws IllegalArgumentException if the quantity is negative 
 	 */
 	public Stock(Product product, int availableQuantity) {
 
@@ -59,11 +59,10 @@ public class Stock {
 	void initAvailableQuantity(int availableQuantity) {
 		this.availableQuantity = availableQuantity;
 	}
-
 	
 	// used for test only
 	Stock() {
-		this.product = new Product();
+		this.product = null;
 	}
 
 }
