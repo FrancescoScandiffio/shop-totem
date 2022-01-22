@@ -44,7 +44,7 @@ class PurchaseBrokerTest {
 	@Test
 	@DisplayName("RetrieveProducts returns a list of products from the product repository")
 	void testRetrieveProductsShouldReturnListOfProductsFromRepository() {
-		List<Product> products = asList(new Product("Pasta", 3));
+		List<Product> products = asList(new Product(PRODUCT_ID, "Pasta", 3));
 		when(productRepository.findAll())
 			.thenReturn(products);
 		
@@ -123,7 +123,7 @@ class PurchaseBrokerTest {
 	@DisplayName("DoesProductExist should return True when product is found on repository")
 	void testDoesProductExistShouldReturnTrueWhenProductIsFound() {
 		
-		when(productRepository.findById(PRODUCT_ID)).thenReturn(new Product("Pasta", 3));
+		when(productRepository.findById(PRODUCT_ID)).thenReturn(new Product(PRODUCT_ID, "Pasta", 3));
 		
 		assertThat(broker.doesProductExist(PRODUCT_ID)).isTrue();
 	}

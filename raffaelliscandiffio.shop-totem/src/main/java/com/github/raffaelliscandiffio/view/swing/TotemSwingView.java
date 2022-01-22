@@ -28,22 +28,13 @@ public class TotemSwingView extends JFrame implements TotemView {
 
 	/**
 	 * Launch the application.
-	
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					TotemSwingView frame = new TotemSwingView();
-					frame.setVisible(true);
-					
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-	*/
-	 
+	 * 
+	 * public static void main(String[] args) { EventQueue.invokeLater(new
+	 * Runnable() { public void run() { try { TotemSwingView frame = new
+	 * TotemSwingView(); frame.setVisible(true);
+	 * 
+	 * } catch (Exception e) { e.printStackTrace(); } } }); }
+	 */
 
 	/**
 	 * Create the frame.
@@ -80,20 +71,20 @@ public class TotemSwingView extends JFrame implements TotemView {
 				openCartAction();
 			}
 		});
-		
+
 		cartPane.addActionListener(e -> {
 			String command = e.getActionCommand();
 			if ("openShopping".equals(command)) {
 				openShoppingAction();
-			} 
+			}
 		});
-		
+
 	}
 
 	private void startShoppingAction() {
 		this.totemController.startShopping();
 	}
-	
+
 	private void openShoppingAction() {
 		this.totemController.openShopping();
 	}
@@ -191,32 +182,35 @@ public class TotemSwingView extends JFrame implements TotemView {
 	@Override
 	public void allItemsRemoved() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void itemRemoved(OrderItem item) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void showErrorItemNotFound(String msg, OrderItem item) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void showGoodbye() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void showErrorEmptyOrder(String msg) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
+	CardLayout getCardLayout() {
+		return layout;
+	}
 
 }

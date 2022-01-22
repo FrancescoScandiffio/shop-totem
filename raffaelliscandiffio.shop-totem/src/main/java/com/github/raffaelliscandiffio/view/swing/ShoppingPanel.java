@@ -52,6 +52,7 @@ public class ShoppingPanel extends JPanel {
 		setLayout(gridBagLayout);
 
 		btnCancelButton = new JButton("Cancel Shopping");
+		btnCancelButton.setName("shopBtnCancelShopping");
 		btnCancelButton.setActionCommand("cancelShopping");
 
 		GridBagConstraints gbc_btnCancelButton = new GridBagConstraints();
@@ -59,7 +60,7 @@ public class ShoppingPanel extends JPanel {
 		gbc_btnCancelButton.gridx = 0;
 		gbc_btnCancelButton.gridy = 0;
 		add(btnCancelButton, gbc_btnCancelButton);
-		
+
 		btnCart = new JButton("Cart");
 		btnCart.setActionCommand("openCart");
 		GridBagConstraints gbc_btnCart = new GridBagConstraints();
@@ -99,7 +100,7 @@ public class ShoppingPanel extends JPanel {
 			}
 		});
 		scrollPane.setViewportView(listProducts);
-		
+
 		lblQuantity = new JLabel("Quantity:");
 		GridBagConstraints gbc_lblQuantity = new GridBagConstraints();
 		gbc_lblQuantity.gridwidth = 2;
@@ -126,11 +127,11 @@ public class ShoppingPanel extends JPanel {
 		tf.setColumns(4);
 		tf.addCaretListener(e -> {
 			btnAddButton.setEnabled(tf.isEditValid() && listProducts.getSelectedIndex() != -1);
-			
-			if(!tf.isEditValid()) {
+
+			if (!tf.isEditValid()) {
 				lblMessage.setText("Invalid quantity");
 				lblMessage.setForeground(Color.RED);
-			}else {
+			} else {
 				lblMessage.setText(" ");
 			}
 		});
@@ -146,7 +147,7 @@ public class ShoppingPanel extends JPanel {
 		gbc_btnAddButton.gridx = 8;
 		gbc_btnAddButton.gridy = 2;
 		add(btnAddButton, gbc_btnAddButton);
-		
+
 		lblMessage = new JLabel(" ");
 		lblMessage.setName("messageLabel");
 		lblMessage.setForeground(Color.BLACK);

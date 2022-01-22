@@ -22,10 +22,9 @@
 		<log4j.version>2.17.1</log4j.version>
 
 		<sonar.coverage.exclusions>
-			**/view/TotemView.java,
-			**/view/swing/TotemSwingView.java,
+			**/controller/PurchaseBroker.java,
 			**/utils/GUITestExtension.java,
-			**/controller/PurchaseBroker.java
+			**/view/swing/TotemSwingView.java,
 		</sonar.coverage.exclusions>
 
 		<sonar.junit.reportPaths>
@@ -49,7 +48,7 @@
 			**/swing/*Test*
 		</sonar.issue.ignore.multicriteria.e2.resourceKey>
 	</properties>
-
+	
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -135,10 +134,12 @@
 					</dependencies>
 					<configuration>
 						<targetClasses>
-							<param>*controller.PurchaseBroker*</param>
+							<param>*model.Product*</param>
+							<param>*model.Stock*</param>
 						</targetClasses>
 						<targetTests>
-							<param>*controller.PurchaseBroker*</param>
+							<param>*model.Product*</param>
+							<param>*model.Stock*</param>
 						</targetTests>
 						<mutators>
 							<mutator>CONDITIONALS_BOUNDARY</mutator>
@@ -164,7 +165,6 @@
 					<version>0.8.7</version>
 					<configuration>
 						<excludes>
-							<exclude>**/view/TotemView.class</exclude>
 							<exclude>**/controller/PurchaseBroker.class</exclude>
 							<exclude>**/utils/GUITestExtension.class</exclude>
 							<exclude>**/view/swing/TotemSwingView.class</exclude>

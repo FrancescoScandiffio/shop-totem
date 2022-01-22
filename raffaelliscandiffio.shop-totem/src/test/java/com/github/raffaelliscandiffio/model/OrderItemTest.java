@@ -27,7 +27,7 @@ class OrderItemTest {
 	@BeforeEach
 	void setup() {
 		softly = new SoftAssertions();
-		product = new Product("name", PRICE);
+		product = new Product(1, "name", PRICE);
 	}
 	
 	

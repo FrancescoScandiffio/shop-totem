@@ -5,17 +5,16 @@ public class Product {
 	private final String name;
 	private final double price;
 	private long id;
-	private static long lastId = 0;
 
-	
 	/**
-	 * Constructs a new Product with the specified name, price and quantity available. Sets its id to a positive incremental number.
+	 * Constructs a new Product with the specified id, name, price.
+	 * @param id of the product
 	 * @param name of the product
 	 * @param price of the product
-	 * @throws IllegalArgumentException if the specified name is empty or null or price is negative
+	 * @throws IllegalArgumentException if the specified name is empty or null, price is negative
 	 */
-	public Product(String name, double price) {
-
+	public Product(long id, String name, double price) {
+		
 		if (!(name != null && !name.trim().isEmpty())) {
 			throw new IllegalArgumentException("Null or empty name is not allowed");
 		}
@@ -26,9 +25,8 @@ public class Product {
 		}
 		this.price = price;
 		
-		this.id = ++lastId;
+		this.id = id;
 	}
-
 
 
 	/**
@@ -54,12 +52,5 @@ public class Product {
 	public long getId() {
 		return id;
 	}
-
-	// used for test only
-	Product() {
-		this.name = "";
-		this.price = 1.0;
-	}
-
 
 }
