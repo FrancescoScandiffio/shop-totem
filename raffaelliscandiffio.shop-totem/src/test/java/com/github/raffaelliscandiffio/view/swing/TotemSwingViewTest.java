@@ -426,6 +426,14 @@ class TotemSwingViewTest {
 
 		@Test
 		@GUITest
+		@DisplayName("Button 'Cancel Shopping' should notify totem controller to cancel shopping")
+		void testCancelShoppingButtonShouldNotifyTotemControllerToCancelShopping() {
+			window.button(JButtonMatcher.withName("cartBtnCancelShopping")).click();
+			verify(totemController).cancelShopping();
+		}
+
+		@Test
+		@GUITest
 		@DisplayName("Method 'itemAdded' should add the received OrderItem element to the cart list")
 		void testItemAddedShouldAddTheOrderItemToTheCartList() {
 			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()

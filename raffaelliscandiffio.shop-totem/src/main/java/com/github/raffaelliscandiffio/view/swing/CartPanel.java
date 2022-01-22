@@ -61,6 +61,7 @@ public class CartPanel extends JPanel {
 
 		btnCancelShopping = new JButton("Cancel Shopping");
 		btnCancelShopping.setName("cartBtnCancelShopping");
+		btnCancelShopping.setActionCommand("cancelShopping");
 		GridBagConstraints gbc_btnCancelShopping = new GridBagConstraints();
 		gbc_btnCancelShopping.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnCancelShopping.insets = new Insets(0, 0, 5, 0);
@@ -165,6 +166,7 @@ public class CartPanel extends JPanel {
 
 	public void addActionListener(ActionListener listener) {
 		btnContinueShopping.addActionListener(listener);
+		btnCancelShopping.addActionListener(listener);
 	}
 
 	public DefaultListModel<OrderItem> getListOrderItemsModel() {
