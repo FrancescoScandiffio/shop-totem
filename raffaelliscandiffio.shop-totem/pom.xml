@@ -133,10 +133,12 @@
 					</dependencies>
 					<configuration>
 						<targetClasses>
-							<param>*controller.TotemController*</param>
+							<param>*model.Product*</param>
+							<param>*model.Stock*</param>
 						</targetClasses>
 						<targetTests>
-							<param>*controller.TotemController*</param>
+							<param>*model.Product*</param>
+							<param>*model.Stock*</param>
 						</targetTests>
 						<mutators>
 							<mutator>CONDITIONALS_BOUNDARY</mutator>
