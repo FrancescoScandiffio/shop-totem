@@ -55,31 +55,26 @@ public class TotemSwingView extends JFrame implements TotemView {
 		getContentPane().add(cartPane, "cart");
 
 		welcomePane.addActionListener(e -> {
-			String command = e.getActionCommand();
-			if ("startShopping".equals(command)) {
-				startShoppingAction();
-			}
+			startShoppingAction();
 		});
 
 		shoppingPane.addActionListener(e -> {
 			String command = e.getActionCommand();
-			if ("cancelShopping".equals(command)) {
+			if ("cancelShopping".equals(command))
 				closeShoppingAction();
-			} else if ("buyProduct".equals(command)) {
+			if ("buyProduct".equals(command))
 				buyProductAction();
-			} else if ("openCart".equals(command)) {
+			if ("openCart".equals(command))
 				openCartAction();
-			}
 		});
 
 		cartPane.addActionListener(e -> {
 			String command = e.getActionCommand();
 			if ("openShopping".equals(command))
 				openShoppingAction();
-			else if ("cancelShopping".equals(command))
+			if ("cancelShopping".equals(command))
 				closeShoppingAction();
 		});
-
 	}
 
 	private void startShoppingAction() {
