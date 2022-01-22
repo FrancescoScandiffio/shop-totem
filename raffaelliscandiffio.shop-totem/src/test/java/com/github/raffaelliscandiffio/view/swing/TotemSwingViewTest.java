@@ -42,7 +42,7 @@ class TotemSwingViewTest {
 
 	@Mock
 	private TotemController totemController;
-	
+
 	@BeforeAll
 	static void setUpOnce() {
 		FailOnThreadViolationRepaintManager.install();
@@ -155,7 +155,8 @@ class TotemSwingViewTest {
 		@DisplayName("Shopping panel inital state")
 		void testShoppingPanelInitialState() {
 
-			window.button(JButtonMatcher.withText("Cancel Shopping")).requireEnabled();
+			window.button(JButtonMatcher.withName("shopBtnCancelShopping")).requireText("Cancel Shopping")
+					.requireEnabled();
 			window.button(JButtonMatcher.withText("Cart")).requireEnabled();
 			window.label("messageLabel").requireText(" ");
 			window.list("productList");
@@ -183,7 +184,7 @@ class TotemSwingViewTest {
 		@DisplayName("Cancel Shopping button should delegate totem controller to abort order")
 		void testCancelShoppingButtonShouldDelegateToTotemControllerToCloseShopping() {
 
-			window.button(JButtonMatcher.withText("Cancel Shopping")).click();
+			window.button(JButtonMatcher.withName("shopBtnCancelShopping")).click();
 
 			verify(totemController).cancelShopping();
 		}
@@ -434,33 +435,40 @@ class TotemSwingViewTest {
 	}
 
 	@Nested
-	@DisplayName("Order panel tests")
-	class OrderPanelTests {
+	@DisplayName("Cart panel tests")
+	class CartPanelTests {
 
 		@BeforeEach
 		void setup() {
-			GuiActionRunner.execute(() -> totemSwingView.showOrder());
+			GuiActionRunner.execute(() -> totemSwingView.getCardLayout().show(totemSwingView.getContentPane(), "cart"));
 		}
 
 		@Test
 		@GUITest
 		@DisplayName("Cart panel inital state")
 		void testCartPanelInitialState() {
-
-			window.button(JButtonMatcher.withText("Go to Shopping")).requireEnabled();
+			window.button(JButtonMatcher.withText("Continue Shopping")).requireEnabled();
+			window.button(JButtonMatcher.withName("cartBtnCancelShopping")).requireText("Cancel Shopping")
+					.requireEnabled();
+			window.button(JButtonMatcher.withText("Return quantity")).requireDisabled();
+			window.button(JButtonMatcher.withText("Remove selected")).requireDisabled();
+			window.button(JButtonMatcher.withText("Checkout")).requireDisabled();
+			window.label("cartMessageLabel").requireText(" ");
+			window.label(JLabelMatcher.withText("Remove selected item"));
+			window.label(JLabelMatcher.withText("Quantity"));
+			window.spinner("cartReturnSpinner").requireDisabled();
 			window.list("cartList");
 		}
-		
+
 		@Test
 		@GUITest
-		@DisplayName("Go to Shopping button should delegate totem controller to open shopping panel")
-		void testGoToShoppingButtonShouldDelegateToTotemControllerToShowShoppingPanel() {
+		@DisplayName("Continue Shopping button should delegate totem controller to open shopping panel")
+		void testContinueShoppingButtonShouldDelegateToTotemControllerToShowShoppingPanel() {
 
-			window.button(JButtonMatcher.withText("Go to Shopping")).click();
-
+			window.button(JButtonMatcher.withText("Continue Shopping")).click();
 			verify(totemController).openShopping();
 		}
-		
+
 		@Test
 		@GUITest
 		@DisplayName("ItemAdded adds the OrderItem element to the cart list")
@@ -490,9 +498,10 @@ class TotemSwingViewTest {
 
 			OrderItem newOrderItem = new OrderItem(product2, 5);
 			GuiActionRunner.execute(() -> totemSwingView.itemModified(oldOrderItem, newOrderItem));
-			
+
 			String[] listContents = window.list("cartList").contents();
-			assertThat(listContents).containsExactly("Product1 - Price: 2.0 € - Quantity: 5", "Product2 - Price: 3.0 € - Quantity: 5");
+			assertThat(listContents).containsExactly("Product1 - Price: 2.0 € - Quantity: 5",
+					"Product2 - Price: 3.0 € - Quantity: 5");
 		}
 
 		@Test
@@ -506,7 +515,7 @@ class TotemSwingViewTest {
 					.addElement(new OrderItem(new Product("Product2", 3), 4)));
 
 			GuiActionRunner.execute(() -> totemSwingView.clearOrderList());
-			
+
 			String[] listContents = window.list("cartList").contents();
 			assertThat(listContents).isEmpty();
 		}
