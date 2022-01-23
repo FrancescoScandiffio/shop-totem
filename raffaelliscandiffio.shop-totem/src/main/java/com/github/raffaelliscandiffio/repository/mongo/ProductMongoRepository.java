@@ -1,6 +1,7 @@
 package com.github.raffaelliscandiffio.repository.mongo;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -31,11 +32,12 @@ public class ProductMongoRepository implements ProductRepository {
 	}
 
 	@Override
-	public Product findById(long id) {
+	public Product findById(long id) throws NoSuchElementException{
 		Document d = productCollection.find(Filters.eq("id", id)).first();
 		if (d != null)
 			return fromDocumentToProduct(d);
-		return null;
+		else
+			throw new NoSuchElementException(String.format("Product with id %d not found", id));
 	}
 
 	@Override
