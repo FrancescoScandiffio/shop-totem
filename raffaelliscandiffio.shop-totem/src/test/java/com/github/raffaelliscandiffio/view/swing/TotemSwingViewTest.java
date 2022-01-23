@@ -492,14 +492,14 @@ class TotemSwingViewTest {
 		@GUITest
 		@DisplayName("Method 'itemModified' should update the specified item in the cart list")
 		void testItemModifiedShouldUpdateTheOldOrderItemWithTheNewOneInCartList() {
+			Product product = new Product("Product2", 3);
+			OrderItem oldItem = new OrderItem(product, 4);
+			OrderItem updatedItem = new OrderItem(product, 5);	
 			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
 					.addElement(new OrderItem(new Product("Product1", 2), 5)));
-			Product product2 = new Product("Product2", 3);
-			OrderItem oldOrderItem = new OrderItem(product2, 4);
-			GuiActionRunner
-					.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel().addElement(oldOrderItem));
-			OrderItem newOrderItem = new OrderItem(product2, 5);
-			GuiActionRunner.execute(() -> totemSwingView.itemModified(oldOrderItem, newOrderItem));
+			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel().addElement(oldItem));
+			
+			GuiActionRunner.execute(() -> totemSwingView.itemModified(oldItem, updatedItem));
 			String[] listContents = window.list("cartList").contents();
 			assertThat(listContents).containsExactly("Product1 - Quantity: 5 - Price: 2.0 € - Subtotal: 10.0 €",
 					"Product2 - Quantity: 5 - Price: 3.0 € - Subtotal: 15.0 €");
