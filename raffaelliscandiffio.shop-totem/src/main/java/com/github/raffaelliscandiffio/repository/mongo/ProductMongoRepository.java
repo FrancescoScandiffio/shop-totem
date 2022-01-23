@@ -1,7 +1,8 @@
 package com.github.raffaelliscandiffio.repository.mongo;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.bson.Document;
 
@@ -20,9 +21,12 @@ public class ProductMongoRepository implements ProductRepository {
 
 	@Override
 	public List<Product> findAll() {
-		return Collections.emptyList();
+		return StreamSupport.stream(productCollection.find().spliterator(), false)
+				.map(d -> new Product(Long.valueOf("" + d.get("id")), "" + d.get("name"), Double.valueOf("" + d.get("price"))))
+				.collect(Collectors.toList());
 	}
-	
+
+
 	@Override
 	public Product findById(long id) {
 		// TODO Auto-generated method stub

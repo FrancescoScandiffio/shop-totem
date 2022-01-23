@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com.github.raffaelliscandiffio.model.Product;
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
@@ -60,9 +61,29 @@ class ProductMongoRepositoryTest {
 	}
 
 	@Test
-	@DisplayName(" ")
+	@DisplayName("'FindAll' when the database is empty")
 	void testFindAllWhenDatabaseIsEmpty() {
 		assertThat(productRepository.findAll()).isEmpty();
+	}
+	
+	@Test
+	@DisplayName("'FindAll' when the database is not empty")
+	void testFindAllWhenDatabaseIsNotEmpty() {
+		addTestProductToDatabase(1, "pizza", 5.5);
+		addTestProductToDatabase(2, "pasta", 2.3);
+		assertThat(productRepository.findAll())
+			.containsExactly(
+				new Product(1, "pizza", 5.5),
+				new Product(2, "pasta", 2.3));
+	}
+	
+	
+	private void addTestProductToDatabase(long id, String name, double price) {
+		productCollection.insertOne(
+				new Document()
+					.append("id", id)
+					.append("name", name)
+					.append("price", price));
 	}
 
 }
