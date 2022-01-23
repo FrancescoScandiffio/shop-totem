@@ -10,6 +10,7 @@ import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.repository.ProductRepository;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
 
 public class ProductMongoRepository implements ProductRepository {
 
@@ -22,14 +23,20 @@ public class ProductMongoRepository implements ProductRepository {
 	@Override
 	public List<Product> findAll() {
 		return StreamSupport.stream(productCollection.find().spliterator(), false)
-				.map(d -> new Product(Long.valueOf("" + d.get("id")), "" + d.get("name"), Double.valueOf("" + d.get("price"))))
+				.map(this::fromDocumentToProduct)
 				.collect(Collectors.toList());
+	}
+	
+	private Product fromDocumentToProduct(Document d) {
+		return new Product(Long.valueOf("" + d.get("id")), "" + d.get("name"), Double.valueOf("" + d.get("price")));
 	}
 
 
 	@Override
 	public Product findById(long id) {
-		// TODO Auto-generated method stub
+		Document d = productCollection.find(Filters.eq("id", id)).first();
+		if (d != null)
+			return fromDocumentToProduct(d);
 		return null;
 	}
 

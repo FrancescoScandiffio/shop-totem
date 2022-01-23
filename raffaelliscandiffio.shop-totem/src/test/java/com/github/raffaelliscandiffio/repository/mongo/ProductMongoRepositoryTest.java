@@ -61,13 +61,13 @@ class ProductMongoRepositoryTest {
 	}
 
 	@Test
-	@DisplayName("'FindAll' when the database is empty")
+	@DisplayName("'findAll' when the database is empty")
 	void testFindAllWhenDatabaseIsEmpty() {
 		assertThat(productRepository.findAll()).isEmpty();
 	}
 	
 	@Test
-	@DisplayName("'FindAll' when the database is not empty")
+	@DisplayName("'findAll' when the database is not empty")
 	void testFindAllWhenDatabaseIsNotEmpty() {
 		addTestProductToDatabase(1, "pizza", 5.5);
 		addTestProductToDatabase(2, "pasta", 2.3);
@@ -75,6 +75,22 @@ class ProductMongoRepositoryTest {
 			.containsExactly(
 				new Product(1, "pizza", 5.5),
 				new Product(2, "pasta", 2.3));
+	}
+	
+	@Test
+	@DisplayName("'findById' when the id is not found")
+	void testFindByIdWhenIdIsNotFound() {
+		assertThat(productRepository.findById(1))
+			.isNull();
+	}
+	
+	@Test
+	@DisplayName("'findById' when the id is found")
+	void testFindByIdWhenIdIsFound() {
+		addTestProductToDatabase(1, "pizza", 5.5);
+		addTestProductToDatabase(2, "pasta", 2.3);
+		assertThat(productRepository.findById(2))
+			.isEqualTo(new Product(2, "pasta", 2.3));
 	}
 	
 	
