@@ -104,7 +104,7 @@ public class TotemController {
 		List<OrderItem> items = order.getItems();
 		if (!items.isEmpty()) {
 			order.clear();
-			totemView.clearOrderList();
+			totemView.allItemsRemoved();
 			for (OrderItem item : items) {
 				broker.returnProduct(item.getProduct().getId(), item.getQuantity());
 			}
@@ -120,7 +120,7 @@ public class TotemController {
 
 		orderRepository.save(order);
 		totemView.showGoodbye();
-		totemView.clearOrderList();
+		totemView.allItemsRemoved();
 		order = null;
 	}
 

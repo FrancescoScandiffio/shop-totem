@@ -1,46 +1,35 @@
 package com.github.raffaelliscandiffio.model;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 @DisplayName("Tests for Product")
 class ProductTest {
 
-	private static final int ZERO = 0;
 	private static final double POSITIVE_PRICE = 3;
 	private static final double NEGATIVE_PRICE = -3;
-	private static final String NAME = "name";
+	private static final String NAME = "pasta";
+	private static final long ID = 1;
 
 	@Nested
-	@DisplayName("Happy cases")
-	class HappyCases {
+	@DisplayName("Happy case")
+	class HappyCase {
 
 		private Product product;
 
 		@Test
-		@DisplayName("An incremental id is automatically generated")
-		void testIdsAreIncremental() {
-			assertThat(new Product(NAME, POSITIVE_PRICE).getId()).isLessThan(new Product(NAME, POSITIVE_PRICE).getId());
-		}
+		@DisplayName("Product initialization with valid arguments")
+		void testConstructorWhenNameNotNullOrEmptyAndPriceIsPositiveShouldBeAllowed() {
 
-		@Test
-		@DisplayName("A positive number is automatically assigned as id")
-		void testIdIsAutomaticallyAssignedAsPositiveNumber() {
-			product = new Product(NAME, POSITIVE_PRICE);
-			assertThat(product.getId()).isPositive();
-		}
-
-		@Test
-		@DisplayName("Product can be initialized with name not null nor empty and non negative price")
-		void testConstructorWhenNameNotNullOrEmptyPricePositiveShouldBeAllowed() {
-
-			product = new Product(NAME, POSITIVE_PRICE);
+			product = new Product(ID, NAME, POSITIVE_PRICE);
+			assertThat(product.getId()).isEqualTo(ID);
 			assertThat(product.getName()).isEqualTo(NAME);
 			assertThat(product.getPrice()).isEqualTo(POSITIVE_PRICE);
 		}
@@ -49,21 +38,21 @@ class ProductTest {
 		@DisplayName("Price can be initialized to zero")
 		void testConstructorWhenPriceIsZeroShouldBeAllowed() {
 
-			product = new Product(NAME, ZERO);
+			product = new Product(ID, NAME, 0);
 			assertThat(product.getPrice()).isZero();
 		}
 	}
 
 	@Nested
-	@DisplayName("Error cases")
-	class ErrorCases {
+	@DisplayName("Exceptional cases")
+	class ExceptionalCases {
 
 		@ParameterizedTest
 		@NullAndEmptySource
 		@ValueSource(strings = { " ", "\t", "\n" })
 		@DisplayName("Name can't be set as null or empty string")
 		void testConstructorWhenNameNullOrEmptyShouldThrow(String name) {
-			assertThatThrownBy(() -> new Product(name, POSITIVE_PRICE)).isInstanceOf(IllegalArgumentException.class)
+			assertThatThrownBy(() -> new Product(ID, name, POSITIVE_PRICE)).isInstanceOf(IllegalArgumentException.class)
 					.hasMessage("Null or empty name is not allowed");
 		}
 
@@ -71,7 +60,7 @@ class ProductTest {
 		@DisplayName("Price can't be set to negative number")
 		void testConstructorWhenPriceIsNegativeShouldThrow() {
 
-			assertThatThrownBy(() -> new Product(NAME, NEGATIVE_PRICE)).isInstanceOf(IllegalArgumentException.class)
+			assertThatThrownBy(() -> new Product(ID, NAME, NEGATIVE_PRICE)).isInstanceOf(IllegalArgumentException.class)
 					.hasMessage("Negative price: " + NEGATIVE_PRICE);
 		}
 	}

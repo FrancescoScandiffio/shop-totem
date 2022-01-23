@@ -166,8 +166,8 @@ class TotemSwingViewTest {
 		@GUITest
 		@DisplayName("Method 'ShowAllProducts' should add the received products to shopping panel")
 		void testShowAllProductsShouldAddProductsFromTheListToShoppingPanel() {
-			Product product1 = new Product("Product1", 2);
-			Product product2 = new Product("Product2", 3);
+			Product product1 = new Product(1, "Product1", 2);
+			Product product2 = new Product(1, "Product2", 3);
 			GuiActionRunner.execute(() -> totemSwingView.showAllProducts(Arrays.asList(product1, product2)));
 
 			String[] listContents = window.list("productList").contents();
@@ -195,7 +195,7 @@ class TotemSwingViewTest {
 		@DisplayName("Button 'Add' and quantity spinner should be enabled only when a Product is selected")
 		void testAddButtonAndQuantitySpinnerShouldBeEnabledOnlyWhenAProductIsSelected() {
 			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel()
-					.addElement(new Product("Product1", 2)));
+					.addElement(new Product(1, "Product1", 2)));
 			window.list("productList").selectItem(0);
 			JButtonFixture buttonAdd = window.button(JButtonMatcher.withText("Add"));
 			JSpinnerFixture spinner = window.spinner("quantitySpinner");
@@ -211,7 +211,7 @@ class TotemSwingViewTest {
 		@GUITest
 		@DisplayName("Button 'Add' should be disabled when quantity in spinner is a negative number")
 		void testAddButtonShouldBeDisabledWhenQuantityInSpinnerIsNegative() {
-			Product product = new Product("Product1", 2);
+			Product product = new Product(1, "Product1", 2);
 			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
 			window.list("productList").selectItem(0);
 			window.spinner("quantitySpinner").enterText("-1");
@@ -222,7 +222,7 @@ class TotemSwingViewTest {
 		@GUITest
 		@DisplayName("Button 'Add' should be disabled when quantity in spinner is not a number")
 		void testAddButtonShouldBeDisabledWhenQuantityInSpinnerIsNaN() {
-			Product product = new Product("Product1", 2);
+			Product product = new Product(1, "Product1", 2);
 			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
 			window.list("productList").selectItem(0);
 			window.spinner("quantitySpinner").enterText("text");
@@ -233,7 +233,7 @@ class TotemSwingViewTest {
 		@GUITest
 		@DisplayName("Button 'Add' should be disabled when quantity in spinner is zero")
 		void testAddButtonShouldBeDisabledWhenQuantityInSpinnerIsZero() {
-			Product product = new Product("Product1", 2);
+			Product product = new Product(1, "Product1", 2);
 			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
 			window.list("productList").selectItem(0);
 			window.spinner("quantitySpinner").enterText("0");
@@ -244,7 +244,7 @@ class TotemSwingViewTest {
 		@GUITest
 		@DisplayName("Button 'Add' should be disabled when quantity in spinner is invalid and enabled when becomes valid")
 		void testAddButtonShouldBeDisabledWhenQuantityInSpinnerIsInvalidAndEnabledWhenTurnsValid() {
-			Product product = new Product("Product1", 2);
+			Product product = new Product(1, "Product1", 2);
 			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
 			window.list("productList").selectItem(0);
 			window.spinner("quantitySpinner").enterText("text");
@@ -257,7 +257,7 @@ class TotemSwingViewTest {
 		@GUITest
 		@DisplayName("Quantity spinner shown value should be resetted to last valid value if an invalid value is inserted and the product is deselected")
 		void testQuantitySpinnerShouldBeResettedToLastValidValueWhenQuantityIsInvalidAndProductIsDeselected() {
-			Product product = new Product("Product1", 2);
+			Product product = new Product(1, "Product1", 2);
 			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
 			// gets the spinner text field
 			JFormattedTextField tf = ((JSpinner.DefaultEditor) window.spinner("quantitySpinner").target().getEditor())
@@ -274,7 +274,7 @@ class TotemSwingViewTest {
 		@GUITest
 		@DisplayName("Message label should display 'Invalid quantity' only when quantity inserted is invalid")
 		void testMessageShouldDisplayInvalidQuantityErrorOnlyWhenQuantityIsInvalid() {
-			Product product = new Product("Product1", 2);
+			Product product = new Product(1, "Product1", 2);
 			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
 			window.list("productList").selectItem(0);
 			window.spinner("quantitySpinner").enterText("3");
@@ -289,14 +289,11 @@ class TotemSwingViewTest {
 		@GUITest
 		@DisplayName("Message label should not display 'Invalid quantity' after deselection if quantity inserted was invalid before")
 		void testMessageShouldNotDisplayInvalidQuantityWhenProductIsNotSelected() {
-			Product product = new Product("Product1", 2);
+			Product product = new Product(1, "Product1", 2);
 			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
-
 			window.list("productList").selectItem(0);
-
 			window.spinner("quantitySpinner").enterText("-1");
 			window.label("messageLabel").requireText("Invalid quantity");
-
 			window.list("productList").clearSelection();
 			window.label("messageLabel").requireText(" ");
 		}
@@ -305,14 +302,11 @@ class TotemSwingViewTest {
 		@GUITest
 		@DisplayName("Button 'Add' should delegate to TotemController 'buyProduct'")
 		void testAddButtonShouldDelegateToTotemControllerBuyProduct() {
-			Product product = new Product("Product1", 2);
+			Product product = new Product(1, "Product1", 2);
 			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
-
 			window.list("productList").selectItem(0);
 			window.spinner("quantitySpinner").enterTextAndCommit("3");
-
 			window.button(JButtonMatcher.withText("Add")).click();
-
 			verify(totemController).buyProduct(product, 3);
 		}
 
@@ -336,8 +330,8 @@ class TotemSwingViewTest {
 		@GUITest
 		@DisplayName("Method 'showErrorProductNotFound' should set error message label and delete product from list")
 		void testShowErrorProductNotFoundShouldSetMessageLabelAndDeleteProductFromList() {
-			Product product1 = new Product("Product1", 2);
-			Product product2 = new Product("Product2", 3);
+			Product product1 = new Product(1, "Product1", 2);
+			Product product2 = new Product(1, "Product2", 3);
 			GuiActionRunner.execute(() -> totemSwingView.showAllProducts(Arrays.asList(product1, product2)));
 			GuiActionRunner.execute(() -> totemSwingView.showErrorProductNotFound("Error message", product2));
 			String[] listContents = window.list("productList").contents();
@@ -357,7 +351,7 @@ class TotemSwingViewTest {
 		@GUITest
 		@DisplayName("Message label should be resetted to empty after Product deselection")
 		void testMessageLabelShouldBeResettedWhenProductIsDeselected() {
-			Product product = new Product("Product1", 2);
+			Product product = new Product(1, "Product1", 2);
 			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
 			window.list("productList").selectItem(0);
 			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getLblMessage().setText("Error message"));
@@ -369,8 +363,8 @@ class TotemSwingViewTest {
 		@GUITest
 		@DisplayName("Message label should be resetted to empty after Product change of selection")
 		void testMessageLabelShouldBeResettedWhenProductIsChangedOfSelection() {
-			Product product1 = new Product("Product1", 2);
-			Product product2 = new Product("Product2", 3);
+			Product product1 = new Product(1, "Product1", 2);
+			Product product2 = new Product(1, "Product2", 3);
 			GuiActionRunner.execute(() -> totemSwingView.showAllProducts(Arrays.asList(product1, product2)));
 			window.list("productList").selectItem(0);
 			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getLblMessage().setText("Error message"));
@@ -382,7 +376,7 @@ class TotemSwingViewTest {
 		@GUITest
 		@DisplayName("Message label should be resetted to empty after quantity change (to valid value)")
 		void testMessageLabelShouldBeResettedWhenQuantityIsChangedToValidValue() {
-			Product product = new Product("Product1", 2);
+			Product product = new Product(1, "Product1", 2);
 			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
 			window.list("productList").selectItem(0);
 			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getLblMessage().setText("Error message"));
@@ -438,7 +432,7 @@ class TotemSwingViewTest {
 		@DisplayName("Button 'Remove selected' should be enabled only when an OrderItem is selected")
 		void testRemoveSelectedButtonShouldBeEnabledOnlyWhenAnOrderItemIsSelected() {
 			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
-					.addElement(new OrderItem(new Product("Product1", 3), 5)));
+					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
 			window.list("cartList").selectItem(0);
 			JButtonFixture buttonAdd = window.button(JButtonMatcher.withText("Remove selected"));
 			buttonAdd.requireEnabled();
@@ -450,8 +444,8 @@ class TotemSwingViewTest {
 		@GUITest
 		@DisplayName("Button 'Remove selected' should delegate to TotemController 'removeItem'")
 		void testRemoveSelectedButtonShouldDelegateToTotemControllerRemoveItem() {
-			OrderItem item1 = new OrderItem(new Product("Product1", 3), 5);
-			OrderItem item2 = new OrderItem(new Product("Product2", 1), 4);
+			OrderItem item1 = new OrderItem(new Product(1, "Product1", 3), 5);
+			OrderItem item2 = new OrderItem(new Product(2, "Product2", 1), 4);
 			JButtonFixture removeButton = window.button(JButtonMatcher.withText("Remove selected"));
 			GuiActionRunner.execute(() -> {
 				DefaultListModel<OrderItem> listItemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
@@ -469,7 +463,7 @@ class TotemSwingViewTest {
 		@DisplayName("Button 'Checkout' should be enabled when an item is added to the cart list")
 		void testCheckoutButtonShouldBeEnabledWhenAnItemIsAddedToCartList() {
 			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
-					.addElement(new OrderItem(new Product("Product1", 3), 5)));
+					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
 			window.button(JButtonMatcher.withText("Checkout")).requireEnabled();
 		}
 
@@ -485,13 +479,16 @@ class TotemSwingViewTest {
 		@GUITest
 		@DisplayName("Button 'Checkout' should be enabled when several items are present and one is removed")
 		void testCheckoutButtonShouldBeEnabledWhenSeveralItemsArePresentAndOneIsRemoved() {
-			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
-					.addElement(new OrderItem(new Product("Product1", 3), 5)));
-			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
-					.addElement(new OrderItem(new Product("Product2", 3), 5)));
-			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel().removeElementAt(0));
-			window.button(JButtonMatcher.withText("Checkout")).requireEnabled();
+			DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+			JButtonFixture checkoutButton = window.button(JButtonMatcher.withText("Checkout"));
+			GuiActionRunner.execute(() -> {
+				itemsModel.addElement(new OrderItem(new Product(1, "Product1", 3), 5));
+				itemsModel.addElement(new OrderItem(new Product(2, "Product2", 3), 5));
+				checkoutButton.target().setEnabled(true);
+			});
 
+			GuiActionRunner.execute(() -> itemsModel.removeElementAt(0));
+			checkoutButton.requireEnabled();
 		}
 
 		@Test
@@ -508,9 +505,10 @@ class TotemSwingViewTest {
 		@GUITest
 		@DisplayName("Method 'itemAdded' should add the received OrderItem element to the cart list")
 		void testItemAddedShouldAddTheOrderItemToTheCartList() {
+			OrderItem newItem = new OrderItem(new Product(2, "Product2", 2), 4);
 			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
-					.addElement(new OrderItem(new Product("Product1", 3), 5)));
-			OrderItem newItem = new OrderItem(new Product("Product2", 2), 4);
+					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+
 			GuiActionRunner.execute(() -> totemSwingView.itemAdded(newItem));
 			String[] listContents = window.list("cartList").contents();
 			assertThat(listContents).containsExactly("Product1 - Quantity: 5 - Price: 3.0 € - Subtotal: 15.0 €",
@@ -521,28 +519,32 @@ class TotemSwingViewTest {
 		@GUITest
 		@DisplayName("Method 'itemModified' should update the specified item in the cart list")
 		void testItemModifiedShouldUpdateTheOldOrderItemWithTheNewOneInCartList() {
-			Product product = new Product("Product2", 3);
+
+			Product product = new Product(2, "Product2", 3);
 			OrderItem oldItem = new OrderItem(product, 4);
 			OrderItem updatedItem = new OrderItem(product, 5);
-			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
-					.addElement(new OrderItem(new Product("Product1", 2), 5)));
-			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel().addElement(oldItem));
-
+			DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+			GuiActionRunner.execute(() -> {
+				itemsModel.addElement(new OrderItem(new Product(1, "Product1", 2), 5));
+				itemsModel.addElement(oldItem);
+			});
 			GuiActionRunner.execute(() -> totemSwingView.itemModified(oldItem, updatedItem));
 			String[] listContents = window.list("cartList").contents();
 			assertThat(listContents).containsExactly("Product1 - Quantity: 5 - Price: 2.0 € - Subtotal: 10.0 €",
 					"Product2 - Quantity: 5 - Price: 3.0 € - Subtotal: 15.0 €");
+
 		}
 
 		@Test
 		@GUITest
-		@DisplayName("Method 'clearOrderList' should remove all items from the cart list")
-		void testClearOrderListShouldClearTheCartList() {
-			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
-					.addElement(new OrderItem(new Product("Product1", 2), 5)));
-			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
-					.addElement(new OrderItem(new Product("Product2", 3), 4)));
-			GuiActionRunner.execute(() -> totemSwingView.clearOrderList());
+		@DisplayName("Method 'allItemsRemoved' should remove all items from the cart list")
+		void testAllItemsRemovedShouldClearTheCartList() {
+			DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+			GuiActionRunner.execute(() -> {
+				itemsModel.addElement(new OrderItem(new Product(1, "Product1", 2), 5));
+				itemsModel.addElement(new OrderItem(new Product(1, "Product1", 2), 4));
+			});
+			GuiActionRunner.execute(() -> totemSwingView.allItemsRemoved());
 			String[] listContents = window.list("cartList").contents();
 			assertThat(listContents).isEmpty();
 		}

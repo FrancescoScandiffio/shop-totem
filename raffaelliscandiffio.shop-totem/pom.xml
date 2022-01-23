@@ -19,10 +19,12 @@
 		<assertj.core.version>3.21.0</assertj.core.version>
 		<mockito.version>4.2.0</mockito.version>
 		<assertj.swing.version>3.17.1</assertj.swing.version>
+		<log4j.version>2.17.1</log4j.version>
 
 		<sonar.coverage.exclusions>
 			**/controller/PurchaseBroker.java,
 			**/utils/GUITestExtension.java,
+			**/view/swing/TotemSwingView.java,
 		</sonar.coverage.exclusions>
 
 		<sonar.junit.reportPaths>
@@ -46,6 +48,18 @@
 			**/swing/*Test*
 		</sonar.issue.ignore.multicriteria.e2.resourceKey>
 	</properties>
+	
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-bom</artifactId>
+				<version>${log4j.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<dependencies>
 		<dependency>
@@ -77,6 +91,14 @@
 			<artifactId>assertj-swing-junit</artifactId>
 			<version>${assertj.swing.version}</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -112,10 +134,14 @@
 					</dependencies>
 					<configuration>
 						<targetClasses>
-							<param>*controller.TotemController*</param>
+							<param>*model.Product*</param>
+							<param>*model.Stock*</param>
+							<param>*model.Order*</param>
 						</targetClasses>
 						<targetTests>
-							<param>*controller.TotemController*</param>
+							<param>*model.Product*</param>
+							<param>*model.Stock*</param>
+							<param>*model.Order*</param>
 						</targetTests>
 						<mutators>
 							<mutator>CONDITIONALS_BOUNDARY</mutator>

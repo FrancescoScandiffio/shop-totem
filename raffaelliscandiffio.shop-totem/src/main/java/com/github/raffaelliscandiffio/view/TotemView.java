@@ -11,8 +11,6 @@ public interface TotemView {
 
 	void showAllProducts(List<Product> allProducts);
 
-	void allItemsRemoved();
-
 	void showWelcome();
 
 	void itemAdded(OrderItem item);
@@ -31,7 +29,7 @@ public interface TotemView {
 
 	void showErrorMessage(String msg);
 
-	void clearOrderList();
+	void allItemsRemoved();
 
 	void showGoodbye();
 
