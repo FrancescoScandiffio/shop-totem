@@ -20,8 +20,6 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 import com.github.raffaelliscandiffio.model.OrderItem;
 
@@ -103,12 +101,8 @@ public class CartPanel extends JPanel {
 
 		});
 		listOrderItems = new JList<>(listOrderItemsModel);
-		listOrderItems.addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent e) {
-				btnRemoveSelected.setEnabled(listOrderItems.getSelectedIndex() != -1);
-			}
-		});
-
+		listOrderItems
+				.addListSelectionListener(e -> btnRemoveSelected.setEnabled(listOrderItems.getSelectedIndex() != -1));
 		listOrderItems.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		listOrderItems.setName("cartList");
 		listOrderItems.setCellRenderer(new DefaultListCellRenderer() {
