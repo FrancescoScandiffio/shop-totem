@@ -2,11 +2,12 @@ package com.github.raffaelliscandiffio.model;
 
 public class Stock {
 	
+	private final long id;
 	private final Product product;
 	private int availableQuantity;
 	
 	/**
-	 * Constructs a new Stock with a product and relative available quantity.
+	 * Constructs a new Stock with a product and relative available quantity. Sets ID as product ID.
 	 * @param product object
 	 * @param availableQuantity of the product
 	 * @throws NullPointerException if the specified product is null
@@ -20,6 +21,8 @@ public class Stock {
 		this.product=product;
 
 		setAvailableQuantityValidation(availableQuantity);
+		
+		this.id = product.getId();
 	}
 
 	private void setAvailableQuantityValidation(int availableQuantity) {
@@ -44,6 +47,14 @@ public class Stock {
 	public Product getProduct() {
 		return product;
 	}
+	
+	/**
+	 * Returns the id of the Stock
+	 * @return the id
+	 */
+	public long getId() {
+		return id;
+	}
 
 	/**
 	 * Sets available quantity to the specified quantity.
@@ -62,7 +73,7 @@ public class Stock {
 	
 	// used for test only
 	Stock() {
+		this.id = 0;
 		this.product = null;
 	}
-
 }
