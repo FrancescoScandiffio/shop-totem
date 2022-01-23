@@ -477,6 +477,16 @@ class TotemSwingViewTest {
 
 		@Test
 		@GUITest
+		@DisplayName("Button 'Checkout' should delegate to TotemController 'confirmOrder'")
+		void testCheckoutButtonShouldDelegateToTotemControllerConfirmOrder() {
+			JButtonFixture checkoutButton = window.button(JButtonMatcher.withText("Checkout"));
+			GuiActionRunner.execute(() -> checkoutButton.target().setEnabled(true));
+			checkoutButton.click();
+			verify(totemController).confirmOrder();
+		}
+
+		@Test
+		@GUITest
 		@DisplayName("Method 'itemAdded' should add the received OrderItem element to the cart list")
 		void testItemAddedShouldAddTheOrderItemToTheCartList() {
 			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()

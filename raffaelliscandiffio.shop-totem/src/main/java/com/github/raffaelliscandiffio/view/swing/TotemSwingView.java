@@ -74,7 +74,14 @@ public class TotemSwingView extends JFrame implements TotemView {
 				openShoppingAction();
 			if ("cancelShopping".equals(command))
 				closeShoppingAction();
+			if ("checkout".equals(command))
+				confirmOrderAction();
+
 		});
+	}
+
+	private void confirmOrderAction() {
+		this.totemController.confirmOrder();
 	}
 
 	private void startShoppingAction() {

@@ -161,6 +161,7 @@ public class CartPanel extends JPanel {
 		add(btnReturnQuantity, gbc_btnReturnQuantity);
 
 		btnCheckout = new JButton("Checkout");
+		btnCheckout.setActionCommand("checkout");
 		btnCheckout.setEnabled(false);
 		GridBagConstraints gbc_btnCheckout = new GridBagConstraints();
 		gbc_btnCheckout.fill = GridBagConstraints.HORIZONTAL;
@@ -195,6 +196,7 @@ public class CartPanel extends JPanel {
 	public void addActionListener(ActionListener listener) {
 		btnContinueShopping.addActionListener(listener);
 		btnCancelShopping.addActionListener(listener);
+		btnCheckout.addActionListener(listener);
 	}
 
 	public DefaultListModel<OrderItem> getListOrderItemsModel() {
