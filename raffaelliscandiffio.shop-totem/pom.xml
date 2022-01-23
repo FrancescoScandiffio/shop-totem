@@ -155,12 +155,10 @@
 					</dependencies>
 					<configuration>
 						<targetClasses>
-							<param>*model.Product*</param>
-							<param>*model.Stock*</param>
+							<param>*repository.mongo.ProductMongoRepository*</param>
 						</targetClasses>
 						<targetTests>
-							<param>*model.Product*</param>
-							<param>*model.Stock*</param>
+							<param>*repository.mongo.ProductMongoRepository*</param>
 						</targetTests>
 						<mutators>
 							<mutator>CONDITIONALS_BOUNDARY</mutator>
