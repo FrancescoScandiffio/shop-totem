@@ -172,6 +172,7 @@ public class CartPanel extends JPanel {
 
 		btnRemoveSelected = new JButton("Remove selected");
 		btnRemoveSelected.setEnabled(false);
+		btnRemoveSelected.setActionCommand("removeSelected");
 		GridBagConstraints gbc_btnRemoveSelected = new GridBagConstraints();
 		gbc_btnRemoveSelected.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnRemoveSelected.insets = new Insets(0, 0, 0, 5);
@@ -197,9 +198,14 @@ public class CartPanel extends JPanel {
 		btnContinueShopping.addActionListener(listener);
 		btnCancelShopping.addActionListener(listener);
 		btnCheckout.addActionListener(listener);
+		btnRemoveSelected.addActionListener(listener);
 	}
 
-	public DefaultListModel<OrderItem> getListOrderItemsModel() {
+	DefaultListModel<OrderItem> getListOrderItemsModel() {
 		return listOrderItemsModel;
+	}
+
+	JList<OrderItem> getListOrderItems() {
+		return listOrderItems;
 	}
 }

@@ -5,6 +5,7 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Arrays;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JFormattedTextField;
 import javax.swing.JSpinner;
 
@@ -443,6 +444,24 @@ class TotemSwingViewTest {
 			buttonAdd.requireEnabled();
 			window.list("cartList").clearSelection();
 			buttonAdd.requireDisabled();
+		}
+
+		@Test
+		@GUITest
+		@DisplayName("Button 'Remove selected' should delegate to TotemController 'removeItem'")
+		void testRemoveSelectedButtonShouldDelegateToTotemControllerRemoveItem() {
+			OrderItem item1 = new OrderItem(new Product("Product1", 3), 5);
+			OrderItem item2 = new OrderItem(new Product("Product2", 1), 4);
+			JButtonFixture removeButton = window.button(JButtonMatcher.withText("Remove selected"));
+			GuiActionRunner.execute(() -> {
+				DefaultListModel<OrderItem> listItemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+				listItemsModel.addElement(item1);
+				listItemsModel.addElement(item2);
+				removeButton.target().setEnabled(true);
+			});
+			window.list("cartList").selectItem(1);
+			removeButton.click();
+			verify(totemController).removeItem(item2);
 		}
 
 		@Test
