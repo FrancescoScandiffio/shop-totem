@@ -136,10 +136,12 @@
 						<targetClasses>
 							<param>*model.Product*</param>
 							<param>*model.Stock*</param>
+							<param>*model.Order*</param>
 						</targetClasses>
 						<targetTests>
 							<param>*model.Product*</param>
 							<param>*model.Stock*</param>
+							<param>*model.Order*</param>
 						</targetTests>
 						<mutators>
 							<mutator>CONDITIONALS_BOUNDARY</mutator>
@@ -167,7 +169,7 @@
 						<excludes>
 							<exclude>**/controller/PurchaseBroker.class</exclude>
 							<exclude>**/utils/GUITestExtension.class</exclude>
-							<exclude>**/view/swing/TotemSwingView.class</exclude>
+							<exclude>**/swing/TotemSwingView.class</exclude>						
 						</excludes>
 					</configuration>
 					<executions>
