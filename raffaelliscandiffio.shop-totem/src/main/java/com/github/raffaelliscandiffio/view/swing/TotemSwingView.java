@@ -175,14 +175,8 @@ public class TotemSwingView extends JFrame implements TotemView {
 	}
 
 	@Override
-	public void clearOrderList() {
-		getCartPane().getListOrderItemsModel().clear();
-	}
-
-	@Override
 	public void allItemsRemoved() {
-		// TODO Auto-generated method stub
-
+		getCartPane().getListOrderItemsModel().clear();
 	}
 
 	@Override

@@ -318,7 +318,7 @@ class TotemControllerTest {
 			totemController.cancelShopping();
 			verify(order).clear();
 			verify(broker).returnProduct(product.getId(), QUANTITY);
-			verify(totemView).clearOrderList();
+			verify(totemView).allItemsRemoved();
 			verify(totemView).showWelcome();
 
 		}
@@ -337,7 +337,7 @@ class TotemControllerTest {
 			verify(order).clear();
 			verify(broker).returnProduct(product.getId(), QUANTITY);
 			verify(broker).returnProduct(product_2.getId(), QUANTITY);
-			verify(totemView).clearOrderList();
+			verify(totemView).allItemsRemoved();
 			verify(totemView).showWelcome();
 		}
 
@@ -358,7 +358,7 @@ class TotemControllerTest {
 			InOrder inOrder = inOrder(totemView, orderRepository);
 			inOrder.verify(orderRepository).save(order);
 			inOrder.verify(totemView).showGoodbye();
-			inOrder.verify(totemView).clearOrderList();
+			inOrder.verify(totemView).allItemsRemoved();
 			assertThat(totemController.getOrder()).isNull();
 		}
 
