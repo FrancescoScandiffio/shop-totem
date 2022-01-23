@@ -1,5 +1,9 @@
 package com.github.raffaelliscandiffio.model;
 
+import java.util.Objects;
+
+import com.github.raffaelliscandiffio.utils.ExcludeGeneratedFromCoverage;
+
 public class Product {
 
 	private final String name;
@@ -52,5 +56,26 @@ public class Product {
 	public long getId() {
 		return id;
 	}
+	
+	@ExcludeGeneratedFromCoverage
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, name, price);
+	}
+
+	@ExcludeGeneratedFromCoverage
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Product other = (Product) obj;
+		return id == other.id && Objects.equals(name, other.name)
+				&& Double.doubleToLongBits(price) == Double.doubleToLongBits(other.price);
+	}
+
 
 }
