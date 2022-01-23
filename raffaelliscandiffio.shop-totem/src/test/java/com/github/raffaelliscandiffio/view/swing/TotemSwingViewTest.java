@@ -456,13 +456,13 @@ class TotemSwingViewTest {
 
 		@Test
 		@GUITest
-		@DisplayName("Method 'clearOrderList' should remove all items from the cart list")
-		void testClearOrderListShouldClearTheCartList() {
+		@DisplayName("Method 'allItemsRemoved' should remove all items from the cart list")
+		void testAllItemsRemovedShouldClearTheCartList() {
 			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
 					.addElement(new OrderItem(new Product(1, "Product1", 2), 5)));
 			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
 					.addElement(new OrderItem(new Product(1, "Product2", 3), 4)));
-			GuiActionRunner.execute(() -> totemSwingView.clearOrderList());
+			GuiActionRunner.execute(() -> totemSwingView.allItemsRemoved());
 			String[] listContents = window.list("cartList").contents();
 			assertThat(listContents).isEmpty();
 		}
