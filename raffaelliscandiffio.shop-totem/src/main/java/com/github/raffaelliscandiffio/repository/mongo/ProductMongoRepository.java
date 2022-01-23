@@ -22,15 +22,13 @@ public class ProductMongoRepository implements ProductRepository {
 
 	@Override
 	public List<Product> findAll() {
-		return StreamSupport.stream(productCollection.find().spliterator(), false)
-				.map(this::fromDocumentToProduct)
+		return StreamSupport.stream(productCollection.find().spliterator(), false).map(this::fromDocumentToProduct)
 				.collect(Collectors.toList());
 	}
-	
+
 	private Product fromDocumentToProduct(Document d) {
 		return new Product(Long.valueOf("" + d.get("id")), "" + d.get("name"), Double.valueOf("" + d.get("price")));
 	}
-
 
 	@Override
 	public Product findById(long id) {
@@ -42,8 +40,8 @@ public class ProductMongoRepository implements ProductRepository {
 
 	@Override
 	public void save(Product product) {
-		// TODO Auto-generated method stub
-		
+		productCollection.insertOne(new Document().append("id", product.getId()).append("name", product.getName())
+				.append("price", product.getPrice()));
 	}
 
 }

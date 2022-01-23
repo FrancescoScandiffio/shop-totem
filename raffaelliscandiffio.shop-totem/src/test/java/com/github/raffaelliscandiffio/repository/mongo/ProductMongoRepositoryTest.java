@@ -3,6 +3,9 @@ package com.github.raffaelliscandiffio.repository.mongo;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.bson.Document;
 import org.junit.jupiter.api.AfterAll;
@@ -65,41 +68,48 @@ class ProductMongoRepositoryTest {
 	void testFindAllWhenDatabaseIsEmpty() {
 		assertThat(productRepository.findAll()).isEmpty();
 	}
-	
+
 	@Test
 	@DisplayName("'findAll' when the database is not empty")
 	void testFindAllWhenDatabaseIsNotEmpty() {
 		addTestProductToDatabase(1, "pizza", 5.5);
 		addTestProductToDatabase(2, "pasta", 2.3);
-		assertThat(productRepository.findAll())
-			.containsExactly(
-				new Product(1, "pizza", 5.5),
+		assertThat(productRepository.findAll()).containsExactly(new Product(1, "pizza", 5.5),
 				new Product(2, "pasta", 2.3));
 	}
-	
+
 	@Test
 	@DisplayName("'findById' when the id is not found")
 	void testFindByIdWhenIdIsNotFound() {
-		assertThat(productRepository.findById(1))
-			.isNull();
+		assertThat(productRepository.findById(1)).isNull();
 	}
-	
+
 	@Test
 	@DisplayName("'findById' when the id is found")
 	void testFindByIdWhenIdIsFound() {
 		addTestProductToDatabase(1, "pizza", 5.5);
 		addTestProductToDatabase(2, "pasta", 2.3);
-		assertThat(productRepository.findById(2))
-			.isEqualTo(new Product(2, "pasta", 2.3));
+		assertThat(productRepository.findById(2)).isEqualTo(new Product(2, "pasta", 2.3));
 	}
 	
-	
+	@Test
+	@DisplayName("'save' product to repository")
+	void testSaveProduct() {
+		Product product = new Product(1, "pizza", 5.5);
+		productRepository.save(product);
+		assertThat(readAllProductsFromDatabase())
+			.containsExactly(product);
+	}
+
 	private void addTestProductToDatabase(long id, String name, double price) {
-		productCollection.insertOne(
-				new Document()
-					.append("id", id)
-					.append("name", name)
-					.append("price", price));
+		productCollection.insertOne(new Document().append("id", id).append("name", name).append("price", price));
+	}
+	
+	private List<Product> readAllProductsFromDatabase() {
+		return StreamSupport.
+			stream(productCollection.find().spliterator(), false)
+				.map(d -> new Product(Long.valueOf("" + d.get("id")), "" + d.get("name"), Double.valueOf("" + d.get("price"))))
+				.collect(Collectors.toList());
 	}
 
 }
