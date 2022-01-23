@@ -126,8 +126,8 @@ class TotemSwingViewTest {
 
 		@Test
 		@GUITest
-		@DisplayName("Button 'Start Shopping' should notify totem controller to show all products")
-		void testStartShoppingButtonShouldNotifyTotemControllerToStartShopping() {
+		@DisplayName("Button 'Start Shopping' should delegate to TotemController 'startShopping'")
+		void testStartShoppingButtonShouldDelegateToTotemControllerStartShopping() {
 			GuiActionRunner
 					.execute(() -> totemSwingView.getCardLayout().show(totemSwingView.getContentPane(), "welcome"));
 
@@ -175,16 +175,16 @@ class TotemSwingViewTest {
 
 		@Test
 		@GUITest
-		@DisplayName("Button 'Cancel Shopping' should notify totem controller to cancel shopping")
-		void testCancelShoppingButtonShouldNotifyTotemControllerToCloseShopping() {
+		@DisplayName("Button 'Cancel Shopping' should delegate to TotemController 'cancelShopping'")
+		void testCancelShoppingButtonShouldDelegateToTotemControllerCancelShopping() {
 			window.button(JButtonMatcher.withName("shopBtnCancelShopping")).click();
 			verify(totemController).cancelShopping();
 		}
 
 		@Test
 		@GUITest
-		@DisplayName("Button 'Open Cart' should notify totem controller to open the cart panel")
-		void testOpenCartButtonShouldNotifyTotemControllerToShowCart() {
+		@DisplayName("Button 'Open Cart' should delegate to TotemController 'openOrder'")
+		void testOpenCartButtonShouldDelegateToTotemControllerOpenOrder() {
 			window.button(JButtonMatcher.withText("Cart")).click();
 			verify(totemController).openOrder();
 		}
@@ -302,8 +302,8 @@ class TotemSwingViewTest {
 
 		@Test
 		@GUITest
-		@DisplayName("Button 'Add' should notify totem controller to buy selected Product with quantity")
-		void testAddButtonShouldNotifyTotemControllerBuySpecifiedProductWithQuantity() {
+		@DisplayName("Button 'Add' should delegate to TotemController 'buyProduct'")
+		void testAddButtonShouldDelegateToTotemControllerBuyProduct() {
 			Product product = new Product("Product1", 2);
 			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
 
@@ -418,16 +418,16 @@ class TotemSwingViewTest {
 
 		@Test
 		@GUITest
-		@DisplayName("Button 'Continue Shopping' should notify totem controller to show the shopping panel")
-		void testContinueShoppingButtonShouldNotifyTotemControllerToShowShoppingPanel() {
+		@DisplayName("Button 'Continue Shopping' should delegate to TotemController 'openShopping'")
+		void testContinueShoppingButtonShouldDelegateToTotemControllerOpenShopping() {
 			window.button(JButtonMatcher.withText("Continue Shopping")).click();
 			verify(totemController).openShopping();
 		}
 
 		@Test
 		@GUITest
-		@DisplayName("Button 'Cancel Shopping' should notify totem controller to cancel shopping")
-		void testCancelShoppingButtonShouldNotifyTotemControllerToCancelShopping() {
+		@DisplayName("Button 'Cancel Shopping' should delegate to TotemController 'cancelShopping'")
+		void testCancelShoppingButtonShouldDelegateToTotemControllerCancelShopping() {
 			window.button(JButtonMatcher.withName("cartBtnCancelShopping")).click();
 			verify(totemController).cancelShopping();
 		}
@@ -494,11 +494,11 @@ class TotemSwingViewTest {
 		void testItemModifiedShouldUpdateTheOldOrderItemWithTheNewOneInCartList() {
 			Product product = new Product("Product2", 3);
 			OrderItem oldItem = new OrderItem(product, 4);
-			OrderItem updatedItem = new OrderItem(product, 5);	
+			OrderItem updatedItem = new OrderItem(product, 5);
 			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
 					.addElement(new OrderItem(new Product("Product1", 2), 5)));
 			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel().addElement(oldItem));
-			
+
 			GuiActionRunner.execute(() -> totemSwingView.itemModified(oldItem, updatedItem));
 			String[] listContents = window.list("cartList").contents();
 			assertThat(listContents).containsExactly("Product1 - Quantity: 5 - Price: 2.0 € - Subtotal: 10.0 €",
