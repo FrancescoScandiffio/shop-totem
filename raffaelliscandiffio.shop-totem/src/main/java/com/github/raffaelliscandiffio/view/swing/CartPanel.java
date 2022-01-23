@@ -188,8 +188,8 @@ public class CartPanel extends JPanel {
 	}
 
 	private String getDisplayRow(OrderItem orderItem) {
-		return orderItem.getProduct().getName() + " - Price: " + orderItem.getProduct().getPrice() + " € - Quantity: "
-				+ orderItem.getQuantity();
+		return orderItem.getProduct().getName() + " - Quantity: " + orderItem.getQuantity() + " - Price: "
+				+ orderItem.getProduct().getPrice() + " € - Subtotal: " + orderItem.getSubTotal() + " €";
 	}
 
 	public void addActionListener(ActionListener listener) {

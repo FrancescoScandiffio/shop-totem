@@ -484,8 +484,8 @@ class TotemSwingViewTest {
 			OrderItem newItem = new OrderItem(new Product("Product2", 2), 4);
 			GuiActionRunner.execute(() -> totemSwingView.itemAdded(newItem));
 			String[] listContents = window.list("cartList").contents();
-			assertThat(listContents).containsExactly("Product1 - Price: 3.0 € - Quantity: 5",
-					"Product2 - Price: 2.0 € - Quantity: 4");
+			assertThat(listContents).containsExactly("Product1 - Quantity: 5 - Price: 3.0 € - Subtotal: 15.0 €",
+					"Product2 - Quantity: 4 - Price: 2.0 € - Subtotal: 8.0 €");
 		}
 
 		@Test
@@ -501,8 +501,8 @@ class TotemSwingViewTest {
 			OrderItem newOrderItem = new OrderItem(product2, 5);
 			GuiActionRunner.execute(() -> totemSwingView.itemModified(oldOrderItem, newOrderItem));
 			String[] listContents = window.list("cartList").contents();
-			assertThat(listContents).containsExactly("Product1 - Price: 2.0 € - Quantity: 5",
-					"Product2 - Price: 3.0 € - Quantity: 5");
+			assertThat(listContents).containsExactly("Product1 - Quantity: 5 - Price: 2.0 € - Subtotal: 10.0 €",
+					"Product2 - Quantity: 5 - Price: 3.0 € - Subtotal: 15.0 €");
 		}
 
 		@Test
