@@ -40,4 +40,10 @@ public class ProductMongoRepository implements ProductRepository {
 		return null;
 	}
 
+	@Override
+	public void save(Product product) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
