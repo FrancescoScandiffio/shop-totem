@@ -1,9 +1,11 @@
 package com.github.raffaelliscandiffio.model;
 
+import java.util.Objects;
+
 import com.github.raffaelliscandiffio.utils.ExcludeGeneratedFromCoverage;
 
 public class Stock {
-	
+
 	private final long id;
 	private int availableQuantity;
 	
@@ -50,6 +52,23 @@ public class Stock {
 	 */
 	public void setAvailableQuantity(int availableQuantity) {
 		setAvailableQuantityValidation(availableQuantity);
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(availableQuantity, id);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Stock other = (Stock) obj;
+		return availableQuantity == other.availableQuantity && id == other.id;
 	}
 
 
