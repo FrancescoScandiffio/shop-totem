@@ -20,6 +20,9 @@
 		<mockito.version>4.2.0</mockito.version>
 		<assertj.swing.version>3.17.1</assertj.swing.version>
 		<log4j.version>2.17.1</log4j.version>
+		<mongo.driver.version>3.12.10</mongo.driver.version>
+		<logback.classic>1.2.10</logback.classic>
+		<mongo.java.server.version>1.39.0</mongo.java.server.version>
 
 		<sonar.coverage.exclusions>
 			**/controller/PurchaseBroker.java,
@@ -100,6 +103,24 @@
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongo-java-driver</artifactId>
+			<version>${mongo.driver.version}</version>
+		</dependency>
+		<dependency>
+			<!-- in memory mongo -->
+			<groupId>de.bwaldvogel</groupId>
+			<artifactId>mongo-java-server</artifactId>
+			<version>${mongo.java.server.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<!-- required to see Mongo Java Driver logs -->
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>${logback.classic}</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -134,28 +155,13 @@
 					</dependencies>
 					<configuration>
 						<targetClasses>
-							<param>*model.Product*</param>
-							<param>*model.Stock*</param>
-							<param>*model.Order*</param>
+							<param>*repository.mongo.ProductMongoRepository*</param>
 						</targetClasses>
 						<targetTests>
-							<param>*model.Product*</param>
-							<param>*model.Stock*</param>
-							<param>*model.Order*</param>
+							<param>*repository.mongo.ProductMongoRepository*</param>
 						</targetTests>
 						<mutators>
-							<mutator>CONDITIONALS_BOUNDARY</mutator>
-							<mutator>EXPERIMENTAL_SWITCH</mutator>
-							<mutator>INCREMENTS</mutator>
-							<mutator>INVERT_NEGS</mutator>
-							<mutator>MATH</mutator>
-							<mutator>NULL_RETURNS</mutator>
-							<mutator>PRIMITIVE_RETURNS</mutator>
-							<mutator>REMOVE_CONDITIONALS_EQUAL_ELSE</mutator>
-							<mutator>REMOVE_CONDITIONALS_EQUAL_IF</mutator>
-							<mutator>REMOVE_CONDITIONALS_ORDER_ELSE</mutator>
-							<mutator>REMOVE_CONDITIONALS_ORDER_IF</mutator>
-							<mutator>VOID_METHOD_CALLS</mutator>
+							<mutator>STRONGER</mutator>
 						</mutators>
 						<mutationThreshold>100</mutationThreshold>
 					</configuration>
