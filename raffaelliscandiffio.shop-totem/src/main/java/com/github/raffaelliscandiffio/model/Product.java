@@ -19,9 +19,6 @@ public class Product {
 	 */
 	public Product(long id, String name, double price) {
 		
-		if (!(name != null && !name.trim().isEmpty())) {
-			throw new IllegalArgumentException("Null or empty name is not allowed");
-		}
 		this.name = name;
 
 		if (price < 0) {

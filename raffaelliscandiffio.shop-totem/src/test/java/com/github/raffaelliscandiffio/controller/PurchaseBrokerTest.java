@@ -2,6 +2,7 @@ package com.github.raffaelliscandiffio.controller;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -13,6 +14,9 @@ import java.util.NoSuchElementException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -138,6 +142,18 @@ class PurchaseBrokerTest {
 		verify(productRepository).save(new Product(PRODUCT_ID, "Pasta", 3));
 		verify(stockRepository).save(new Stock(PRODUCT_ID, 100));
 	}
+	
+	
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = { " ", "\t", "\n" })
+	@DisplayName("'saveNewProductInStock' should throw when name is null or empty")
+	void testSaveNewProductInStockWhenNameIsNotValidShouldThrow(String name) {
+		assertThatThrownBy(() -> broker.saveNewProductInStock(PRODUCT_ID, name, 3, 100)).isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("Null or empty name is not allowed");
+		verifyNoMoreInteractions(stockRepository, productRepository);
+	}
+	
 	
 	
 }

@@ -6,9 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
+
 
 @DisplayName("Tests for Product")
 class ProductTest {
@@ -46,15 +44,6 @@ class ProductTest {
 	@Nested
 	@DisplayName("Exceptional cases")
 	class ExceptionalCases {
-
-		@ParameterizedTest
-		@NullAndEmptySource
-		@ValueSource(strings = { " ", "\t", "\n" })
-		@DisplayName("Name can't be set as null or empty string")
-		void testConstructorWhenNameNullOrEmptyShouldThrow(String name) {
-			assertThatThrownBy(() -> new Product(ID, name, POSITIVE_PRICE)).isInstanceOf(IllegalArgumentException.class)
-					.hasMessage("Null or empty name is not allowed");
-		}
 
 		@Test
 		@DisplayName("Price can't be set to negative number")
