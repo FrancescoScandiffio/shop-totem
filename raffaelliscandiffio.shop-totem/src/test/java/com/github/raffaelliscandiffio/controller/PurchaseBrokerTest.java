@@ -3,6 +3,7 @@ package com.github.raffaelliscandiffio.controller;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -42,7 +43,7 @@ class PurchaseBrokerTest {
 	private static final long PRODUCT_ID=1;
 
 	@Test
-	@DisplayName("RetrieveProducts returns a list of products from the product repository")
+	@DisplayName("'retrieveProducts' returns a list of products from the product repository")
 	void testRetrieveProductsShouldReturnListOfProductsFromRepository() {
 		List<Product> products = asList(new Product(PRODUCT_ID, "Pasta", 3));
 		when(productRepository.findAll())
@@ -53,7 +54,7 @@ class PurchaseBrokerTest {
 	
 
 	@Test
-	@DisplayName("TakeAvailable should return 0 when Stock is not found")
+	@DisplayName("'takeAvailable' should return 0 when Stock is not found")
 	void testTakeAvailableShouldReturnZeroWhenStockIsNotFound() {
 		when(stockRepository.findById(PRODUCT_ID)).thenThrow(new NoSuchElementException("Stock with id "+ PRODUCT_ID+ " is not found"));
 		
@@ -61,7 +62,7 @@ class PurchaseBrokerTest {
 	}
 	
 	@Test
-	@DisplayName("TakeAvailable should return requested quantity when more than requested is available and save the stock")
+	@DisplayName("'takeAvailable' should return requested quantity when more than requested is available and save the stock")
 	void testTakeAvailableShouldReturnRequestedQuantityWhenMoreThanRequestedIsAvailableAndSave() {
 
 		when(stockRepository.findById(PRODUCT_ID)).thenReturn(stock);
@@ -74,7 +75,7 @@ class PurchaseBrokerTest {
 	}
 	
 	@Test
-	@DisplayName("TakeAvailable should return requested quantity when only requested is available and save the stock")
+	@DisplayName("'takeAvailable' should return requested quantity when only requested is available and save the stock")
 	void testTakeAvailableShouldReturnRequestedQuantityWhenOnlyRequestedIsAvailableAndSave() {
 
 		when(stockRepository.findById(PRODUCT_ID)).thenReturn(stock);
@@ -87,7 +88,7 @@ class PurchaseBrokerTest {
 	}
 	
 	@Test
-	@DisplayName("TakeAvailable should return available quantity when requested is more than available and save the stock")
+	@DisplayName("'takeAvailable' should return available quantity when requested is more than available and save the stock")
 	void testTakeAvailableShouldReturnAvailableQuantityWhenRequestedIsMoreThanAvailableAndSave() {
 
 		when(stockRepository.findById(PRODUCT_ID)).thenReturn(stock);
@@ -100,7 +101,7 @@ class PurchaseBrokerTest {
 	}
 	
 	@Test
-	@DisplayName("TakeAvailable should return zero when quantity in stock is zero")
+	@DisplayName("'takeAvailable' should return zero when quantity in stock is zero")
 	void testTakeAvailableShouldReturnZeroWhenQuantityAvailableIsZero() {
 
 		when(stockRepository.findById(PRODUCT_ID)).thenReturn(stock);
@@ -111,7 +112,7 @@ class PurchaseBrokerTest {
 	}
 	
 	@Test
-	@DisplayName("DoesProductExist should return False when product is not found on repository")
+	@DisplayName("'doesProductExist' should return False when product is not found on repository")
 	void testDoesProductExistShouldReturnFalseWhenProductIsNotFound() {
 		
 		when(productRepository.findById(PRODUCT_ID)).thenThrow(new NoSuchElementException("Product with id "+ PRODUCT_ID+ " is not found"));
@@ -120,12 +121,23 @@ class PurchaseBrokerTest {
 	}
 	
 	@Test
-	@DisplayName("DoesProductExist should return True when product is found on repository")
+	@DisplayName("'doesProductExist' should return True when product is found on repository")
 	void testDoesProductExistShouldReturnTrueWhenProductIsFound() {
 		
 		when(productRepository.findById(PRODUCT_ID)).thenReturn(new Product(PRODUCT_ID, "Pasta", 3));
 		
 		assertThat(broker.doesProductExist(PRODUCT_ID)).isTrue();
 	}
+	
+	@Test
+	@DisplayName("'saveNewProductInStock' should 'save' in product and stock repositories when name, price, quantity are valid")
+	void testSaveNewProductInStockWhenNamePriceQuantityAreValidShouldSaveInProductAndStockRepositories() {
+		
+		broker.saveNewProductInStock(PRODUCT_ID, "Pasta", 3, 100);
+		
+		verify(productRepository).save(new Product(PRODUCT_ID, "Pasta", 3));
+		verify(stockRepository).save(new Stock(PRODUCT_ID, 100));
+	}
+	
 	
 }

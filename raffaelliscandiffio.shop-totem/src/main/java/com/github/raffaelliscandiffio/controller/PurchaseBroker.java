@@ -24,6 +24,11 @@ public class PurchaseBroker {
 		this.productRepository = productRepository;
 		this.stockRepository = stockRepository;
 	}
+	
+	public void saveNewProductInStock(long id, String name, double price, int quantity) {
+		productRepository.save(new Product(id, name, price));
+		stockRepository.save(new Stock(id, quantity));
+	}
 
 	public List<Product> retrieveProducts() {
 		return productRepository.findAll();
