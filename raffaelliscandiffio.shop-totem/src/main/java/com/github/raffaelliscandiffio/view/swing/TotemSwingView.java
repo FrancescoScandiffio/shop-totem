@@ -54,31 +54,37 @@ public class TotemSwingView extends JFrame implements TotemView {
 		getContentPane().add(shoppingPane, "shopping");
 		getContentPane().add(cartPane, "cart");
 
-		welcomePane.addActionListener(e -> {
-			String command = e.getActionCommand();
-			if ("startShopping".equals(command)) {
-				startShoppingAction();
-			}
-		});
+		welcomePane.addActionListener(e -> startShoppingAction());
 
 		shoppingPane.addActionListener(e -> {
 			String command = e.getActionCommand();
-			if ("cancelShopping".equals(command)) {
+			if ("cancelShopping".equals(command))
 				closeShoppingAction();
-			} else if ("buyProduct".equals(command)) {
+			if ("buyProduct".equals(command))
 				buyProductAction();
-			} else if ("openCart".equals(command)) {
+			if ("openCart".equals(command))
 				openCartAction();
-			}
 		});
 
 		cartPane.addActionListener(e -> {
 			String command = e.getActionCommand();
-			if ("openShopping".equals(command)) {
+			if ("openShopping".equals(command))
 				openShoppingAction();
-			}
+			if ("cancelShopping".equals(command))
+				closeShoppingAction();
+			if ("checkout".equals(command))
+				confirmOrderAction();
+			if ("removeSelected".equals(command))
+				removeItemAction();
 		});
+	}
 
+	private void removeItemAction() {
+		this.totemController.removeItem(getCartPane().getListOrderItems().getSelectedValue());
+	}
+
+	private void confirmOrderAction() {
+		this.totemController.confirmOrder();
 	}
 
 	private void startShoppingAction() {
@@ -175,14 +181,8 @@ public class TotemSwingView extends JFrame implements TotemView {
 	}
 
 	@Override
-	public void clearOrderList() {
-		getCartPane().getListOrderItemsModel().clear();
-	}
-
-	@Override
 	public void allItemsRemoved() {
-		// TODO Auto-generated method stub
-
+		getCartPane().getListOrderItemsModel().clear();
 	}
 
 	@Override

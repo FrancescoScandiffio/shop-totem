@@ -18,6 +18,8 @@ import javax.swing.JSpinner;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 
 import com.github.raffaelliscandiffio.model.OrderItem;
 
@@ -61,6 +63,7 @@ public class CartPanel extends JPanel {
 
 		btnCancelShopping = new JButton("Cancel Shopping");
 		btnCancelShopping.setName("cartBtnCancelShopping");
+		btnCancelShopping.setActionCommand("cancelShopping");
 		GridBagConstraints gbc_btnCancelShopping = new GridBagConstraints();
 		gbc_btnCancelShopping.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnCancelShopping.insets = new Insets(0, 0, 5, 0);
@@ -78,8 +81,28 @@ public class CartPanel extends JPanel {
 		add(scrollPane, gbc_scrollPane);
 
 		listOrderItemsModel = new DefaultListModel<>();
-		listOrderItems = new JList<>(listOrderItemsModel);
+		listOrderItemsModel.addListDataListener(new ListDataListener() {
 
+			@Override
+			public void intervalRemoved(ListDataEvent e) {
+				btnCheckout.setEnabled(!listOrderItemsModel.isEmpty());
+			}
+
+			@Override
+			public void intervalAdded(ListDataEvent e) {
+				btnCheckout.setEnabled(true);
+			}
+
+			@Override
+			public void contentsChanged(ListDataEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+		});
+		listOrderItems = new JList<>(listOrderItemsModel);
+		listOrderItems
+				.addListSelectionListener(e -> btnRemoveSelected.setEnabled(listOrderItems.getSelectedIndex() != -1));
 		listOrderItems.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		listOrderItems.setName("cartList");
 		listOrderItems.setCellRenderer(new DefaultListCellRenderer() {
@@ -132,6 +155,7 @@ public class CartPanel extends JPanel {
 		add(btnReturnQuantity, gbc_btnReturnQuantity);
 
 		btnCheckout = new JButton("Checkout");
+		btnCheckout.setActionCommand("checkout");
 		btnCheckout.setEnabled(false);
 		GridBagConstraints gbc_btnCheckout = new GridBagConstraints();
 		gbc_btnCheckout.fill = GridBagConstraints.HORIZONTAL;
@@ -142,6 +166,7 @@ public class CartPanel extends JPanel {
 
 		btnRemoveSelected = new JButton("Remove selected");
 		btnRemoveSelected.setEnabled(false);
+		btnRemoveSelected.setActionCommand("removeSelected");
 		GridBagConstraints gbc_btnRemoveSelected = new GridBagConstraints();
 		gbc_btnRemoveSelected.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnRemoveSelected.insets = new Insets(0, 0, 0, 5);
@@ -159,15 +184,22 @@ public class CartPanel extends JPanel {
 	}
 
 	private String getDisplayRow(OrderItem orderItem) {
-		return orderItem.getProduct().getName() + " - Price: " + orderItem.getProduct().getPrice() + " € - Quantity: "
-				+ orderItem.getQuantity();
+		return orderItem.getProduct().getName() + " - Quantity: " + orderItem.getQuantity() + " - Price: "
+				+ orderItem.getProduct().getPrice() + " € - Subtotal: " + orderItem.getSubTotal() + " €";
 	}
 
 	public void addActionListener(ActionListener listener) {
 		btnContinueShopping.addActionListener(listener);
+		btnCancelShopping.addActionListener(listener);
+		btnCheckout.addActionListener(listener);
+		btnRemoveSelected.addActionListener(listener);
 	}
 
-	public DefaultListModel<OrderItem> getListOrderItemsModel() {
+	DefaultListModel<OrderItem> getListOrderItemsModel() {
 		return listOrderItemsModel;
+	}
+
+	JList<OrderItem> getListOrderItems() {
+		return listOrderItems;
 	}
 }

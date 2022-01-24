@@ -175,7 +175,7 @@
 						<excludes>
 							<exclude>**/controller/PurchaseBroker.class</exclude>
 							<exclude>**/utils/GUITestExtension.class</exclude>
-							<exclude>**/view/swing/TotemSwingView.class</exclude>
+							<exclude>**/swing/TotemSwingView.class</exclude>						
 						</excludes>
 					</configuration>
 					<executions>
