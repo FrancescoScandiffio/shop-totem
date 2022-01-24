@@ -48,7 +48,7 @@ public class CartPanel extends JPanel {
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		gridBagLayout.rowHeights = new int[] { 0, 243, 0, 0, 0, 0, 0 };
-		gridBagLayout.columnWeights = new double[] { 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, Double.MIN_VALUE };
+		gridBagLayout.columnWeights = new double[] { 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, Double.MIN_VALUE };
 		gridBagLayout.rowWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		setLayout(gridBagLayout);
 
@@ -177,9 +177,12 @@ public class CartPanel extends JPanel {
 		messageLabel = new JLabel(" ");
 		messageLabel.setName("cartMessageLabel");
 		GridBagConstraints gbc_messageLabel = new GridBagConstraints();
+		gbc_messageLabel.fill = GridBagConstraints.VERTICAL;
+		gbc_messageLabel.gridheight = 3;
+		gbc_messageLabel.gridwidth = 4;
 		gbc_messageLabel.insets = new Insets(0, 0, 0, 5);
-		gbc_messageLabel.gridx = 4;
-		gbc_messageLabel.gridy = 5;
+		gbc_messageLabel.gridx = 3;
+		gbc_messageLabel.gridy = 3;
 		add(messageLabel, gbc_messageLabel);
 	}
 
@@ -201,5 +204,9 @@ public class CartPanel extends JPanel {
 
 	JList<OrderItem> getListOrderItems() {
 		return listOrderItems;
+	}
+
+	public JLabel getMessageLabel() {
+		return messageLabel;
 	}
 }

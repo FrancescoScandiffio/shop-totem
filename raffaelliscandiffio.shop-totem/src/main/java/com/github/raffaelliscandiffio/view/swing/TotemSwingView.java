@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.util.List;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 import com.github.raffaelliscandiffio.controller.TotemController;
 import com.github.raffaelliscandiffio.model.OrderItem;
@@ -193,18 +194,25 @@ public class TotemSwingView extends JFrame implements TotemView {
 
 	@Override
 	public void showErrorItemNotFound(String msg, OrderItem item) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void showGoodbye() {
-		// TODO Auto-generated method stub
+		setCartErrorMessage(msg);
+		getCartPane().getListOrderItemsModel().removeElement(item);
 
 	}
 
 	@Override
 	public void showErrorEmptyOrder(String msg) {
+		setCartErrorMessage(msg);
+		getCartPane().getListOrderItemsModel().clear();
+	}
+
+	private void setCartErrorMessage(String msg) {
+		JLabel label = getCartPane().getMessageLabel();
+		label.setForeground(Color.RED);
+		label.setText(msg);
+	}
+
+	@Override
+	public void showGoodbye() {
 		// TODO Auto-generated method stub
 
 	}
