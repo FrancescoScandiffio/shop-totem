@@ -1,28 +1,22 @@
 package com.github.raffaelliscandiffio.model;
 
+import com.github.raffaelliscandiffio.utils.ExcludeGeneratedFromCoverage;
+
 public class Stock {
 	
 	private final long id;
-	private final Product product;
 	private int availableQuantity;
 	
 	/**
-	 * Constructs a new Stock with a product and relative available quantity. Sets ID as product ID.
-	 * @param product object
+	 * Constructs a new Stock with an id and quantity available.
+	 * @param id of the stock
 	 * @param availableQuantity of the product
-	 * @throws NullPointerException if the specified product is null
 	 * @throws IllegalArgumentException if the quantity is negative 
 	 */
-	public Stock(Product product, int availableQuantity) {
-
-		if (product==null) {
-			throw new NullPointerException("Null product");
-		}
-		this.product=product;
+	public Stock(long id, int availableQuantity) {
 
 		setAvailableQuantityValidation(availableQuantity);
-		
-		this.id = product.getId();
+		this.id = id;
 	}
 
 	private void setAvailableQuantityValidation(int availableQuantity) {
@@ -41,17 +35,10 @@ public class Stock {
 	}
 	
 	/**
-	 * Returns the product
-	 * @return the product
-	 */
-	public Product getProduct() {
-		return product;
-	}
-	
-	/**
 	 * Returns the id of the Stock
 	 * @return the id
 	 */
+	@ExcludeGeneratedFromCoverage
 	public long getId() {
 		return id;
 	}
@@ -74,6 +61,5 @@ public class Stock {
 	// used for test only
 	Stock() {
 		this.id = 0;
-		this.product = null;
 	}
 }

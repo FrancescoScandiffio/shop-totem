@@ -20,12 +20,6 @@ class StockTest {
 	@DisplayName("Test 'constructor'") 
 	class ConstructorTest {
 		
-		private Product product;
-		
-		@BeforeEach
-		void setup() {
-			product = new Product(ID, "pasta", 2);
-		}
 		
 		@Nested 
 		@DisplayName("Happy case") 
@@ -34,19 +28,18 @@ class StockTest {
 			private Stock stock;
 			
 			@Test
-			@DisplayName("Stock is initialized with product non null, non negative quantity and ID as Product ID")
-			void testConstructorSetsProductNotNullAvailableQuantityPositiveAndIdAsProductId() {
-				stock = new Stock(product, POSITIVE_QUANTITY);
+			@DisplayName("Stock is initialized with ID and non negative quantity")
+			void testConstructorWithIdAndNonNegativeQuantity() {
+				stock = new Stock(ID, POSITIVE_QUANTITY);
 				
 				assertThat(stock.getId()).isEqualTo(ID);
-				assertThat(stock.getProduct()).isEqualTo(product);
 				assertThat(stock.getAvailableQuantity()).isEqualTo(POSITIVE_QUANTITY);
 			}
 			
 			@Test
 			@DisplayName("Available quantity can be initialized to zero")
 			void testConstructorWhenAvailableQuantityIsZeroShouldBeAllowed() {
-				stock = new Stock(product, 0);
+				stock = new Stock(ID, 0);
 				
 				assertThat(stock.getAvailableQuantity()).isZero();
 			}
@@ -57,18 +50,10 @@ class StockTest {
 		class ExceptionalCase {
 			
 			@Test
-			@DisplayName("Product can't be null")
-			void testConstructorWhenProductIsNullShouldThrow() {
-
-				assertThatThrownBy(() -> new Stock(null, POSITIVE_QUANTITY)).isInstanceOf(NullPointerException.class)
-						.hasMessage("Null product");
-			}
-			
-			@Test
 			@DisplayName("Available quantity can't be a negative number")
 			void testConstructorWhenAvailableQuantityIsNegativeShouldThrow() {
 
-				assertThatThrownBy(() -> new Stock(product, NEGATIVE_QUANTITY)).isInstanceOf(IllegalArgumentException.class)
+				assertThatThrownBy(() -> new Stock(ID, NEGATIVE_QUANTITY)).isInstanceOf(IllegalArgumentException.class)
 						.hasMessage("Negative available quantity: "+NEGATIVE_QUANTITY);
 			}
 		}
