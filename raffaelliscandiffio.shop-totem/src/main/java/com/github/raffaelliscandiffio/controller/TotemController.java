@@ -45,7 +45,7 @@ public class TotemController {
 
 	public void buyProduct(Product product, int requested) {
 		if (requested <= 0) {
-			totemView.showErrorMessage("Buy quantity must be positive: received " + requested);
+			totemView.showShoppingErrorMessage("Buy quantity must be positive: received " + requested);
 			return;
 		}
 
@@ -71,7 +71,7 @@ public class TotemController {
 		if (provided < requested)
 			totemView.showWarning("Not enough " + product.getName() + " in stock: added only " + provided);
 		else
-			totemView.showMessage("Added " + requested + " " + product.getName());
+			totemView.showShoppingMessage("Added " + requested + " " + product.getName());
 
 	}
 
@@ -80,7 +80,7 @@ public class TotemController {
 			order.popItemById(item.getId());
 			broker.returnProduct(item.getProduct().getId(), item.getQuantity());
 			totemView.itemRemoved(item);
-			totemView.showMessage("Removed all " + item.getProduct().getName());
+			totemView.showCartMessage("Removed all " + item.getProduct().getName());
 		} catch (NoSuchElementException exception) {
 			totemView.showErrorItemNotFound("Item not found", item);
 		}
@@ -91,11 +91,11 @@ public class TotemController {
 			OrderItem modifiedItem = order.decreaseItem(item.getId(), quantity);
 			broker.returnProduct(item.getProduct().getId(), quantity);
 			totemView.itemModified(item, modifiedItem);
-			totemView.showMessage("Removed " + quantity + " " + item.getProduct().getName());
+			totemView.showCartMessage("Removed " + quantity + " " + item.getProduct().getName());
 		} catch (NoSuchElementException exception) {
 			totemView.showErrorItemNotFound("Item not found", item);
 		} catch (IllegalArgumentException exception) {
-			totemView.showErrorMessage(exception.getMessage());
+			totemView.showCartErrorMessage(exception.getMessage());
 		}
 	}
 

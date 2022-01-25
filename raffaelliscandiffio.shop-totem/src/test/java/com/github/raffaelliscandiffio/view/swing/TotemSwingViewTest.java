@@ -312,17 +312,17 @@ class TotemSwingViewTest {
 
 		@Test
 		@GUITest
-		@DisplayName("Method 'showErrorMessage' should set message label with given message")
-		void testShowErrorMessageShouldSetMessageLabel() {
-			GuiActionRunner.execute(() -> totemSwingView.showErrorMessage("Error message"));
+		@DisplayName("Method 'showShoppingErrorMessage' should show the error message in the shopping label")
+		void testShowShoppingErrorMessageShouldShowTheErrorMessageInTheShoppingLabel() {
+			GuiActionRunner.execute(() -> totemSwingView.showShoppingErrorMessage("Error message"));
 			window.label("messageLabel").requireText("Error message");
 		}
 
 		@Test
 		@GUITest
-		@DisplayName("Method 'showMessage' should set message label with given message")
-		void testShowMessageShouldSetMessageLabel() {
-			GuiActionRunner.execute(() -> totemSwingView.showMessage("Message"));
+		@DisplayName("Method 'showShoppingMessage' should show the message in the shopping label")
+		void testShowShoppingMessageShouldShowTheMessageInTheShoppingLabel() {
+			GuiActionRunner.execute(() -> totemSwingView.showShoppingMessage("Message"));
 			window.label("messageLabel").requireText("Message");
 		}
 
@@ -341,8 +341,8 @@ class TotemSwingViewTest {
 
 		@Test
 		@GUITest
-		@DisplayName("Method 'showWarning' should set message label with given message")
-		void testShowWarningShouldSetMessageLabel() {
+		@DisplayName("Method 'showWarning' should show the warning message in the shopping label")
+		void testShowWarningShouldShowTheWarningMessageInTheShoppingLabel() {
 			GuiActionRunner.execute(() -> totemSwingView.showWarning("Message"));
 			window.label("messageLabel").requireText("Message");
 		}
@@ -579,6 +579,22 @@ class TotemSwingViewTest {
 			GuiActionRunner.execute(() -> totemSwingView.showErrorEmptyOrder("error message"));
 			window.label("cartMessageLabel").requireText("error message");
 			assertThat(window.list("cartList").contents()).isEmpty();
+		}
+
+		@Test
+		@GUITest
+		@DisplayName("Method 'showCartMessage' should show the message in the cart label")
+		void testShowCartMessageShouldShowTheMessageInTheCartLabel() {
+			GuiActionRunner.execute(() -> totemSwingView.showCartMessage("Message"));
+			window.label("cartMessageLabel").requireText("Message");
+		}
+
+		@Test
+		@GUITest
+		@DisplayName("Method 'showCartErrorMessage' should show the error message in the cart label")
+		void testShowCartErrorMessageShouldShowTheErrorMessageInTheCartLabel() {
+			GuiActionRunner.execute(() -> totemSwingView.showCartErrorMessage("Error message"));
+			window.label("cartMessageLabel").requireText("Error message");
 		}
 
 	}

@@ -146,15 +146,28 @@ public class TotemSwingView extends JFrame implements TotemView {
 	}
 
 	@Override
-	public void showErrorMessage(String msg) {
-		getShoppingPane().getLblMessage().setText(msg);
-		getShoppingPane().getLblMessage().setForeground(Color.RED);
+	public void showShoppingMessage(String msg) {
+		setLabelMessage(getShoppingPane().getLblMessage(), msg, Color.BLACK);
 	}
 
 	@Override
-	public void showMessage(String msg) {
-		getShoppingPane().getLblMessage().setText(msg);
-		getShoppingPane().getLblMessage().setForeground(Color.BLACK);
+	public void showCartMessage(String msg) {
+		setLabelMessage(getCartPane().getMessageLabel(), msg, Color.BLACK);
+	}
+
+	@Override
+	public void showShoppingErrorMessage(String msg) {
+		setLabelMessage(getShoppingPane().getLblMessage(), msg, Color.RED);
+	}
+
+	@Override
+	public void showCartErrorMessage(String msg) {
+		setLabelMessage(getCartPane().getMessageLabel(), msg, Color.RED);
+	}
+
+	private void setLabelMessage(JLabel label, String msg, Color color) {
+		label.setText(msg);
+		label.setForeground(color);
 	}
 
 	@Override
