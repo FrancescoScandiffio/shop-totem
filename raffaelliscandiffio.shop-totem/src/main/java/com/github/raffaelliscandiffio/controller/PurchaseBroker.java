@@ -47,6 +47,10 @@ public class PurchaseBroker {
 
 		productRepository.save(new Product(id, name, price));
 		stockRepository.save(new Stock(id, quantity));
+		LOGGER.log(Level.INFO, 
+				"New product with ID: {}, name: {}, price: {}", id, name, price);
+		LOGGER.log(Level.INFO, 
+				"New stock with ID: {}, quantity: {}", id, quantity);
 	}
 
 	public List<Product> retrieveProducts() {
@@ -76,7 +80,7 @@ public class PurchaseBroker {
 			stock = stockRepository.findById(id);
 		} catch (NoSuchElementException e) {
 			LOGGER.log(Level.ERROR,
-					String.format("Stock with id %d not found %n%s %n", id, getReducedStackTrace(e)));
+					"Stock with id {} not found \n{}", id, getReducedStackTrace(e));
 			return 0;
 		}
 		int stockAvailableQuantity = stock.getQuantity();
@@ -105,14 +109,14 @@ public class PurchaseBroker {
 			return true;
 		} catch (NoSuchElementException e) {
 			LOGGER.log(Level.ERROR,
-					String.format("Product with id %d not found %n%s %n", id, getReducedStackTrace(e)));
+					"Product with id {} not found \n{}", id, getReducedStackTrace(e));
 			return false;
 		}
 	}
 
 	private String getReducedStackTrace(Exception e) {
 		StackTraceElement el = e.getStackTrace()[0];
-		return String.format("at %s.%s() - line %s", el.getClassName(), el.getMethodName(), el.getLineNumber());
+		return String.format("-> at %s.%s() - line %s", el.getClassName(), el.getMethodName(), el.getLineNumber());
 	}
 
 }
