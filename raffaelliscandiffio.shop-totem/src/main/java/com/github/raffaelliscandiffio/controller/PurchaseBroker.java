@@ -12,26 +12,27 @@ import com.github.raffaelliscandiffio.model.Stock;
 import com.github.raffaelliscandiffio.repository.ProductRepository;
 import com.github.raffaelliscandiffio.repository.StockRepository;
 
-
 public class PurchaseBroker {
-	
+
 	private static final Logger LOGGER = LogManager.getLogger(PurchaseBroker.class);
 	private ProductRepository productRepository;
 	private StockRepository stockRepository;
-	
 
 	public PurchaseBroker(ProductRepository productRepository, StockRepository stockRepository) {
 		this.productRepository = productRepository;
 		this.stockRepository = stockRepository;
 	}
-	
+
 	/**
-	 * Constructs a new Product with the specified id, name and price and a Stock with the same id and quantity.
-	 * @param id of the product and stock
-	 * @param name of the product
-	 * @param price of the product
+	 * Constructs a new Product with the specified id, name and price and a Stock
+	 * with the same id and quantity.
+	 * 
+	 * @param id       of the product and stock
+	 * @param name     of the product
+	 * @param price    of the product
 	 * @param quantity of the product in stock
-	 * @throws IllegalArgumentException if the specified name is empty or null, price is negative, quantity is negative
+	 * @throws IllegalArgumentException if the specified name is empty or null,
+	 *                                  price is negative, quantity is negative
 	 */
 	public void saveNewProductInStock(long id, String name, double price, int quantity) {
 		if (!(name != null && !name.trim().isEmpty())) {
@@ -43,7 +44,7 @@ public class PurchaseBroker {
 		if (quantity < 0) {
 			throw new IllegalArgumentException("Negative quantity: " + quantity);
 		}
-		
+
 		productRepository.save(new Product(id, name, price));
 		stockRepository.save(new Stock(id, quantity));
 	}
@@ -52,44 +53,63 @@ public class PurchaseBroker {
 		return productRepository.findAll();
 	}
 
-	public int takeAvailable(long productId, int quantity) {
+	/**
+	 * Fetches the stock with given id and saves it back after subtracting the given
+	 * quantity. If current quantity in stock is not sufficient only the available
+	 * quantity is taken.
+	 * 
+	 * @param id of the product/stock
+	 * @param quantity  positive of the product that needs to be subtracted from
+	 *                  current stock quantity
+	 * @return the quantity available given the requested, in the following
+	 *         conditions:
+	 *         <ul>
+	 *         <li>the whole quantity requested if available in stock</li>
+	 *         <li>the whole quantity available if the requested was not entirely in
+	 *         stock</li>
+	 *         <li>zero if the product is out of stock or not found</li>
+	 *         </ul>
+	 */
+	public int takeAvailable(long id, int quantity) {
 		Stock stock;
 		try {
-			stock = stockRepository.findById(productId);
-		}catch(NoSuchElementException e){
-			LOGGER.log(Level.ERROR, String.format("Stock with id %d not found %n%s %n", productId, getReducedStackTrace(e)));
+			stock = stockRepository.findById(id);
+		} catch (NoSuchElementException e) {
+			LOGGER.log(Level.ERROR,
+					String.format("Stock with id %d not found %n%s %n", id, getReducedStackTrace(e)));
 			return 0;
 		}
 		int stockAvailableQuantity = stock.getQuantity();
-		
-		if(stockAvailableQuantity == 0) {
+
+		if (stockAvailableQuantity == 0) {
 			return 0;
-		}else {
-			int returnedQuantity =  Math.max(0, stockAvailableQuantity-quantity);
+		} else {
+			int returnedQuantity = Math.max(0, stockAvailableQuantity - quantity);
 			stock.setQuantity(returnedQuantity);
 			stockRepository.save(stock);
-			if(returnedQuantity == 0) {
+			if (returnedQuantity == 0) {
 				return stockAvailableQuantity;
-			}else {
+			} else {
 				return quantity;
 			}
 		}
 	}
 
-	public void returnProduct(long productId, int quantity) {
+	public void returnProduct(long id, int quantity) {
 		// TODO Auto-generated method stub
 	}
 
-	public boolean doesProductExist(long productId) {
+	public boolean doesProductExist(long id) {
 		try {
-			productRepository.findById(productId);
+			productRepository.findById(id);
 			return true;
-		}catch(NoSuchElementException e){
-			LOGGER.log(Level.ERROR, String.format("Product with id %d not found %n%s %n", productId, getReducedStackTrace(e)));
+		} catch (NoSuchElementException e) {
+			LOGGER.log(Level.ERROR,
+					String.format("Product with id %d not found %n%s %n", id, getReducedStackTrace(e)));
 			return false;
 		}
 	}
-	
+
 	private String getReducedStackTrace(Exception e) {
 		StackTraceElement el = e.getStackTrace()[0];
 		return String.format("at %s.%s() - line %s", el.getClassName(), el.getMethodName(), el.getLineNumber());
