@@ -2,7 +2,6 @@ package com.github.raffaelliscandiffio.model;
 
 import java.util.Objects;
 
-import com.github.raffaelliscandiffio.utils.ExcludeGeneratedFromCoverage;
 
 public class Product {
 
@@ -15,20 +14,13 @@ public class Product {
 	 * @param id of the product
 	 * @param name of the product
 	 * @param price of the product
-	 * @throws IllegalArgumentException if the specified name is empty or null, price is negative
 	 */
 	public Product(long id, String name, double price) {
 		
-		this.name = name;
-
-		if (price < 0) {
-			throw new IllegalArgumentException("Negative price: " + price);
-		}
-		this.price = price;
-		
 		this.id = id;
+		this.name = name;
+		this.price = price;
 	}
-
 
 	/**
 	 * Returns the price
@@ -54,13 +46,11 @@ public class Product {
 		return id;
 	}
 	
-	@ExcludeGeneratedFromCoverage
 	@Override
 	public int hashCode() {
 		return Objects.hash(id, name, price);
 	}
 
-	@ExcludeGeneratedFromCoverage
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -73,6 +63,5 @@ public class Product {
 		return id == other.id && Objects.equals(name, other.name)
 				&& Double.doubleToLongBits(price) == Double.doubleToLongBits(other.price);
 	}
-
 
 }
