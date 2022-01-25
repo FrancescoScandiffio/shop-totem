@@ -19,8 +19,13 @@ public class Stock {
 		this.id = id;
 		this.quantity = quantity;
 	}
-
-	private void setAvailableQuantityValidation(int quantity) {
+	
+	/**
+	 * Sets quantity to the specified quantity.
+	 * @param quantity to be set
+	 * @throws IllegalArgumentException if the specified quantity is negative 
+	 */
+	public void setQuantity(int quantity) {
 		if (quantity < 0) {
 			throw new IllegalArgumentException("Negative quantity: " + quantity);
 		}
@@ -44,14 +49,6 @@ public class Stock {
 		return id;
 	}
 
-	/**
-	 * Sets quantity to the specified quantity.
-	 * @param quantity to be set
-	 * @throws IllegalArgumentException if the specified quantity is negative 
-	 */
-	public void setQuantity(int quantity) {
-		setAvailableQuantityValidation(quantity);
-	}
 	
 	@Override
 	public int hashCode() {
