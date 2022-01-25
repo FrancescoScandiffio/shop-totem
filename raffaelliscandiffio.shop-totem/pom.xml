@@ -27,14 +27,13 @@
 		<sonar.coverage.exclusions>
 			**/controller/PurchaseBroker.java,
 			**/utils/GUITestExtension.java,
-			**/view/swing/TotemSwingView.java,
 		</sonar.coverage.exclusions>
 
 		<sonar.junit.reportPaths>
 			${project.build.directory}/surefire-reports
 		</sonar.junit.reportPaths>
 
-		<sonar.issue.ignore.multicriteria>e1,e2</sonar.issue.ignore.multicriteria>
+		<sonar.issue.ignore.multicriteria>e1,e2,e3</sonar.issue.ignore.multicriteria>
 		<!-- disable rule on naming convention -->
 		<sonar.issue.ignore.multicriteria.e1.ruleKey>
 			java:S117
@@ -50,6 +49,14 @@
 		<sonar.issue.ignore.multicriteria.e2.resourceKey>
 			**/swing/*Test*
 		</sonar.issue.ignore.multicriteria.e2.resourceKey>
+		
+		<!-- disable rule on static access -->
+		<sonar.issue.ignore.multicriteria.e3.ruleKey>
+			java:S3252
+		</sonar.issue.ignore.multicriteria.e3.ruleKey>
+		<sonar.issue.ignore.multicriteria.e3.resourceKey>
+			**/swing/TotemSwingView*
+		</sonar.issue.ignore.multicriteria.e3.resourceKey>
 	</properties>
 	
 	<dependencyManagement>
@@ -175,7 +182,6 @@
 						<excludes>
 							<exclude>**/controller/PurchaseBroker.class</exclude>
 							<exclude>**/utils/GUITestExtension.class</exclude>
-							<exclude>**/swing/TotemSwingView.class</exclude>						
 						</excludes>
 					</configuration>
 					<executions>
