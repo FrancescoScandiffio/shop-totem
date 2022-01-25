@@ -25,6 +25,14 @@ public class PurchaseBroker {
 		this.stockRepository = stockRepository;
 	}
 	
+	/**
+	 * Constructs a new Product with the specified id, name and price and a Stock with the same id and quantity.
+	 * @param id of the product and stock
+	 * @param name of the product
+	 * @param price of the product
+	 * @param quantity of the product in stock
+	 * @throws IllegalArgumentException if the specified name is empty or null, price is negative, quantity is negative
+	 */
 	public void saveNewProductInStock(long id, String name, double price, int quantity) {
 		if (!(name != null && !name.trim().isEmpty())) {
 			throw new IllegalArgumentException("Null or empty name is not allowed");
