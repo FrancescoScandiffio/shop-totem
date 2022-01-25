@@ -25,7 +25,6 @@ public class PurchaseBroker {
 		this.stockRepository = stockRepository;
 	}
 	
-
 	public void saveNewProductInStock(long id, String name, double price, int quantity) {
 		if (!(name != null && !name.trim().isEmpty())) {
 			throw new IllegalArgumentException("Null or empty name is not allowed");
@@ -33,6 +32,10 @@ public class PurchaseBroker {
 		if (price < 0) {
 			throw new IllegalArgumentException("Negative price: " + price);
 		}
+		if (quantity < 0) {
+			throw new IllegalArgumentException("Negative quantity: " + quantity);
+		}
+		
 		productRepository.save(new Product(id, name, price));
 		stockRepository.save(new Stock(id, quantity));
 	}
@@ -49,13 +52,13 @@ public class PurchaseBroker {
 			LOGGER.log(Level.ERROR, String.format("Stock with id %d not found", productId), e);
 			return 0;
 		}
-		int stockAvailableQuantity = stock.getAvailableQuantity();
+		int stockAvailableQuantity = stock.getQuantity();
 		
 		if(stockAvailableQuantity == 0) {
 			return 0;
 		}else {
 			int returnedQuantity =  Math.max(0, stockAvailableQuantity-quantity);
-			stock.setAvailableQuantity(returnedQuantity);
+			stock.setQuantity(returnedQuantity);
 			stockRepository.save(stock);
 			if(returnedQuantity == 0) {
 				return stockAvailableQuantity;

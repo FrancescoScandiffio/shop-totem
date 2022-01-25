@@ -70,11 +70,11 @@ class PurchaseBrokerTest {
 	void testTakeAvailableShouldReturnRequestedQuantityWhenMoreThanRequestedIsAvailableAndSave() {
 
 		when(stockRepository.findById(PRODUCT_ID)).thenReturn(stock);
-		when(stock.getAvailableQuantity()).thenReturn(GREATER_QUANTITY);
+		when(stock.getQuantity()).thenReturn(GREATER_QUANTITY);
 		
 		assertThat(broker.takeAvailable(PRODUCT_ID, QUANTITY)).isEqualTo(QUANTITY);
 		InOrder inOrder = inOrder(stock, stockRepository);
-		inOrder.verify(stock).setAvailableQuantity(GREATER_QUANTITY-QUANTITY);
+		inOrder.verify(stock).setQuantity(GREATER_QUANTITY-QUANTITY);
 		inOrder.verify(stockRepository).save(stock);
 	}
 	
@@ -83,11 +83,11 @@ class PurchaseBrokerTest {
 	void testTakeAvailableShouldReturnRequestedQuantityWhenOnlyRequestedIsAvailableAndSave() {
 
 		when(stockRepository.findById(PRODUCT_ID)).thenReturn(stock);
-		when(stock.getAvailableQuantity()).thenReturn(QUANTITY);
+		when(stock.getQuantity()).thenReturn(QUANTITY);
 		
 		assertThat(broker.takeAvailable(PRODUCT_ID, QUANTITY)).isEqualTo(QUANTITY);
 		InOrder inOrder = inOrder(stock, stockRepository);
-		inOrder.verify(stock).setAvailableQuantity(0);
+		inOrder.verify(stock).setQuantity(0);
 		inOrder.verify(stockRepository).save(stock);
 	}
 	
@@ -96,11 +96,11 @@ class PurchaseBrokerTest {
 	void testTakeAvailableShouldReturnAvailableQuantityWhenRequestedIsMoreThanAvailableAndSave() {
 
 		when(stockRepository.findById(PRODUCT_ID)).thenReturn(stock);
-		when(stock.getAvailableQuantity()).thenReturn(QUANTITY);
+		when(stock.getQuantity()).thenReturn(QUANTITY);
 		
 		assertThat(broker.takeAvailable(PRODUCT_ID, GREATER_QUANTITY)).isEqualTo(QUANTITY);
 		InOrder inOrder = inOrder(stock, stockRepository);
-		inOrder.verify(stock).setAvailableQuantity(0);
+		inOrder.verify(stock).setQuantity(0);
 		inOrder.verify(stockRepository).save(stock);
 	}
 	
@@ -109,7 +109,7 @@ class PurchaseBrokerTest {
 	void testTakeAvailableShouldReturnZeroWhenQuantityAvailableIsZero() {
 
 		when(stockRepository.findById(PRODUCT_ID)).thenReturn(stock);
-		when(stock.getAvailableQuantity()).thenReturn(0);
+		when(stock.getQuantity()).thenReturn(0);
 		
 		assertThat(broker.takeAvailable(PRODUCT_ID, QUANTITY)).isZero();
 		verifyNoMoreInteractions(stockRepository);
@@ -169,6 +169,22 @@ class PurchaseBrokerTest {
 
 		assertThatThrownBy(() ->  broker.saveNewProductInStock(PRODUCT_ID, "Pasta", -2, 100)).isInstanceOf(IllegalArgumentException.class)
 				.hasMessage("Negative price: -2.0");
+	}
+	
+	@Test
+	@DisplayName("'saveNewProductInStock' throws when quantity is a negative number")
+	void testSaveNewProductInStockWhenQuantityIsNegativeShouldThrow() {
+
+		assertThatThrownBy(() -> broker.saveNewProductInStock(PRODUCT_ID, "Pasta", 3, -10)).isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("Negative quantity: -10");
+	}
+	
+	@Test
+	@DisplayName("'saveNewProductInStock' allows quantity to be zero")
+	void testSaveNewProductInStockWhenQuantityIsZeroShouldBeAllowed() {
+		broker.saveNewProductInStock(PRODUCT_ID, "Pasta", 3, 0);
+		verify(productRepository).save(new Product(PRODUCT_ID, "Pasta", 3));
+		verify(stockRepository).save(new Stock(PRODUCT_ID, 0));
 	}
 	
 	
