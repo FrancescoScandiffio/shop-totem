@@ -7,33 +7,32 @@ import com.github.raffaelliscandiffio.utils.ExcludeGeneratedFromCoverage;
 public class Stock {
 
 	private final long id;
-	private int availableQuantity;
+	private int quantity;
 	
 	/**
 	 * Constructs a new Stock with an id and quantity available.
 	 * @param id of the stock
-	 * @param availableQuantity of the product
-	 * @throws IllegalArgumentException if the quantity is negative 
+	 * @param quantity of the product currently in stock
 	 */
-	public Stock(long id, int availableQuantity) {
+	public Stock(long id, int quantity) {
 
-		setAvailableQuantityValidation(availableQuantity);
 		this.id = id;
+		this.quantity = quantity;
 	}
 
-	private void setAvailableQuantityValidation(int availableQuantity) {
-		if (availableQuantity < 0) {
-			throw new IllegalArgumentException("Negative available quantity: " + availableQuantity);
+	private void setAvailableQuantityValidation(int quantity) {
+		if (quantity < 0) {
+			throw new IllegalArgumentException("Negative quantity: " + quantity);
 		}
-		this.availableQuantity = availableQuantity;
+		this.quantity = quantity;
 	}
 
 	/**
 	 * Returns the available quantity
 	 * @return the available quantity
 	 */
-	public int getAvailableQuantity() {
-		return availableQuantity;
+	public int getQuantity() {
+		return quantity;
 	}
 	
 	/**
@@ -46,17 +45,17 @@ public class Stock {
 	}
 
 	/**
-	 * Sets available quantity to the specified quantity.
-	 * @param availableQuantity to be set
-	 * @throws IllegalArgumentException if the specified availableQuantity is negative 
+	 * Sets quantity to the specified quantity.
+	 * @param quantity to be set
+	 * @throws IllegalArgumentException if the specified quantity is negative 
 	 */
-	public void setAvailableQuantity(int availableQuantity) {
-		setAvailableQuantityValidation(availableQuantity);
+	public void setQuantity(int quantity) {
+		setAvailableQuantityValidation(quantity);
 	}
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(availableQuantity, id);
+		return Objects.hash(quantity, id);
 	}
 
 	@Override
@@ -68,13 +67,13 @@ public class Stock {
 		if (getClass() != obj.getClass())
 			return false;
 		Stock other = (Stock) obj;
-		return availableQuantity == other.availableQuantity && id == other.id;
+		return quantity == other.quantity && id == other.id;
 	}
 
 
 	// used for test only
-	void initAvailableQuantity(int availableQuantity) {
-		this.availableQuantity = availableQuantity;
+	void initQuantity(int quantity) {
+		this.quantity = quantity;
 	}
 	
 	// used for test only

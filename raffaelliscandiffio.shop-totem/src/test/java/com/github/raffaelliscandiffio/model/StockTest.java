@@ -33,28 +33,7 @@ class StockTest {
 				stock = new Stock(ID, POSITIVE_QUANTITY);
 				
 				assertThat(stock.getId()).isEqualTo(ID);
-				assertThat(stock.getAvailableQuantity()).isEqualTo(POSITIVE_QUANTITY);
-			}
-			
-			@Test
-			@DisplayName("Available quantity can be initialized to zero")
-			void testConstructorWhenAvailableQuantityIsZeroShouldBeAllowed() {
-				stock = new Stock(ID, 0);
-				
-				assertThat(stock.getAvailableQuantity()).isZero();
-			}
-		}
-		
-		@Nested 
-		@DisplayName("Exceptional case") 
-		class ExceptionalCase {
-			
-			@Test
-			@DisplayName("Available quantity can't be a negative number")
-			void testConstructorWhenAvailableQuantityIsNegativeShouldThrow() {
-
-				assertThatThrownBy(() -> new Stock(ID, NEGATIVE_QUANTITY)).isInstanceOf(IllegalArgumentException.class)
-						.hasMessage("Negative available quantity: "+NEGATIVE_QUANTITY);
+				assertThat(stock.getQuantity()).isEqualTo(POSITIVE_QUANTITY);
 			}
 		}
 	}
@@ -68,33 +47,33 @@ class StockTest {
 		@BeforeEach
 		void setup() {
 			stock = new Stock();
-			stock.initAvailableQuantity(INITIAL_QUANTITY);
+			stock.initQuantity(INITIAL_QUANTITY);
 		}
 		
 		@Test
 		@DisplayName("Available quantity can't be set to negative number")
 		void testSetAvailableQuantityWhenAvailableQuantityIsNegativeShouldThrow() {
 			
-			assertThatThrownBy(() -> stock.setAvailableQuantity(NEGATIVE_QUANTITY)).isInstanceOf(IllegalArgumentException.class)
-					.hasMessage("Negative available quantity: "+NEGATIVE_QUANTITY);
+			assertThatThrownBy(() -> stock.setQuantity(NEGATIVE_QUANTITY)).isInstanceOf(IllegalArgumentException.class)
+					.hasMessage("Negative quantity: "+NEGATIVE_QUANTITY);
 			
-			assertThat(stock.getAvailableQuantity()).isEqualTo(INITIAL_QUANTITY);
+			assertThat(stock.getQuantity()).isEqualTo(INITIAL_QUANTITY);
 		}
 		
 		@Test
 		@DisplayName("Available quantity can be set to zero")
 		void testSetAvailableQuantityWhenAvailableQuantityIsZeroShouldBeAllowed() {
 				
-			stock.setAvailableQuantity(0);
-			assertThat(stock.getAvailableQuantity()).isZero();
+			stock.setQuantity(0);
+			assertThat(stock.getQuantity()).isZero();
 		}
 		
 		@Test
 		@DisplayName("Available quantity can be set to positive number")
 		void testSetAvailableQuantityWhenAvailableQuantityIsPositiveShouldBeAllowed() {
 			
-			stock.setAvailableQuantity(POSITIVE_QUANTITY);
-			assertThat(stock.getAvailableQuantity()).isEqualTo(POSITIVE_QUANTITY);
+			stock.setQuantity(POSITIVE_QUANTITY);
+			assertThat(stock.getQuantity()).isEqualTo(POSITIVE_QUANTITY);
 		}
 	}
 }
