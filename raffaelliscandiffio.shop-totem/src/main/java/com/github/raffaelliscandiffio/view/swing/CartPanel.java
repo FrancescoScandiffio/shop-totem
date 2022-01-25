@@ -54,6 +54,7 @@ public class CartPanel extends JPanel {
 
 		btnContinueShopping = new JButton("Continue Shopping");
 		btnContinueShopping.setActionCommand("openShopping");
+		btnContinueShopping.setFocusPainted(false);
 		GridBagConstraints gbc_btnBackToShopping = new GridBagConstraints();
 		gbc_btnBackToShopping.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnBackToShopping.insets = new Insets(0, 0, 5, 5);
@@ -64,6 +65,7 @@ public class CartPanel extends JPanel {
 		btnCancelShopping = new JButton("Cancel Shopping");
 		btnCancelShopping.setName("cartBtnCancelShopping");
 		btnCancelShopping.setActionCommand("cancelShopping");
+		btnCancelShopping.setFocusPainted(false);
 		GridBagConstraints gbc_btnCancelShopping = new GridBagConstraints();
 		gbc_btnCancelShopping.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnCancelShopping.insets = new Insets(0, 0, 5, 0);
@@ -147,6 +149,7 @@ public class CartPanel extends JPanel {
 
 		btnReturnQuantity = new JButton("Return quantity");
 		btnReturnQuantity.setEnabled(false);
+		btnReturnQuantity.setFocusPainted(false);
 		GridBagConstraints gbc_btnReturnQuantity = new GridBagConstraints();
 		gbc_btnReturnQuantity.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnReturnQuantity.insets = new Insets(0, 0, 5, 5);
@@ -157,6 +160,7 @@ public class CartPanel extends JPanel {
 		btnCheckout = new JButton("Checkout");
 		btnCheckout.setActionCommand("checkout");
 		btnCheckout.setEnabled(false);
+		btnCheckout.setFocusPainted(false);
 		GridBagConstraints gbc_btnCheckout = new GridBagConstraints();
 		gbc_btnCheckout.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnCheckout.insets = new Insets(0, 0, 5, 0);
@@ -167,6 +171,7 @@ public class CartPanel extends JPanel {
 		btnRemoveSelected = new JButton("Remove selected");
 		btnRemoveSelected.setEnabled(false);
 		btnRemoveSelected.setActionCommand("removeSelected");
+		btnRemoveSelected.setFocusPainted(false);
 		GridBagConstraints gbc_btnRemoveSelected = new GridBagConstraints();
 		gbc_btnRemoveSelected.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnRemoveSelected.insets = new Insets(0, 0, 0, 5);

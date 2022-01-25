@@ -24,6 +24,7 @@ public class WelcomePanel extends JPanel {
 
 		btnStartShopping = new JButton("Start shopping");
 		btnStartShopping.setName("welcomeStartShopping");
+		btnStartShopping.setFocusPainted(false);
 
 		GridBagConstraints gbc_btnStartShopping = new GridBagConstraints();
 		gbc_btnStartShopping.gridx = 0;
