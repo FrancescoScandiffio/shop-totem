@@ -4,6 +4,7 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -20,6 +21,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.github.raffaelliscandiffio.model.Product;
@@ -35,9 +37,7 @@ class PurchaseBrokerTest {
 	
 	@Mock
 	private StockRepository stockRepository;
-	
-	@Mock
-	private Stock stock;
+
 	
 	@InjectMocks
 	private PurchaseBroker broker;
@@ -68,9 +68,8 @@ class PurchaseBrokerTest {
 	@Test
 	@DisplayName("'takeAvailable' should return requested quantity when more than requested is available and save the stock")
 	void testTakeAvailableShouldReturnRequestedQuantityWhenMoreThanRequestedIsAvailableAndSave() {
-
+		Stock stock = spy(new Stock(PRODUCT_ID, GREATER_QUANTITY));
 		when(stockRepository.findById(PRODUCT_ID)).thenReturn(stock);
-		when(stock.getQuantity()).thenReturn(GREATER_QUANTITY);
 		
 		assertThat(broker.takeAvailable(PRODUCT_ID, QUANTITY)).isEqualTo(QUANTITY);
 		InOrder inOrder = inOrder(stock, stockRepository);
@@ -81,9 +80,8 @@ class PurchaseBrokerTest {
 	@Test
 	@DisplayName("'takeAvailable' should return requested quantity when only requested is available and save the stock")
 	void testTakeAvailableShouldReturnRequestedQuantityWhenOnlyRequestedIsAvailableAndSave() {
-
+		Stock stock = spy(new Stock(PRODUCT_ID, QUANTITY));
 		when(stockRepository.findById(PRODUCT_ID)).thenReturn(stock);
-		when(stock.getQuantity()).thenReturn(QUANTITY);
 		
 		assertThat(broker.takeAvailable(PRODUCT_ID, QUANTITY)).isEqualTo(QUANTITY);
 		InOrder inOrder = inOrder(stock, stockRepository);
@@ -94,9 +92,8 @@ class PurchaseBrokerTest {
 	@Test
 	@DisplayName("'takeAvailable' should return available quantity when requested is more than available and save the stock")
 	void testTakeAvailableShouldReturnAvailableQuantityWhenRequestedIsMoreThanAvailableAndSave() {
-
+		Stock stock = spy(new Stock(PRODUCT_ID, QUANTITY));
 		when(stockRepository.findById(PRODUCT_ID)).thenReturn(stock);
-		when(stock.getQuantity()).thenReturn(QUANTITY);
 		
 		assertThat(broker.takeAvailable(PRODUCT_ID, GREATER_QUANTITY)).isEqualTo(QUANTITY);
 		InOrder inOrder = inOrder(stock, stockRepository);
@@ -107,9 +104,8 @@ class PurchaseBrokerTest {
 	@Test
 	@DisplayName("'takeAvailable' should return zero when quantity in stock is zero")
 	void testTakeAvailableShouldReturnZeroWhenQuantityAvailableIsZero() {
-
+		Stock stock = new Stock(PRODUCT_ID, 0);
 		when(stockRepository.findById(PRODUCT_ID)).thenReturn(stock);
-		when(stock.getQuantity()).thenReturn(0);
 		
 		assertThat(broker.takeAvailable(PRODUCT_ID, QUANTITY)).isZero();
 		verifyNoMoreInteractions(stockRepository);
