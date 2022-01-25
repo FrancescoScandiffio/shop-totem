@@ -57,7 +57,7 @@ public class PurchaseBroker {
 		try {
 			stock = stockRepository.findById(productId);
 		}catch(NoSuchElementException e){
-			LOGGER.log(Level.ERROR, String.format("Stock with id %d not found", productId), e);
+			LOGGER.log(Level.ERROR, String.format("Stock with id %d not found %n%s %n", productId, getReducedStackTrace(e)));
 			return 0;
 		}
 		int stockAvailableQuantity = stock.getQuantity();
@@ -85,9 +85,14 @@ public class PurchaseBroker {
 			productRepository.findById(productId);
 			return true;
 		}catch(NoSuchElementException e){
-			LOGGER.log(Level.WARN, String.format("Product with id %d not found", productId), e);
+			LOGGER.log(Level.ERROR, String.format("Product with id %d not found %n%s %n", productId, getReducedStackTrace(e)));
 			return false;
 		}
+	}
+	
+	private String getReducedStackTrace(Exception e) {
+		StackTraceElement el = e.getStackTrace()[0];
+		return String.format("at %s.%s() - line %s", el.getClassName(), el.getMethodName(), el.getLineNumber());
 	}
 
 }
