@@ -129,7 +129,7 @@ class TotemControllerTest {
 		void testBuyProductWhenRequestedQuantityIsNegative() {
 			Product product = new Product(1, "pizza", 2.5);
 			totemController.buyProduct(product, -3);
-			verify(totemView).showErrorMessage("Buy quantity must be positive: received -3");
+			verify(totemView).showShoppingErrorMessage("Buy quantity must be positive: received -3");
 			verifyNoMoreInteractions(totemView, broker, order);
 		}
 
@@ -138,7 +138,7 @@ class TotemControllerTest {
 		void testBuyProductWhenRequestedQuantityIsZero() {
 			Product product = new Product(1, "pizza", 2.5);
 			totemController.buyProduct(product, 0);
-			verify(totemView).showErrorMessage("Buy quantity must be positive: received 0");
+			verify(totemView).showShoppingErrorMessage("Buy quantity must be positive: received 0");
 			verifyNoMoreInteractions(totemView, broker, order);
 		}
 
@@ -197,7 +197,7 @@ class TotemControllerTest {
 
 			totemController.setOrder(order);
 			totemController.buyProduct(product, QUANTITY);
-			verify(totemView).showMessage("Added " + QUANTITY + " pizza");
+			verify(totemView).showShoppingMessage("Added " + QUANTITY + " pizza");
 		}
 
 		@Test
@@ -233,7 +233,7 @@ class TotemControllerTest {
 			inOrder.verify(order).popItemById(item.getId());
 			inOrder.verify(broker).returnProduct(product.getId(), QUANTITY);
 			inOrder.verify(totemView).itemRemoved(item);
-			inOrder.verify(totemView).showMessage("Removed all pizza");
+			inOrder.verify(totemView).showCartMessage("Removed all pizza");
 		}
 
 		@Test
@@ -266,7 +266,7 @@ class TotemControllerTest {
 			inOrder.verify(order).decreaseItem(item.getId(), QUANTITY);
 			inOrder.verify(broker).returnProduct(product.getId(), QUANTITY);
 			inOrder.verify(totemView).itemModified(item, modifiedItem);
-			inOrder.verify(totemView).showMessage("Removed 3 pizza");
+			inOrder.verify(totemView).showCartMessage("Removed 3 pizza");
 		}
 
 		@Test
@@ -288,7 +288,7 @@ class TotemControllerTest {
 			when(order.decreaseItem(anyLong(), anyInt())).thenThrow(new IllegalArgumentException(exceptionMessage));
 			totemController.setOrder(order);
 			totemController.returnProduct(existingItem, GREATER_QUANTITY);
-			verify(totemView).showErrorMessage(exceptionMessage);
+			verify(totemView).showCartErrorMessage(exceptionMessage);
 			verifyNoMoreInteractions(order, broker, totemView);
 		}
 

@@ -312,17 +312,17 @@ class TotemSwingViewTest {
 
 		@Test
 		@GUITest
-		@DisplayName("Method 'showErrorMessage' should set message label with given message")
-		void testShowErrorMessageShouldSetMessageLabel() {
-			GuiActionRunner.execute(() -> totemSwingView.showErrorMessage("Error message"));
+		@DisplayName("Method 'showShoppingErrorMessage' should show the error message in the shopping label")
+		void testShowShoppingErrorMessageShouldShowTheErrorMessageInTheShoppingLabel() {
+			GuiActionRunner.execute(() -> totemSwingView.showShoppingErrorMessage("Error message"));
 			window.label("messageLabel").requireText("Error message");
 		}
 
 		@Test
 		@GUITest
-		@DisplayName("Method 'showMessage' should set message label with given message")
-		void testShowMessageShouldSetMessageLabel() {
-			GuiActionRunner.execute(() -> totemSwingView.showMessage("Message"));
+		@DisplayName("Method 'showShoppingMessage' should show the message in the shopping label")
+		void testShowShoppingMessageShouldShowTheMessageInTheShoppingLabel() {
+			GuiActionRunner.execute(() -> totemSwingView.showShoppingMessage("Message"));
 			window.label("messageLabel").requireText("Message");
 		}
 
@@ -341,8 +341,8 @@ class TotemSwingViewTest {
 
 		@Test
 		@GUITest
-		@DisplayName("Method 'showWarning' should set message label with given message")
-		void testShowWarningShouldSetMessageLabel() {
+		@DisplayName("Method 'showWarning' should show the warning message in the shopping label")
+		void testShowWarningShouldShowTheWarningMessageInTheShoppingLabel() {
 			GuiActionRunner.execute(() -> totemSwingView.showWarning("Message"));
 			window.label("messageLabel").requireText("Message");
 		}
@@ -519,7 +519,6 @@ class TotemSwingViewTest {
 		@GUITest
 		@DisplayName("Method 'itemModified' should update the specified item in the cart list")
 		void testItemModifiedShouldUpdateTheOldOrderItemWithTheNewOneInCartList() {
-
 			Product product = new Product(2, "Product2", 3);
 			OrderItem oldItem = new OrderItem(product, 4);
 			OrderItem updatedItem = new OrderItem(product, 5);
@@ -539,14 +538,63 @@ class TotemSwingViewTest {
 		@GUITest
 		@DisplayName("Method 'allItemsRemoved' should remove all items from the cart list")
 		void testAllItemsRemovedShouldClearTheCartList() {
-			DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
 			GuiActionRunner.execute(() -> {
+				DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
 				itemsModel.addElement(new OrderItem(new Product(1, "Product1", 2), 5));
 				itemsModel.addElement(new OrderItem(new Product(1, "Product1", 2), 4));
 			});
 			GuiActionRunner.execute(() -> totemSwingView.allItemsRemoved());
 			String[] listContents = window.list("cartList").contents();
 			assertThat(listContents).isEmpty();
+		}
+
+		@Test
+		@GUITest
+		@DisplayName("Method 'showErrorItemNotFound' should set error message label and delete the item from the cart list")
+		void testShowErrorItemNotFoundShouldSetMessageLabelAndDeleteItemFromCartList() {
+			OrderItem item1 = new OrderItem(new Product(1, "Product1", 3), 5);
+			OrderItem item2 = new OrderItem(new Product(2, "Product2", 1), 4);
+			GuiActionRunner.execute(() -> {
+				DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+				itemsModel.addElement(item1);
+				itemsModel.addElement(item2);
+			});
+			GuiActionRunner.execute(() -> totemSwingView.showErrorItemNotFound("error message", item1));
+			window.label("cartMessageLabel").requireText("error message");
+			assertThat(window.list("cartList").contents())
+					.containsExactly("Product2 - Quantity: 4 - Price: 1.0 € - Subtotal: 4.0 €");
+		}
+
+		@Test
+		@GUITest
+		@DisplayName("Method 'showErrorEmptyOrder' should set error message label and clear the cart list")
+		void testShowErrorEmptyOrderShouldSetMessageLabelAndClearTheCartList() {
+			OrderItem item1 = new OrderItem(new Product(1, "Product1", 3), 5);
+			OrderItem item2 = new OrderItem(new Product(2, "Product2", 1), 4);
+			GuiActionRunner.execute(() -> {
+				DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+				itemsModel.addElement(item1);
+				itemsModel.addElement(item2);
+			});
+			GuiActionRunner.execute(() -> totemSwingView.showErrorEmptyOrder("error message"));
+			window.label("cartMessageLabel").requireText("error message");
+			assertThat(window.list("cartList").contents()).isEmpty();
+		}
+
+		@Test
+		@GUITest
+		@DisplayName("Method 'showCartMessage' should show the message in the cart label")
+		void testShowCartMessageShouldShowTheMessageInTheCartLabel() {
+			GuiActionRunner.execute(() -> totemSwingView.showCartMessage("Message"));
+			window.label("cartMessageLabel").requireText("Message");
+		}
+
+		@Test
+		@GUITest
+		@DisplayName("Method 'showCartErrorMessage' should show the error message in the cart label")
+		void testShowCartErrorMessageShouldShowTheErrorMessageInTheCartLabel() {
+			GuiActionRunner.execute(() -> totemSwingView.showCartErrorMessage("Error message"));
+			window.label("cartMessageLabel").requireText("Error message");
 		}
 
 	}
