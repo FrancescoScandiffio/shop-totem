@@ -19,6 +19,7 @@ public class TotemSwingView extends JFrame implements TotemView {
 	private WelcomePanel welcomePane;
 	private ShoppingPanel shoppingPane;
 	private CartPanel cartPane;
+	private GoodbyePanel goodbyePane;
 
 	private transient TotemController totemController;
 	private CardLayout layout;
@@ -51,9 +52,11 @@ public class TotemSwingView extends JFrame implements TotemView {
 		welcomePane = new WelcomePanel();
 		shoppingPane = new ShoppingPanel();
 		cartPane = new CartPanel();
+		goodbyePane = new GoodbyePanel();
 		getContentPane().add(welcomePane, "welcome");
 		getContentPane().add(shoppingPane, "shopping");
 		getContentPane().add(cartPane, "cart");
+		getContentPane().add(goodbyePane, "bye");
 
 		welcomePane.addActionListener(e -> startShoppingAction());
 
@@ -121,6 +124,10 @@ public class TotemSwingView extends JFrame implements TotemView {
 		return cartPane;
 	}
 
+	GoodbyePanel getGoodbyePane() {
+		return goodbyePane;
+	}
+
 	@Override
 	public void showAllProducts(List<Product> products) {
 		products.stream().forEach(getShoppingPane().getListProductsModel()::addElement);
@@ -139,6 +146,11 @@ public class TotemSwingView extends JFrame implements TotemView {
 	@Override
 	public void showOrder() {
 		changePane("cart");
+	}
+
+	@Override
+	public void showGoodbye() {
+		changePane("bye");
 	}
 
 	private void changePane(String pane) {
@@ -163,12 +175,6 @@ public class TotemSwingView extends JFrame implements TotemView {
 
 	@Override
 	public void itemRemoved(OrderItem item) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void showGoodbye() {
 		// TODO Auto-generated method stub
 
 	}

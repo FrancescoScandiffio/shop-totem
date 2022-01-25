@@ -71,36 +71,42 @@ class TotemSwingViewTest {
 	class PanelShowTest {
 
 		@Test
-		@DisplayName("Method 'showShopping' should replace any panel with shopping panel")
+		@DisplayName("Method 'showShopping' should show the shopping panel")
 		void testShowShoppingShouldChangePanelToShoppingPanel() {
 			GuiActionRunner
 					.execute(() -> totemSwingView.getCardLayout().show(totemSwingView.getContentPane(), "welcome"));
 			GuiActionRunner.execute(() -> totemSwingView.showShopping());
 			assertThat(totemSwingView.getShoppingPane().isShowing()).isTrue();
 			assertThat(totemSwingView.getWelcomePane().isShowing()).isFalse();
-			assertThat(totemSwingView.getCartPane().isShowing()).isFalse();
 		}
 
 		@Test
-		@DisplayName("Method 'showWelcome' should replace any panel with welcome panel")
+		@DisplayName("Method 'showWelcome' should show the welcome panel")
 		void testShowWelcomeShouldChangePanelToWelcomePanel() {
 			GuiActionRunner
 					.execute(() -> totemSwingView.getCardLayout().show(totemSwingView.getContentPane(), "shopping"));
 			GuiActionRunner.execute(() -> totemSwingView.showWelcome());
 			assertThat(totemSwingView.getWelcomePane().isShowing()).isTrue();
 			assertThat(totemSwingView.getShoppingPane().isShowing()).isFalse();
-			assertThat(totemSwingView.getCartPane().isShowing()).isFalse();
 		}
 
 		@Test
-		@DisplayName("Method 'showCart' should replace any panel with cart panel")
+		@DisplayName("Method 'showCart' should show the cart panel")
 		void testShowCartShouldChangePanelToCartPanel() {
 			GuiActionRunner
 					.execute(() -> totemSwingView.getCardLayout().show(totemSwingView.getContentPane(), "shopping"));
 			GuiActionRunner.execute(() -> totemSwingView.showOrder());
-			assertThat(totemSwingView.getWelcomePane().isShowing()).isFalse();
 			assertThat(totemSwingView.getCartPane().isShowing()).isTrue();
 			assertThat(totemSwingView.getShoppingPane().isShowing()).isFalse();
+		}
+
+		@Test
+		@DisplayName("Method 'showGoodbye' should sho the goodbye panel")
+		void testShowGoodbyeShouldChangePanelToGoodbyePanel() {
+			GuiActionRunner.execute(() -> totemSwingView.getCardLayout().show(totemSwingView.getContentPane(), "cart"));
+			GuiActionRunner.execute(() -> totemSwingView.showGoodbye());
+			assertThat(totemSwingView.getCartPane().isShowing()).isFalse();
+			assertThat(totemSwingView.getGoodbyePane().isShowing()).isTrue();
 		}
 	}
 
