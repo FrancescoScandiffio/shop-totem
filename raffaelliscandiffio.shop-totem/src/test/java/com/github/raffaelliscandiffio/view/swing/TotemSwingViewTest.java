@@ -128,7 +128,8 @@ class TotemSwingViewTest {
 		void testWelcomePanelInitialState() {
 			GuiActionRunner
 					.execute(() -> totemSwingView.getCardLayout().show(totemSwingView.getContentPane(), "welcome"));
-			window.button(JButtonMatcher.withText("Start shopping")).requireEnabled();
+			window.button(JButtonMatcher.withName("welcomeStartShopping")).requireText("Start shopping")
+					.requireEnabled();
 		}
 
 		@Test
@@ -137,8 +138,7 @@ class TotemSwingViewTest {
 		void testStartShoppingButtonShouldDelegateToTotemControllerStartShopping() {
 			GuiActionRunner
 					.execute(() -> totemSwingView.getCardLayout().show(totemSwingView.getContentPane(), "welcome"));
-
-			window.button(JButtonMatcher.withText("Start shopping")).click();
+			window.button(JButtonMatcher.withName("welcomeStartShopping")).requireText("Start shopping").click();
 			verify(totemController).startShopping();
 		}
 
@@ -604,4 +604,32 @@ class TotemSwingViewTest {
 		}
 
 	}
+
+	@Nested
+	@DisplayName("Test Goodbye panel")
+	class GoodbyePanelTest {
+		@BeforeEach
+		void setup() {
+			GuiActionRunner.execute(() -> totemSwingView.getCardLayout().show(totemSwingView.getContentPane(), "bye"));
+		}
+
+		@Test
+		@GUITest
+		@DisplayName("Goodbye panel inital state")
+		void testCartPanelInitialState() {
+			window.button(JButtonMatcher.withName("goodbyeStartShopping")).requireText("Start shopping")
+					.requireEnabled();
+			window.label("byeLabel").requireText("Goodbye!");
+		}
+
+		@Test
+		@GUITest
+		@DisplayName("Button 'Start Shopping' should delegate to TotemController 'openShopping'")
+		void testStartShoppingButtonShouldDelegateToTotemControllerOpenShopping() {
+			window.button(JButtonMatcher.withName("goodbyeStartShopping")).click();
+			verify(totemController).startShopping();
+		}
+
+	}
+
 }

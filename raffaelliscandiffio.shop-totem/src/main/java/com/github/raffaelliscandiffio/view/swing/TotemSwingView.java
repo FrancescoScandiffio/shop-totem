@@ -81,6 +81,8 @@ public class TotemSwingView extends JFrame implements TotemView {
 			if ("removeSelected".equals(command))
 				removeItemAction();
 		});
+
+		goodbyePane.addActionListener(e -> startShoppingAction());
 	}
 
 	private void removeItemAction() {
