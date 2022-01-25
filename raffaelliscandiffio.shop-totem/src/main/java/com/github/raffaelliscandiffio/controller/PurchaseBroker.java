@@ -25,9 +25,13 @@ public class PurchaseBroker {
 		this.stockRepository = stockRepository;
 	}
 	
+
 	public void saveNewProductInStock(long id, String name, double price, int quantity) {
 		if (!(name != null && !name.trim().isEmpty())) {
 			throw new IllegalArgumentException("Null or empty name is not allowed");
+		}
+		if (price < 0) {
+			throw new IllegalArgumentException("Negative price: " + price);
 		}
 		productRepository.save(new Product(id, name, price));
 		stockRepository.save(new Stock(id, quantity));

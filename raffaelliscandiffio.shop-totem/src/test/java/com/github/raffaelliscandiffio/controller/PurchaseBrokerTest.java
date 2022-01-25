@@ -154,6 +154,22 @@ class PurchaseBrokerTest {
 		verifyNoMoreInteractions(stockRepository, productRepository);
 	}
 	
+	@Test
+	@DisplayName("'saveNewProductInStock' allows price to be zero")
+	void testSaveNewProductInStockWhenPriceIsZeroShouldBeAllowed() {
+
+		broker.saveNewProductInStock(PRODUCT_ID, "Pasta", 0, 100);
+		verify(productRepository).save(new Product(PRODUCT_ID, "Pasta", 0));
+		verify(stockRepository).save(new Stock(PRODUCT_ID, 100));
+	}
+	
+	@Test
+	@DisplayName("'saveNewProductInStock' throws when price is a negative number")
+	void testSaveNewProductInStockWhenPriceIsNegativeShouldThrow() {
+
+		assertThatThrownBy(() ->  broker.saveNewProductInStock(PRODUCT_ID, "Pasta", -2, 100)).isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("Negative price: -2.0");
+	}
 	
 	
 }
