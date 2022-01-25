@@ -2,8 +2,6 @@ package com.github.raffaelliscandiffio.model;
 
 import java.util.Objects;
 
-import com.github.raffaelliscandiffio.utils.ExcludeGeneratedFromCoverage;
-
 public class Stock {
 
 	private final long id;
@@ -21,20 +19,16 @@ public class Stock {
 	}
 	
 	/**
-	 * Sets quantity to the specified quantity.
-	 * @param quantity to be set
-	 * @throws IllegalArgumentException if the specified quantity is negative 
+	 * Sets quantity
+	 * @param quantity available in stock
 	 */
 	public void setQuantity(int quantity) {
-		if (quantity < 0) {
-			throw new IllegalArgumentException("Negative quantity: " + quantity);
-		}
 		this.quantity = quantity;
 	}
 
 	/**
-	 * Returns the available quantity
-	 * @return the available quantity
+	 * Returns the quantity currently in stock
+	 * @return quantity
 	 */
 	public int getQuantity() {
 		return quantity;
@@ -44,11 +38,9 @@ public class Stock {
 	 * Returns the id of the Stock
 	 * @return the id
 	 */
-	@ExcludeGeneratedFromCoverage
 	public long getId() {
 		return id;
 	}
-
 	
 	@Override
 	public int hashCode() {
@@ -65,16 +57,5 @@ public class Stock {
 			return false;
 		Stock other = (Stock) obj;
 		return quantity == other.quantity && id == other.id;
-	}
-
-
-	// used for test only
-	void initQuantity(int quantity) {
-		this.quantity = quantity;
-	}
-	
-	// used for test only
-	Stock() {
-		this.id = 0;
 	}
 }
