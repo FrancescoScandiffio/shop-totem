@@ -11,10 +11,13 @@ import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.model.Stock;
 import com.github.raffaelliscandiffio.repository.ProductRepository;
 import com.github.raffaelliscandiffio.repository.StockRepository;
+import com.github.raffaelliscandiffio.utils.ExcludeGeneratedFromCoverage;
+import com.github.raffaelliscandiffio.utils.LogUtility;
 
 public class PurchaseBroker {
 
 	private static final Logger LOGGER = LogManager.getLogger(PurchaseBroker.class);
+	private static final LogUtility logUtil = new LogUtility();
 	private ProductRepository productRepository;
 	private StockRepository stockRepository;
 
@@ -80,7 +83,7 @@ public class PurchaseBroker {
 			stock = stockRepository.findById(id);
 		} catch (NoSuchElementException e) {
 			LOGGER.log(Level.ERROR,
-					"Stock with id {} not found \n{}", id, getReducedStackTrace(e));
+					"Stock with id {} not found \n{}", id, logUtil.getReducedStackTrace(e));
 			return 0;
 		}
 		int stockAvailableQuantity = stock.getQuantity();
@@ -98,7 +101,8 @@ public class PurchaseBroker {
 			}
 		}
 	}
-
+	
+	@ExcludeGeneratedFromCoverage
 	public void returnProduct(long id, int quantity) {
 		// TODO Auto-generated method stub
 	}
@@ -109,14 +113,9 @@ public class PurchaseBroker {
 			return true;
 		} catch (NoSuchElementException e) {
 			LOGGER.log(Level.ERROR,
-					"Product with id {} not found \n{}", id, getReducedStackTrace(e));
+					"Product with id {} not found \n{}", id, logUtil.getReducedStackTrace(e));
 			return false;
 		}
-	}
-
-	private String getReducedStackTrace(Exception e) {
-		StackTraceElement el = e.getStackTrace()[0];
-		return String.format("-> at %s.%s() - line %s", el.getClassName(), el.getMethodName(), el.getLineNumber());
 	}
 
 }
