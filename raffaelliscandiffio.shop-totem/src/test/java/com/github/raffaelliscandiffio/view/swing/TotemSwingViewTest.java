@@ -523,13 +523,28 @@ class TotemSwingViewTest {
 
 		@Test
 		@GUITest
+		@DisplayName("Method 'itemRemoved' should remove the specified OrderItem from the cart")
+		void testItemRemovedShouldRemoveTheOrderItemFromTheCart() {
+			OrderItem toRemove = new OrderItem(new Product(2, "Product2", 2), 4);
+			GuiActionRunner.execute(() -> {
+				DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+				itemsModel.addElement(new OrderItem(new Product(1, "Product1", 3), 5));
+				itemsModel.addElement(toRemove);
+			});
+			GuiActionRunner.execute(() -> totemSwingView.itemRemoved(toRemove));
+			String[] listContents = window.list("cartList").contents();
+			assertThat(listContents).containsExactly("Product1 - Quantity: 5 - Price: 3.0 € - Subtotal: 15.0 €");
+		}
+
+		@Test
+		@GUITest
 		@DisplayName("Method 'itemModified' should update the specified item in the cart list")
 		void testItemModifiedShouldUpdateTheOldOrderItemWithTheNewOneInCartList() {
 			Product product = new Product(2, "Product2", 3);
 			OrderItem oldItem = new OrderItem(product, 4);
 			OrderItem updatedItem = new OrderItem(product, 5);
-			DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
 			GuiActionRunner.execute(() -> {
+				DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
 				itemsModel.addElement(new OrderItem(new Product(1, "Product1", 2), 5));
 				itemsModel.addElement(oldItem);
 			});

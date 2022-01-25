@@ -27,7 +27,6 @@
 		<sonar.coverage.exclusions>
 			**/controller/PurchaseBroker.java,
 			**/utils/GUITestExtension.java,
-			**/view/swing/TotemSwingView.java,
 		</sonar.coverage.exclusions>
 
 		<sonar.junit.reportPaths>
@@ -175,7 +174,6 @@
 						<excludes>
 							<exclude>**/controller/PurchaseBroker.class</exclude>
 							<exclude>**/utils/GUITestExtension.class</exclude>
-							<exclude>**/swing/TotemSwingView.class</exclude>						
 						</excludes>
 					</configuration>
 					<executions>
