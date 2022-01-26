@@ -93,7 +93,7 @@ public class PurchaseBroker {
 		} else {
 			int returnedQuantity = Math.max(0, stockAvailableQuantity - quantity);
 			stock.setQuantity(returnedQuantity);
-			stockRepository.save(stock);
+			stockRepository.update(stock);
 			if (returnedQuantity == 0) {
 				return stockAvailableQuantity;
 			} else {
