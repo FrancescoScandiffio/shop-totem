@@ -1,51 +1,37 @@
 package com.github.raffaelliscandiffio.model;
 
+import java.util.Objects;
+
 public class Stock {
-	
+
 	private final long id;
-	private final Product product;
-	private int availableQuantity;
+	private int quantity;
 	
 	/**
-	 * Constructs a new Stock with a product and relative available quantity. Sets ID as product ID.
-	 * @param product object
-	 * @param availableQuantity of the product
-	 * @throws NullPointerException if the specified product is null
-	 * @throws IllegalArgumentException if the quantity is negative 
+	 * Constructs a new Stock with an id and quantity available.
+	 * @param id of the stock
+	 * @param quantity of the product currently in stock
 	 */
-	public Stock(Product product, int availableQuantity) {
+	public Stock(long id, int quantity) {
 
-		if (product==null) {
-			throw new NullPointerException("Null product");
-		}
-		this.product=product;
-
-		setAvailableQuantityValidation(availableQuantity);
-		
-		this.id = product.getId();
-	}
-
-	private void setAvailableQuantityValidation(int availableQuantity) {
-		if (availableQuantity < 0) {
-			throw new IllegalArgumentException("Negative available quantity: " + availableQuantity);
-		}
-		this.availableQuantity = availableQuantity;
-	}
-
-	/**
-	 * Returns the available quantity
-	 * @return the available quantity
-	 */
-	public int getAvailableQuantity() {
-		return availableQuantity;
+		this.id = id;
+		this.quantity = quantity;
 	}
 	
 	/**
-	 * Returns the product
-	 * @return the product
+	 * Sets quantity
+	 * @param quantity available in stock
 	 */
-	public Product getProduct() {
-		return product;
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
+	}
+
+	/**
+	 * Returns the quantity currently in stock
+	 * @return quantity
+	 */
+	public int getQuantity() {
+		return quantity;
 	}
 	
 	/**
@@ -55,25 +41,21 @@ public class Stock {
 	public long getId() {
 		return id;
 	}
-
-	/**
-	 * Sets available quantity to the specified quantity.
-	 * @param availableQuantity to be set
-	 * @throws IllegalArgumentException if the specified availableQuantity is negative 
-	 */
-	public void setAvailableQuantity(int availableQuantity) {
-		setAvailableQuantityValidation(availableQuantity);
-	}
-
-
-	// used for test only
-	void initAvailableQuantity(int availableQuantity) {
-		this.availableQuantity = availableQuantity;
-	}
 	
-	// used for test only
-	Stock() {
-		this.id = 0;
-		this.product = null;
+	@Override
+	public int hashCode() {
+		return Objects.hash(quantity, id);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Stock other = (Stock) obj;
+		return quantity == other.quantity && id == other.id;
 	}
 }

@@ -25,7 +25,8 @@
 		<mongo.java.server.version>1.39.0</mongo.java.server.version>
 
 		<sonar.coverage.exclusions>
-			**/controller/PurchaseBroker.java,
+			**/model/Product.java,
+			**/model/Stock.java,
 			**/utils/GUITestExtension.java,
 		</sonar.coverage.exclusions>
 
@@ -58,7 +59,7 @@
 			**/swing/TotemSwingView*
 		</sonar.issue.ignore.multicriteria.e3.resourceKey>
 	</properties>
-	
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -163,9 +164,13 @@
 					<configuration>
 						<targetClasses>
 							<param>*repository.mongo.ProductMongoRepository*</param>
+							<param>*controller.PurchaseBroker*</param>
+							<param>*utils.LogUtilityTest*</param>
 						</targetClasses>
 						<targetTests>
 							<param>*repository.mongo.ProductMongoRepository*</param>
+							<param>*controller.PurchaseBroker*</param>
+							<param>*utils.LogUtilityTest*</param>
 						</targetTests>
 						<mutators>
 							<mutator>STRONGER</mutator>
@@ -180,7 +185,8 @@
 					<version>0.8.7</version>
 					<configuration>
 						<excludes>
-							<exclude>**/controller/PurchaseBroker.class</exclude>
+							<exclude>**/model/Product.class</exclude>
+							<exclude>**/model/Stock.class</exclude>
 							<exclude>**/utils/GUITestExtension.class</exclude>
 						</excludes>
 					</configuration>
