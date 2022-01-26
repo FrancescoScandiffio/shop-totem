@@ -20,16 +20,16 @@ public class StockMongoRepository implements StockRepository {
 
 	@Override
 	public Stock findById(long id) throws NoSuchElementException {
-		Document d = stockCollection.find(Filters.eq("id", id)).first();
+		Document d = stockCollection.find(Filters.eq("_id", id)).first();
 		if (d != null)
-			return new Stock(Long.valueOf("" + d.get("id")), Integer.valueOf("" + d.get("quantity")));
+			return new Stock(Long.valueOf("" + d.get("_id")), Integer.valueOf("" + d.get("quantity")));
 		else
 			throw new NoSuchElementException(String.format("Stock with id %d not found", id));
 	}
 
 	@Override
 	public void save(Stock stock) {
-		stockCollection.insertOne(new Document().append("id", stock.getId()).append("quantity", stock.getQuantity()));
+		stockCollection.insertOne(new Document().append("_id", stock.getId()).append("quantity", stock.getQuantity()));
 	}
 
 	@Override

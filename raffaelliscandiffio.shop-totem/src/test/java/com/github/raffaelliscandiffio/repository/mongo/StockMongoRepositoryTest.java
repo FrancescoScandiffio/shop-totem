@@ -90,14 +90,15 @@ class StockMongoRepositoryTest {
 			.containsExactly(stock);
 	}
 	
+	
 	private void addTestStockToDatabase(long id, int quantity) {
-		stockCollection.insertOne(new Document().append("id", id).append("quantity", quantity));
+		stockCollection.insertOne(new Document().append("_id", id).append("quantity", quantity));
 	}
 	
 	private List<Stock> readAllStocksFromDatabase() {
 		return StreamSupport.
 			stream(stockCollection.find().spliterator(), false)
-				.map(d -> new Stock(Long.valueOf("" + d.get("id")), Integer.valueOf("" + d.get("quantity"))))
+				.map(d -> new Stock(Long.valueOf("" + d.get("_id")), Integer.valueOf("" + d.get("quantity"))))
 				.collect(Collectors.toList());
 	}
 
