@@ -100,15 +100,27 @@ class StockMongoRepositoryTest {
 	}
 
 	@Test
-	@DisplayName("should 'update' stock in repository")
+	@DisplayName("'update' should update stock in repository")
 	void testUpdateShouldUpdateStockInRepository() {
 		addTestStockToDatabase(1, 50);
 		addTestStockToDatabase(2, 55);
 		Stock stock = new Stock(1, 100);
-		
+
 		stockRepository.update(stock);
-		
-		assertThat(readAllStocksFromDatabase()).containsExactly(new Stock[] {stock, new Stock(2, 55)});
+
+		assertThat(readAllStocksFromDatabase()).containsExactly(new Stock[] { stock, new Stock(2, 55) });
+	}
+
+	@Test
+	@DisplayName("'update' should not update stock in repository when stock id is not found in repository")
+	void testUpdateShouldNotUpdateStockInRepositoryIfIdNotExisting() {
+		addTestStockToDatabase(1, 50);
+		Stock stock = new Stock(2, 100);
+
+		assertThatThrownBy(() -> stockRepository.update(stock)).isInstanceOf(NoSuchElementException.class)
+				.hasMessage("Stock with id 2 cannot be updated because not found in database");
+
+		assertThat(readAllStocksFromDatabase()).containsExactly(new Stock(1, 50));
 	}
 
 	private void addTestStockToDatabase(long id, int quantity) {

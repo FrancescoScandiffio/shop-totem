@@ -14,6 +14,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.UpdateResult;
 
 public class StockMongoRepository implements StockRepository {
 
@@ -35,10 +36,9 @@ public class StockMongoRepository implements StockRepository {
 	}
 
 	@Override
-	public void save(Stock stock) throws MongoWriteException {
+	public void save(Stock stock) {
 		try {
-			stockCollection
-					.insertOne(new Document().append("_id", stock.getId()).append("quantity", stock.getQuantity()));
+			stockCollection.insertOne(fromStockToDocument(stock));
 		} catch (MongoWriteException e) {
 			LOGGER.log(Level.ERROR, "Stock with id {} already in database \n{}", stock.getId(),
 					logUtil.getReducedStackTrace(e));
@@ -46,9 +46,16 @@ public class StockMongoRepository implements StockRepository {
 	}
 
 	@Override
-	public void update(Stock stock) {
-		stockCollection.replaceOne(Filters.eq("_id", stock.getId()), new Document().append("_id", stock.getId()).append("quantity", stock.getQuantity()));
+	public void update(Stock stock) throws NoSuchElementException{
+		
+		UpdateResult result = stockCollection.replaceOne(Filters.eq("_id", stock.getId()), fromStockToDocument(stock));
 
+		if (result.getModifiedCount() == 0) {
+			throw new NoSuchElementException(String.format("Stock with id %d cannot be updated because not found in database", stock.getId()));
+		}
 	}
-
+	
+	private Document fromStockToDocument(Stock stock) {
+		return new Document().append("_id", stock.getId()).append("quantity", stock.getQuantity());
+	}
 }
