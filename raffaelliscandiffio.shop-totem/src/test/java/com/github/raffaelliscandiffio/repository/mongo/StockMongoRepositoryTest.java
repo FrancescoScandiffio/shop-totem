@@ -5,7 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.bson.Document;
 import org.junit.jupiter.api.AfterAll;
@@ -78,8 +81,24 @@ class StockMongoRepositoryTest {
 		assertThat(stockRepository.findById(2)).isEqualTo(new Stock(2, 100));
 	}
 	
+	@Test
+	@DisplayName("'save' stock to repository")
+	void testSaveStock() {
+		Stock stock = new Stock(1, 50);
+		stockRepository.save(stock);
+		assertThat(readAllStocksFromDatabase())
+			.containsExactly(stock);
+	}
+	
 	private void addTestStockToDatabase(long id, int quantity) {
 		stockCollection.insertOne(new Document().append("id", id).append("quantity", quantity));
+	}
+	
+	private List<Stock> readAllStocksFromDatabase() {
+		return StreamSupport.
+			stream(stockCollection.find().spliterator(), false)
+				.map(d -> new Stock(Long.valueOf("" + d.get("id")), Integer.valueOf("" + d.get("quantity"))))
+				.collect(Collectors.toList());
 	}
 
 }
