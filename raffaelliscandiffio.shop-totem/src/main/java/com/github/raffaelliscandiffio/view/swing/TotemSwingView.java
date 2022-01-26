@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.util.List;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 import com.github.raffaelliscandiffio.controller.TotemController;
 import com.github.raffaelliscandiffio.model.OrderItem;
@@ -18,6 +19,7 @@ public class TotemSwingView extends JFrame implements TotemView {
 	private WelcomePanel welcomePane;
 	private ShoppingPanel shoppingPane;
 	private CartPanel cartPane;
+	private GoodbyePanel goodbyePane;
 
 	private transient TotemController totemController;
 	private CardLayout layout;
@@ -50,9 +52,11 @@ public class TotemSwingView extends JFrame implements TotemView {
 		welcomePane = new WelcomePanel();
 		shoppingPane = new ShoppingPanel();
 		cartPane = new CartPanel();
+		goodbyePane = new GoodbyePanel();
 		getContentPane().add(welcomePane, "welcome");
 		getContentPane().add(shoppingPane, "shopping");
 		getContentPane().add(cartPane, "cart");
+		getContentPane().add(goodbyePane, "bye");
 
 		welcomePane.addActionListener(e -> startShoppingAction());
 
@@ -77,6 +81,8 @@ public class TotemSwingView extends JFrame implements TotemView {
 			if ("removeSelected".equals(command))
 				removeItemAction();
 		});
+
+		goodbyePane.addActionListener(e -> startShoppingAction());
 	}
 
 	private void removeItemAction() {
@@ -120,6 +126,10 @@ public class TotemSwingView extends JFrame implements TotemView {
 		return cartPane;
 	}
 
+	GoodbyePanel getGoodbyePane() {
+		return goodbyePane;
+	}
+
 	@Override
 	public void showAllProducts(List<Product> products) {
 		products.stream().forEach(getShoppingPane().getListProductsModel()::addElement);
@@ -140,33 +150,13 @@ public class TotemSwingView extends JFrame implements TotemView {
 		changePane("cart");
 	}
 
+	@Override
+	public void showGoodbye() {
+		changePane("bye");
+	}
+
 	private void changePane(String pane) {
 		this.layout.show(getContentPane(), pane);
-	}
-
-	@Override
-	public void showErrorMessage(String msg) {
-		getShoppingPane().getLblMessage().setText(msg);
-		getShoppingPane().getLblMessage().setForeground(Color.RED);
-	}
-
-	@Override
-	public void showMessage(String msg) {
-		getShoppingPane().getLblMessage().setText(msg);
-		getShoppingPane().getLblMessage().setForeground(Color.BLACK);
-	}
-
-	@Override
-	public void showErrorProductNotFound(String msg, Product product) {
-		getShoppingPane().getLblMessage().setText(msg);
-		getShoppingPane().getLblMessage().setForeground(Color.RED);
-		getShoppingPane().getListProductsModel().removeElement(product);
-	}
-
-	@Override
-	public void showWarning(String msg) {
-		getShoppingPane().getLblMessage().setText(msg);
-		getShoppingPane().getLblMessage().setForeground(Color.ORANGE);
 	}
 
 	@Override
@@ -187,26 +177,65 @@ public class TotemSwingView extends JFrame implements TotemView {
 
 	@Override
 	public void itemRemoved(OrderItem item) {
-		// TODO Auto-generated method stub
+		getCartPane().getListOrderItemsModel().removeElement(item);
 
+	}
+
+	@Override
+	public void showShoppingMessage(String msg) {
+		setMessageWithColor(getShoppingLabel(), msg, Color.BLACK);
+	}
+
+	@Override
+	public void showCartMessage(String msg) {
+		setMessageWithColor(getCartLabel(), msg, Color.BLACK);
+	}
+
+	@Override
+	public void showWarning(String msg) {
+		setMessageWithColor(getShoppingLabel(), msg, Color.ORANGE);
+	}
+
+	@Override
+	public void showShoppingErrorMessage(String msg) {
+		setMessageWithColor(getShoppingLabel(), msg, Color.RED);
+	}
+
+	@Override
+	public void showCartErrorMessage(String msg) {
+		setMessageWithColor(getCartLabel(), msg, Color.RED);
+	}
+
+	@Override
+	public void showErrorProductNotFound(String msg, Product product) {
+		setMessageWithColor(getShoppingLabel(), msg, Color.RED);
+		getShoppingPane().getListProductsModel().removeElement(product);
+	}
+
+	private JLabel getShoppingLabel() {
+		return getShoppingPane().getLblMessage();
 	}
 
 	@Override
 	public void showErrorItemNotFound(String msg, OrderItem item) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void showGoodbye() {
-		// TODO Auto-generated method stub
+		setMessageWithColor(getCartLabel(), msg, Color.RED);
+		getCartPane().getListOrderItemsModel().removeElement(item);
 
 	}
 
 	@Override
 	public void showErrorEmptyOrder(String msg) {
-		// TODO Auto-generated method stub
+		setMessageWithColor(getCartLabel(), msg, Color.RED);
+		getCartPane().getListOrderItemsModel().clear();
+	}
 
+	private JLabel getCartLabel() {
+		return getCartPane().getMessageLabel();
+	}
+
+	private void setMessageWithColor(JLabel label, String msg, Color color) {
+		label.setText(msg);
+		label.setForeground(color);
 	}
 
 	CardLayout getCardLayout() {

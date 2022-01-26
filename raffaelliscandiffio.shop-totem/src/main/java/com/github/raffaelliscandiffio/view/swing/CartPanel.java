@@ -48,12 +48,13 @@ public class CartPanel extends JPanel {
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		gridBagLayout.rowHeights = new int[] { 0, 243, 0, 0, 0, 0, 0 };
-		gridBagLayout.columnWeights = new double[] { 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, Double.MIN_VALUE };
+		gridBagLayout.columnWeights = new double[] { 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, Double.MIN_VALUE };
 		gridBagLayout.rowWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		setLayout(gridBagLayout);
 
 		btnContinueShopping = new JButton("Continue Shopping");
 		btnContinueShopping.setActionCommand("openShopping");
+		btnContinueShopping.setFocusPainted(false);
 		GridBagConstraints gbc_btnBackToShopping = new GridBagConstraints();
 		gbc_btnBackToShopping.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnBackToShopping.insets = new Insets(0, 0, 5, 5);
@@ -64,6 +65,7 @@ public class CartPanel extends JPanel {
 		btnCancelShopping = new JButton("Cancel Shopping");
 		btnCancelShopping.setName("cartBtnCancelShopping");
 		btnCancelShopping.setActionCommand("cancelShopping");
+		btnCancelShopping.setFocusPainted(false);
 		GridBagConstraints gbc_btnCancelShopping = new GridBagConstraints();
 		gbc_btnCancelShopping.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnCancelShopping.insets = new Insets(0, 0, 5, 0);
@@ -143,10 +145,11 @@ public class CartPanel extends JPanel {
 		spinner.setName("cartReturnSpinner");
 		horizontalBox.add(spinner);
 		spinner.setEnabled(false);
-		spinner.setModel(new SpinnerNumberModel(new Integer(1), new Integer(1), null, new Integer(1)));
+		spinner.setModel(new SpinnerNumberModel(1, 1, null, 1));
 
 		btnReturnQuantity = new JButton("Return quantity");
 		btnReturnQuantity.setEnabled(false);
+		btnReturnQuantity.setFocusPainted(false);
 		GridBagConstraints gbc_btnReturnQuantity = new GridBagConstraints();
 		gbc_btnReturnQuantity.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnReturnQuantity.insets = new Insets(0, 0, 5, 5);
@@ -157,6 +160,7 @@ public class CartPanel extends JPanel {
 		btnCheckout = new JButton("Checkout");
 		btnCheckout.setActionCommand("checkout");
 		btnCheckout.setEnabled(false);
+		btnCheckout.setFocusPainted(false);
 		GridBagConstraints gbc_btnCheckout = new GridBagConstraints();
 		gbc_btnCheckout.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnCheckout.insets = new Insets(0, 0, 5, 0);
@@ -167,6 +171,7 @@ public class CartPanel extends JPanel {
 		btnRemoveSelected = new JButton("Remove selected");
 		btnRemoveSelected.setEnabled(false);
 		btnRemoveSelected.setActionCommand("removeSelected");
+		btnRemoveSelected.setFocusPainted(false);
 		GridBagConstraints gbc_btnRemoveSelected = new GridBagConstraints();
 		gbc_btnRemoveSelected.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnRemoveSelected.insets = new Insets(0, 0, 0, 5);
@@ -177,9 +182,12 @@ public class CartPanel extends JPanel {
 		messageLabel = new JLabel(" ");
 		messageLabel.setName("cartMessageLabel");
 		GridBagConstraints gbc_messageLabel = new GridBagConstraints();
+		gbc_messageLabel.fill = GridBagConstraints.VERTICAL;
+		gbc_messageLabel.gridheight = 3;
+		gbc_messageLabel.gridwidth = 4;
 		gbc_messageLabel.insets = new Insets(0, 0, 0, 5);
-		gbc_messageLabel.gridx = 4;
-		gbc_messageLabel.gridy = 5;
+		gbc_messageLabel.gridx = 3;
+		gbc_messageLabel.gridy = 3;
 		add(messageLabel, gbc_messageLabel);
 	}
 
@@ -201,5 +209,9 @@ public class CartPanel extends JPanel {
 
 	JList<OrderItem> getListOrderItems() {
 		return listOrderItems;
+	}
+
+	public JLabel getMessageLabel() {
+		return messageLabel;
 	}
 }

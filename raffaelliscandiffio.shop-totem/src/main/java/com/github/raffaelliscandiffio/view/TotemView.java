@@ -15,7 +15,13 @@ public interface TotemView {
 
 	void itemAdded(OrderItem item);
 
-	void showMessage(String msg);
+	void showShoppingMessage(String msg);
+
+	void showCartMessage(String msg);
+
+	void showCartErrorMessage(String msg);
+
+	void showShoppingErrorMessage(String msg);
 
 	void showWarning(String msg);
 
@@ -27,8 +33,6 @@ public interface TotemView {
 
 	void showErrorProductNotFound(String msg, Product product);
 
-	void showErrorMessage(String msg);
-
 	void allItemsRemoved();
 
 	void showGoodbye();
@@ -36,4 +40,5 @@ public interface TotemView {
 	void showErrorEmptyOrder(String msg);
 
 	void showOrder();
+
 }
