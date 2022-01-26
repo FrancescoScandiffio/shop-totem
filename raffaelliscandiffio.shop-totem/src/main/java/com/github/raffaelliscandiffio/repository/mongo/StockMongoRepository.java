@@ -32,4 +32,10 @@ public class StockMongoRepository implements StockRepository {
 		stockCollection.insertOne(new Document().append("id", stock.getId()).append("quantity", stock.getQuantity()));
 	}
 
+	@Override
+	public void update(Stock stock) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
