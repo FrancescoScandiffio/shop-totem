@@ -1,6 +1,5 @@
 package com.github.raffaelliscandiffio.repository.mongo;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -28,7 +27,7 @@ import de.bwaldvogel.mongo.MongoServer;
 import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
 
 class StockMongoRepositoryTest {
-	
+
 	private static MongoServer server;
 	private static InetSocketAddress serverAddress;
 
@@ -65,14 +64,14 @@ class StockMongoRepositoryTest {
 	public void tearDown() {
 		client.close();
 	}
-	
+
 	@Test
 	@DisplayName("'findById' when the id is not found should throw NoSuchElementException")
 	void testFindByIdWhenIdIsNotFoundShouldThrowNoSuchElementException() {
 		assertThatThrownBy(() -> stockRepository.findById(1)).isInstanceOf(NoSuchElementException.class)
-		.hasMessage("Stock with id 1 not found");
+				.hasMessage("Stock with id 1 not found");
 	}
-	
+
 	@Test
 	@DisplayName("'findById' when the id is found")
 	void testFindByIdWhenIdIsFound() {
@@ -80,24 +79,32 @@ class StockMongoRepositoryTest {
 		addTestStockToDatabase(2, 100);
 		assertThat(stockRepository.findById(2)).isEqualTo(new Stock(2, 100));
 	}
-	
+
 	@Test
 	@DisplayName("'save' stock to repository")
 	void testSaveStock() {
 		Stock stock = new Stock(1, 50);
 		stockRepository.save(stock);
-		assertThat(readAllStocksFromDatabase())
-			.containsExactly(stock);
+		assertThat(readAllStocksFromDatabase()).containsExactly(stock);
 	}
-	
-	
+
+	@Test
+	@DisplayName("'save' stock to repository should not save if stock id is already existing")
+	void testSaveStockIfIdAlreadyExistingShouldNotSave() {
+		addTestStockToDatabase(1, 20);
+		Stock stock = new Stock(1, 50);
+		
+		stockRepository.save(stock);
+		
+		assertThat(readAllStocksFromDatabase()).containsExactly(new Stock(1, 20));
+	}
+
 	private void addTestStockToDatabase(long id, int quantity) {
 		stockCollection.insertOne(new Document().append("_id", id).append("quantity", quantity));
 	}
-	
+
 	private List<Stock> readAllStocksFromDatabase() {
-		return StreamSupport.
-			stream(stockCollection.find().spliterator(), false)
+		return StreamSupport.stream(stockCollection.find().spliterator(), false)
 				.map(d -> new Stock(Long.valueOf("" + d.get("_id")), Integer.valueOf("" + d.get("quantity"))))
 				.collect(Collectors.toList());
 	}
