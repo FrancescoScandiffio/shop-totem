@@ -1,5 +1,7 @@
 package com.github.raffaelliscandiffio.repository.mongo;
 
+import java.util.NoSuchElementException;
+
 import org.bson.Document;
 
 import com.github.raffaelliscandiffio.model.Stock;
@@ -16,9 +18,8 @@ public class StockMongoRepository implements StockRepository {
 	}
 
 	@Override
-	public Stock findById(long id) {
-		// TODO Auto-generated method stub
-		return null;
+	public Stock findById(long id) throws NoSuchElementException{
+		throw new NoSuchElementException(String.format("Stock with id %d not found", id));
 	}
 
 	@Override
