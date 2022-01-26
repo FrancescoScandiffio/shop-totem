@@ -84,7 +84,7 @@ class ProductMongoRepositoryTest {
 	@DisplayName("'findById' when the id is not found should throw NoSuchElementException")
 	void testFindByIdWhenIdIsNotFoundShouldThrowNoSuchElementException() {
 		assertThatThrownBy(() -> productRepository.findById(1)).isInstanceOf(NoSuchElementException.class)
-		.hasMessage("Product with id 1 not found");
+				.hasMessage("Product with id 1 not found");
 	}
 
 	@Test
@@ -94,24 +94,34 @@ class ProductMongoRepositoryTest {
 		addTestProductToDatabase(2, "pasta", 2.3);
 		assertThat(productRepository.findById(2)).isEqualTo(new Product(2, "pasta", 2.3));
 	}
-	
+
 	@Test
 	@DisplayName("'save' product to repository")
 	void testSaveProduct() {
 		Product product = new Product(1, "pizza", 5.5);
 		productRepository.save(product);
-		assertThat(readAllProductsFromDatabase())
-			.containsExactly(product);
+		assertThat(readAllProductsFromDatabase()).containsExactly(product);
+	}
+
+	@Test
+	@DisplayName("'save' product to repository should not save if product id is already existing")
+	void testSaveProductIfIdAlreadyExistingShouldNotSave() {
+		addTestProductToDatabase(1, "pasta", 3);
+		Product product = new Product(1, "pizza", 5.5);
+
+		productRepository.save(product);
+
+		assertThat(readAllProductsFromDatabase()).containsExactly(new Product(1, "pasta", 3));
 	}
 
 	private void addTestProductToDatabase(long id, String name, double price) {
-		productCollection.insertOne(new Document().append("id", id).append("name", name).append("price", price));
+		productCollection.insertOne(new Document().append("_id", id).append("name", name).append("price", price));
 	}
-	
+
 	private List<Product> readAllProductsFromDatabase() {
-		return StreamSupport.
-			stream(productCollection.find().spliterator(), false)
-				.map(d -> new Product(Long.valueOf("" + d.get("id")), "" + d.get("name"), Double.valueOf("" + d.get("price"))))
+		return StreamSupport.stream(productCollection.find().spliterator(), false)
+				.map(d -> new Product(Long.valueOf("" + d.get("_id")), "" + d.get("name"),
+						Double.valueOf("" + d.get("price"))))
 				.collect(Collectors.toList());
 	}
 
