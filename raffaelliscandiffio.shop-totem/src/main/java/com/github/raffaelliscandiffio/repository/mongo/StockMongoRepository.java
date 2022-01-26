@@ -47,7 +47,7 @@ public class StockMongoRepository implements StockRepository {
 
 	@Override
 	public void update(Stock stock) {
-		// TODO Auto-generated method stub
+		stockCollection.replaceOne(Filters.eq("_id", stock.getId()), new Document().append("_id", stock.getId()).append("quantity", stock.getQuantity()));
 
 	}
 

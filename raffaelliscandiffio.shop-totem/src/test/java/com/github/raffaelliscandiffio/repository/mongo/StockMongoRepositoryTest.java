@@ -93,10 +93,22 @@ class StockMongoRepositoryTest {
 	void testSaveStockIfIdAlreadyExistingShouldNotSave() {
 		addTestStockToDatabase(1, 20);
 		Stock stock = new Stock(1, 50);
-		
+
 		stockRepository.save(stock);
-		
+
 		assertThat(readAllStocksFromDatabase()).containsExactly(new Stock(1, 20));
+	}
+
+	@Test
+	@DisplayName("should 'update' stock in repository")
+	void testUpdateShouldUpdateStockInRepository() {
+		addTestStockToDatabase(1, 50);
+		addTestStockToDatabase(2, 55);
+		Stock stock = new Stock(1, 100);
+		
+		stockRepository.update(stock);
+		
+		assertThat(readAllStocksFromDatabase()).containsExactly(new Stock[] {stock, new Stock(2, 55)});
 	}
 
 	private void addTestStockToDatabase(long id, int quantity) {
