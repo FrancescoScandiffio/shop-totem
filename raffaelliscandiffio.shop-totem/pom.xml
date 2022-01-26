@@ -163,14 +163,10 @@
 					</dependencies>
 					<configuration>
 						<targetClasses>
-							<param>*repository.mongo.ProductMongoRepository*</param>
-							<param>*controller.PurchaseBroker*</param>
-							<param>*utils.LogUtilityTest*</param>
+							<param>*repository.mongo.StockMongoRepository*</param>
 						</targetClasses>
 						<targetTests>
-							<param>*repository.mongo.ProductMongoRepository*</param>
-							<param>*controller.PurchaseBroker*</param>
-							<param>*utils.LogUtilityTest*</param>
+							<param>*repository.mongo.StockMongoRepository*</param>
 						</targetTests>
 						<mutators>
 							<mutator>STRONGER</mutator>
