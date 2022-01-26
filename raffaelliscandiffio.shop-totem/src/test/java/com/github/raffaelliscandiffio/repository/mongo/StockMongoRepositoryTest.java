@@ -1,6 +1,7 @@
 package com.github.raffaelliscandiffio.repository.mongo;
 
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.net.InetSocketAddress;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com.github.raffaelliscandiffio.model.Stock;
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
@@ -66,6 +68,18 @@ class StockMongoRepositoryTest {
 	void testFindByIdWhenIdIsNotFoundShouldThrowNoSuchElementException() {
 		assertThatThrownBy(() -> stockRepository.findById(1)).isInstanceOf(NoSuchElementException.class)
 		.hasMessage("Stock with id 1 not found");
+	}
+	
+	@Test
+	@DisplayName("'findById' when the id is found")
+	void testFindByIdWhenIdIsFound() {
+		addTestStockToDatabase(1, 50);
+		addTestStockToDatabase(2, 100);
+		assertThat(stockRepository.findById(2)).isEqualTo(new Stock(2, 100));
+	}
+	
+	private void addTestStockToDatabase(long id, int quantity) {
+		stockCollection.insertOne(new Document().append("id", id).append("quantity", quantity));
 	}
 
 }
