@@ -51,6 +51,8 @@ public class StockMongoRepository implements StockRepository {
 		UpdateResult result = stockCollection.replaceOne(Filters.eq("_id", stock.getId()), fromStockToDocument(stock));
 
 		if (result.getModifiedCount() == 0) {
+			LOGGER.log(Level.ERROR, "Stock with id {} cannot be updated because not found in database",
+					stock.getId());
 			throw new NoSuchElementException(String.format("Stock with id %d cannot be updated because not found in database", stock.getId()));
 		}
 	}
