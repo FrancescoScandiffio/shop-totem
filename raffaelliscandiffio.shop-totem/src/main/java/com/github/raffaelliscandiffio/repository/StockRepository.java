@@ -7,5 +7,6 @@ public interface StockRepository {
 	public Stock findById(long id);
 
 	public void save(Stock stock);
-
+	
+	public void update(Stock stock);
 }

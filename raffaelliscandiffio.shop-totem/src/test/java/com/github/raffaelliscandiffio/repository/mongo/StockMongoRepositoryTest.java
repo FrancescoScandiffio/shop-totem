@@ -1,6 +1,5 @@
 package com.github.raffaelliscandiffio.repository.mongo;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -28,7 +27,7 @@ import de.bwaldvogel.mongo.MongoServer;
 import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
 
 class StockMongoRepositoryTest {
-	
+
 	private static MongoServer server;
 	private static InetSocketAddress serverAddress;
 
@@ -65,14 +64,14 @@ class StockMongoRepositoryTest {
 	public void tearDown() {
 		client.close();
 	}
-	
+
 	@Test
 	@DisplayName("'findById' when the id is not found should throw NoSuchElementException")
 	void testFindByIdWhenIdIsNotFoundShouldThrowNoSuchElementException() {
 		assertThatThrownBy(() -> stockRepository.findById(1)).isInstanceOf(NoSuchElementException.class)
-		.hasMessage("Stock with id 1 not found");
+				.hasMessage("Stock with id 1 not found");
 	}
-	
+
 	@Test
 	@DisplayName("'findById' when the id is found")
 	void testFindByIdWhenIdIsFound() {
@@ -80,24 +79,57 @@ class StockMongoRepositoryTest {
 		addTestStockToDatabase(2, 100);
 		assertThat(stockRepository.findById(2)).isEqualTo(new Stock(2, 100));
 	}
-	
+
 	@Test
 	@DisplayName("'save' stock to repository")
 	void testSaveStock() {
 		Stock stock = new Stock(1, 50);
 		stockRepository.save(stock);
-		assertThat(readAllStocksFromDatabase())
-			.containsExactly(stock);
+		assertThat(readAllStocksFromDatabase()).containsExactly(stock);
 	}
-	
+
+	@Test
+	@DisplayName("'save' stock to repository should not save if stock id is already existing")
+	void testSaveStockIfIdAlreadyExistingShouldNotSave() {
+		addTestStockToDatabase(1, 20);
+		Stock stock = new Stock(1, 50);
+
+		stockRepository.save(stock);
+
+		assertThat(readAllStocksFromDatabase()).containsExactly(new Stock(1, 20));
+	}
+
+	@Test
+	@DisplayName("'update' should update stock in repository")
+	void testUpdateShouldUpdateStockInRepository() {
+		addTestStockToDatabase(1, 50);
+		addTestStockToDatabase(2, 55);
+		Stock stock = new Stock(1, 100);
+
+		stockRepository.update(stock);
+
+		assertThat(readAllStocksFromDatabase()).containsExactly(new Stock[] { stock, new Stock(2, 55) });
+	}
+
+	@Test
+	@DisplayName("'update' should not update stock in repository when stock id is not found in repository")
+	void testUpdateShouldNotUpdateStockInRepositoryIfIdNotExisting() {
+		addTestStockToDatabase(1, 50);
+		Stock stock = new Stock(2, 100);
+
+		assertThatThrownBy(() -> stockRepository.update(stock)).isInstanceOf(NoSuchElementException.class)
+				.hasMessage("Stock with id 2 cannot be updated because not found in database");
+
+		assertThat(readAllStocksFromDatabase()).containsExactly(new Stock(1, 50));
+	}
+
 	private void addTestStockToDatabase(long id, int quantity) {
-		stockCollection.insertOne(new Document().append("id", id).append("quantity", quantity));
+		stockCollection.insertOne(new Document().append("_id", id).append("quantity", quantity));
 	}
-	
+
 	private List<Stock> readAllStocksFromDatabase() {
-		return StreamSupport.
-			stream(stockCollection.find().spliterator(), false)
-				.map(d -> new Stock(Long.valueOf("" + d.get("id")), Integer.valueOf("" + d.get("quantity"))))
+		return StreamSupport.stream(stockCollection.find().spliterator(), false)
+				.map(d -> new Stock(Long.valueOf("" + d.get("_id")), Integer.valueOf("" + d.get("quantity"))))
 				.collect(Collectors.toList());
 	}
 

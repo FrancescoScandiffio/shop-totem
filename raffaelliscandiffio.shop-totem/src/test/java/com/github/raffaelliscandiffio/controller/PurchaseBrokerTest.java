@@ -70,39 +70,39 @@ class PurchaseBrokerTest {
 		}
 
 		@Test
-		@DisplayName("should return requested quantity when more than requested is available and save the stock with residual quantity")
-		void testTakeAvailableShouldReturnRequestedQuantityWhenMoreThanRequestedIsAvailableAndSaveResidualQuantity() {
+		@DisplayName("should return requested quantity when more than requested is available and update the stock with residual quantity")
+		void testTakeAvailableShouldReturnRequestedQuantityWhenMoreThanRequestedIsAvailableAndUpdateResidualQuantity() {
 			Stock stock = spy(new Stock(PRODUCT_ID, GREATER_QUANTITY));
 			when(stockRepository.findById(PRODUCT_ID)).thenReturn(stock);
 
 			assertThat(broker.takeAvailable(PRODUCT_ID, QUANTITY)).isEqualTo(QUANTITY);
 			InOrder inOrder = inOrder(stock, stockRepository);
 			inOrder.verify(stock).setQuantity(GREATER_QUANTITY - QUANTITY);
-			inOrder.verify(stockRepository).save(stock);
+			inOrder.verify(stockRepository).update(stock);
 		}
 
 		@Test
-		@DisplayName("should return requested quantity when only requested is available and save the stock with zero quantity")
-		void testTakeAvailableShouldReturnRequestedQuantityWhenOnlyRequestedIsAvailableAndSaveWithZeroQuantity() {
+		@DisplayName("should return requested quantity when only requested is available and update the stock with zero quantity")
+		void testTakeAvailableShouldReturnRequestedQuantityWhenOnlyRequestedIsAvailableAndUpdateWithZeroQuantity() {
 			Stock stock = spy(new Stock(PRODUCT_ID, QUANTITY));
 			when(stockRepository.findById(PRODUCT_ID)).thenReturn(stock);
 
 			assertThat(broker.takeAvailable(PRODUCT_ID, QUANTITY)).isEqualTo(QUANTITY);
 			InOrder inOrder = inOrder(stock, stockRepository);
 			inOrder.verify(stock).setQuantity(0);
-			inOrder.verify(stockRepository).save(stock);
+			inOrder.verify(stockRepository).update(stock);
 		}
 
 		@Test
-		@DisplayName("should return available quantity when requested is more than available and save the stock with zero quantity")
-		void testTakeAvailableShouldReturnAvailableQuantityWhenRequestedIsMoreThanAvailableAndSaveWithZeroQuantity() {
+		@DisplayName("should return available quantity when requested is more than available and update the stock with zero quantity")
+		void testTakeAvailableShouldReturnAvailableQuantityWhenRequestedIsMoreThanAvailableAndUpdateWithZeroQuantity() {
 			Stock stock = spy(new Stock(PRODUCT_ID, QUANTITY));
 			when(stockRepository.findById(PRODUCT_ID)).thenReturn(stock);
 
 			assertThat(broker.takeAvailable(PRODUCT_ID, GREATER_QUANTITY)).isEqualTo(QUANTITY);
 			InOrder inOrder = inOrder(stock, stockRepository);
 			inOrder.verify(stock).setQuantity(0);
-			inOrder.verify(stockRepository).save(stock);
+			inOrder.verify(stockRepository).update(stock);
 		}
 
 		@Test
