@@ -261,8 +261,8 @@ class TotemSwingViewTest {
 
 		@Test
 		@GUITest
-		@DisplayName("Quantity spinner shown value should be resetted to last valid value if an invalid value is inserted and the product is deselected")
-		void testQuantitySpinnerShouldBeResettedToLastValidValueWhenQuantityIsInvalidAndProductIsDeselected() {
+		@DisplayName("Quantity spinner shown value should be reset to last valid value if an invalid value is inserted and the product is deselected")
+		void testQuantitySpinnerShouldBeResetToLastValidValueWhenQuantityIsInvalidAndProductIsDeselected() {
 			Product product = new Product(1, "Product1", 2);
 			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
 			// gets the spinner text field
@@ -355,8 +355,8 @@ class TotemSwingViewTest {
 
 		@Test
 		@GUITest
-		@DisplayName("Message label should be resetted to empty after Product deselection")
-		void testMessageLabelShouldBeResettedWhenProductIsDeselected() {
+		@DisplayName("Message label should be reset to empty after Product deselection")
+		void testMessageLabelShouldBeResetWhenProductIsDeselected() {
 			Product product = new Product(1, "Product1", 2);
 			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
 			window.list("productList").selectItem(0);
@@ -367,8 +367,8 @@ class TotemSwingViewTest {
 
 		@Test
 		@GUITest
-		@DisplayName("Message label should be resetted to empty after Product change of selection")
-		void testMessageLabelShouldBeResettedWhenProductIsChangedOfSelection() {
+		@DisplayName("Message label should be reset to empty after Product change of selection")
+		void testMessageLabelShouldBeResetWhenProductIsChangedOfSelection() {
 			Product product1 = new Product(1, "Product1", 2);
 			Product product2 = new Product(1, "Product2", 3);
 			GuiActionRunner.execute(() -> totemSwingView.showAllProducts(Arrays.asList(product1, product2)));
@@ -380,8 +380,8 @@ class TotemSwingViewTest {
 
 		@Test
 		@GUITest
-		@DisplayName("Message label should be resetted to empty after quantity change (to valid value)")
-		void testMessageLabelShouldBeResettedWhenQuantityIsChangedToValidValue() {
+		@DisplayName("Message label should be reset to empty after quantity change (to valid value)")
+		void testMessageLabelShouldBeResetWhenQuantityIsChangedToValidValue() {
 			Product product = new Product(1, "Product1", 2);
 			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
 			window.list("productList").selectItem(0);
@@ -415,6 +415,7 @@ class TotemSwingViewTest {
 			window.label(JLabelMatcher.withText("Quantity"));
 			window.spinner("cartReturnSpinner").requireDisabled();
 			window.list("cartList");
+			window.spinner("cartReturnSpinner").requireDisabled();
 		}
 
 		@Test
@@ -631,7 +632,7 @@ class TotemSwingViewTest {
 		@Test
 		@GUITest
 		@DisplayName("Goodbye panel inital state")
-		void testCartPanelInitialState() {
+		void testGoodbyePanelInitialState() {
 			window.button(JButtonMatcher.withName("goodbyeStartShopping")).requireText("Start shopping")
 					.requireEnabled();
 			window.label("byeLabel").requireText("Goodbye!");
@@ -639,8 +640,8 @@ class TotemSwingViewTest {
 
 		@Test
 		@GUITest
-		@DisplayName("Button 'Start Shopping' should delegate to TotemController 'openShopping'")
-		void testStartShoppingButtonShouldDelegateToTotemControllerOpenShopping() {
+		@DisplayName("Button 'Start Shopping' should delegate to TotemController 'startShopping'")
+		void testStartShoppingButtonShouldDelegateToTotemControllerStartShopping() {
 			window.button(JButtonMatcher.withName("goodbyeStartShopping")).click();
 			verify(totemController).startShopping();
 		}
