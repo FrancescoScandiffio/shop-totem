@@ -102,7 +102,7 @@ class TotemSwingViewTest {
 		}
 
 		@Test
-		@DisplayName("Method 'showGoodbye' should sho the goodbye panel")
+		@DisplayName("Method 'showGoodbye' should show the goodbye panel")
 		void testShowGoodbyeShouldChangePanelToGoodbyePanel() {
 			GuiActionRunner.execute(() -> totemSwingView.getCardLayout().show(totemSwingView.getContentPane(), "cart"));
 			GuiActionRunner.execute(() -> totemSwingView.showGoodbye());
@@ -134,7 +134,6 @@ class TotemSwingViewTest {
 		}
 
 		@Test
-		@GUITest
 		@DisplayName("Button 'Start Shopping' should delegate to TotemController 'startShopping'")
 		void testStartShoppingButtonShouldDelegateToTotemControllerStartShopping() {
 			GuiActionRunner
@@ -182,7 +181,6 @@ class TotemSwingViewTest {
 		}
 
 		@Test
-		@GUITest
 		@DisplayName("Button 'Cancel Shopping' should delegate to TotemController 'cancelShopping'")
 		void testCancelShoppingButtonShouldDelegateToTotemControllerCancelShopping() {
 			window.button(JButtonMatcher.withName("shopBtnCancelShopping")).click();
@@ -190,7 +188,6 @@ class TotemSwingViewTest {
 		}
 
 		@Test
-		@GUITest
 		@DisplayName("Button 'Open Cart' should delegate to TotemController 'openOrder'")
 		void testOpenCartButtonShouldDelegateToTotemControllerOpenOrder() {
 			window.button(JButtonMatcher.withText("Cart")).click();
@@ -306,7 +303,6 @@ class TotemSwingViewTest {
 		}
 
 		@Test
-		@GUITest
 		@DisplayName("Button 'Add' should delegate to TotemController 'buyProduct'")
 		void testAddButtonShouldDelegateToTotemControllerBuyProduct() {
 			Product product = new Product(1, "Product1", 2);
@@ -425,7 +421,6 @@ class TotemSwingViewTest {
 		}
 
 		@Test
-		@GUITest
 		@DisplayName("Button 'Continue Shopping' should delegate to TotemController 'openShopping'")
 		void testContinueShoppingButtonShouldDelegateToTotemControllerOpenShopping() {
 			window.button(JButtonMatcher.withText("Continue Shopping")).click();
@@ -433,7 +428,6 @@ class TotemSwingViewTest {
 		}
 
 		@Test
-		@GUITest
 		@DisplayName("Button 'Cancel Shopping' should delegate to TotemController 'cancelShopping'")
 		void testCancelShoppingButtonShouldDelegateToTotemControllerCancelShopping() {
 			window.button(JButtonMatcher.withName("cartBtnCancelShopping")).click();
@@ -454,7 +448,6 @@ class TotemSwingViewTest {
 		}
 
 		@Test
-		@GUITest
 		@DisplayName("Button 'Remove selected' should delegate to TotemController 'removeItem'")
 		void testRemoveSelectedButtonShouldDelegateToTotemControllerRemoveItem() {
 			OrderItem item1 = new OrderItem(new Product(1, "Product1", 3), 5);
@@ -505,7 +498,6 @@ class TotemSwingViewTest {
 		}
 
 		@Test
-		@GUITest
 		@DisplayName("Button 'Checkout' should delegate to TotemController 'confirmOrder'")
 		void testCheckoutButtonShouldDelegateToTotemControllerConfirmOrder() {
 			JButtonFixture checkoutButton = window.button(JButtonMatcher.withText("Checkout"));
@@ -674,7 +666,6 @@ class TotemSwingViewTest {
 		}
 
 		@Test
-		@GUITest
 		@DisplayName("The spinner upper bound should be set to the quantity of the selected item minus one")
 		void testTheSpinnerUpperBoundShouldBeSetToTheQuantityOfTheSelectedItemMinusOne() {
 			SpinnerNumberModel spinnerModel = (SpinnerNumberModel) (window.spinner("cartReturnSpinner").target()
@@ -689,7 +680,6 @@ class TotemSwingViewTest {
 		}
 
 		@Test
-		@GUITest
 		@DisplayName("The spinner upper bound should be removed when the item is deselected")
 		void testTheSpinnerUpperBoundShouldBeRemovedWhenTheItemIsDeselected() {
 			SpinnerNumberModel spinnerModel = (SpinnerNumberModel) (window.spinner("cartReturnSpinner").target()
@@ -706,7 +696,6 @@ class TotemSwingViewTest {
 		}
 
 		@Test
-		@GUITest
 		@DisplayName("The spinner upper bound should be updated when the quantity of the selected item changes")
 		void testTheSpinnerUpperBoundShouldBeUpdatedWhenTheQuantityOfTheSelectedItemChanges() {
 			SpinnerNumberModel spinnerModel = (SpinnerNumberModel) (window.spinner("cartReturnSpinner").target()
@@ -742,7 +731,6 @@ class TotemSwingViewTest {
 		}
 
 		@Test
-		@GUITest
 		@DisplayName("Button 'Start Shopping' should delegate to TotemController 'startShopping'")
 		void testStartShoppingButtonShouldDelegateToTotemControllerStartShopping() {
 			window.button(JButtonMatcher.withName("goodbyeStartShopping")).click();
