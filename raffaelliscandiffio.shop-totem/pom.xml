@@ -17,14 +17,18 @@
 
 		<junit.jupiter.version>5.8.1</junit.jupiter.version>
 		<assertj.core.version>3.21.0</assertj.core.version>
+		
 		<mockito.version>4.2.0</mockito.version>
 		<assertj.swing.version>3.17.1</assertj.swing.version>
+		
 		<log4j.version>2.17.1</log4j.version>
 		<mongo.driver.version>3.12.10</mongo.driver.version>
 		<logback.classic>1.2.10</logback.classic>
 		<mongo.java.server.version>1.39.0</mongo.java.server.version>
+		
 		<testcontainers.version>1.16.3</testcontainers.version>
 		<mysql.version>8.0.28</mysql.version>
+		<hibernate.version>5.3.23.Final</hibernate.version>
 
 		<sonar.coverage.exclusions>
 			**/model/Product.java,
@@ -159,6 +163,11 @@
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<version>${mysql.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>${hibernate.version}</version>
 		</dependency>
 
 	</dependencies>
