@@ -421,6 +421,7 @@ class TotemSwingViewTest {
 					.getModel());
 			assertThat(spinnerModel.getValue()).isEqualTo(1);
 			assertThat((Integer) spinnerModel.getMinimum()).isEqualTo(1);
+
 		}
 
 		@Test
@@ -622,6 +623,22 @@ class TotemSwingViewTest {
 		void testShowCartErrorMessageShouldShowTheErrorMessageInTheCartLabel() {
 			GuiActionRunner.execute(() -> totemSwingView.showCartErrorMessage("Error message"));
 			window.label("cartMessageLabel").requireText("Error message");
+		}
+
+		@Test
+		@GUITest
+		@DisplayName("The spinner should be enabled only when an item is selected")
+		void testTheSpinnerShouldBeEnabledOnlyWhenAnItemIsSelected() {
+			JSpinnerFixture cartSpinner = window.spinner("cartReturnSpinner");
+			GuiActionRunner.execute(() -> {
+				totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 5));
+				cartSpinner.target().setEnabled(false);
+			});
+			window.list("cartList").selectItem(0);
+			cartSpinner.requireEnabled();
+			window.list("cartList").clearSelection();
+			cartSpinner.requireDisabled();
 		}
 
 	}

@@ -103,8 +103,11 @@ public class CartPanel extends JPanel {
 
 		});
 		listOrderItems = new JList<>(listOrderItemsModel);
-		listOrderItems
-				.addListSelectionListener(e -> btnRemoveSelected.setEnabled(listOrderItems.getSelectedIndex() != -1));
+		listOrderItems.addListSelectionListener(e -> {
+			boolean isItemSelected = listOrderItems.getSelectedIndex() != -1;
+			btnRemoveSelected.setEnabled(isItemSelected);
+			spinner.setEnabled(isItemSelected);
+		});
 		listOrderItems.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		listOrderItems.setName("cartList");
 		listOrderItems.setCellRenderer(new DefaultListCellRenderer() {
