@@ -641,6 +641,38 @@ class TotemSwingViewTest {
 			cartSpinner.requireDisabled();
 		}
 
+		@Test
+		@GUITest
+		@DisplayName("The spinner value should be reset to one when the selection changes")
+		void testTheSpinnerValueShouldBeResetToOneWhenAnItemIsSelected() {
+			JSpinnerFixture cartSpinner = window.spinner("cartReturnSpinner");
+			GuiActionRunner.execute(() -> {
+				totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 5));
+				totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 5));
+			});
+			window.list("cartList").selectItem(0);
+			cartSpinner.enterTextAndCommit("2");
+			window.list("cartList").selectItem(1);
+			cartSpinner.requireValue(1);
+		}
+
+		@Test
+		@GUITest
+		@DisplayName("The spinner value should be reset to one when an item is deselected")
+		void testTheSpinnerValueShouldBeResetToOneWhenAnItemIsDeselected() {
+			JSpinnerFixture cartSpinner = window.spinner("cartReturnSpinner");
+			GuiActionRunner.execute(() -> {
+				totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 5));
+			});
+			window.list("cartList").selectItem(0);
+			cartSpinner.enterTextAndCommit("2");
+			window.list("cartList").clearSelection();
+			cartSpinner.requireValue(1);
+		}
+
 	}
 
 	@Nested

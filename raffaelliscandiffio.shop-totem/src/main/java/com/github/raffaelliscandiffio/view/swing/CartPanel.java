@@ -107,6 +107,7 @@ public class CartPanel extends JPanel {
 			boolean isItemSelected = listOrderItems.getSelectedIndex() != -1;
 			btnRemoveSelected.setEnabled(isItemSelected);
 			spinner.setEnabled(isItemSelected);
+			spinner.setValue(1);
 		});
 		listOrderItems.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		listOrderItems.setName("cartList");
