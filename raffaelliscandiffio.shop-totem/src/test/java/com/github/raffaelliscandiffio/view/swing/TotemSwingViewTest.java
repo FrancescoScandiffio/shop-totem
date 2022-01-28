@@ -121,6 +121,7 @@ class TotemSwingViewTest {
 			assertThat(totemSwingView.getWelcomePane().isShowing()).isTrue();
 			assertThat(totemSwingView.getShoppingPane().isShowing()).isFalse();
 			assertThat(totemSwingView.getCartPane().isShowing()).isFalse();
+			assertThat(totemSwingView.getGoodbyePane().isShowing()).isFalse();
 		}
 
 		@Test
