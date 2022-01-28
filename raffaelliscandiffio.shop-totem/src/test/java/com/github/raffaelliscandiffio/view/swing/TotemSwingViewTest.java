@@ -705,6 +705,23 @@ class TotemSwingViewTest {
 			assertThat((Integer) spinnerModel.getMaximum()).isNull();
 		}
 
+		@Test
+		@GUITest
+		@DisplayName("The spinner upper bound should be updated when the quantity of the selected item changes")
+		void testTheSpinnerUpperBoundShouldBeUpdatedWhenTheQuantityOfTheSelectedItemChanges() {
+			SpinnerNumberModel spinnerModel = (SpinnerNumberModel) (window.spinner("cartReturnSpinner").target()
+					.getModel());
+			Product product = new Product(1, "Product2", 3);
+			int updatedQuantity = 5;
+			OrderItem selectedItem = new OrderItem(product, 10);
+			OrderItem updatedItem = new OrderItem(product, updatedQuantity);
+			GuiActionRunner
+					.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel().addElement(selectedItem));
+			window.list("cartList").selectItem(0);
+			GuiActionRunner.execute(() -> totemSwingView.itemModified(selectedItem, updatedItem));
+			assertThat((Integer) spinnerModel.getMaximum()).isEqualTo(updatedQuantity - 1);
+		}
+
 	}
 
 	@Nested

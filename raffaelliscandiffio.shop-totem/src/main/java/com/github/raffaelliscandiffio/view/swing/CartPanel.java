@@ -41,6 +41,7 @@ public class CartPanel extends JPanel {
 	private JLabel lblQuantity;
 	private JSpinner spinner;
 	private Component horizontalStrut;
+	private SpinnerNumberModel spinnerModel;
 
 	public CartPanel() {
 
@@ -97,12 +98,10 @@ public class CartPanel extends JPanel {
 
 			@Override
 			public void contentsChanged(ListDataEvent e) {
-				// TODO Auto-generated method stub
-
+				if (listOrderItems.getSelectedIndex() != -1 && e.getIndex0() == listOrderItems.getSelectedIndex())
+					updateCurrentUpperBound();
 			}
-
 		});
-		SpinnerNumberModel spinnerModel = new SpinnerNumberModel(1, 1, null, 1);
 
 		listOrderItems = new JList<>(listOrderItemsModel);
 		listOrderItems.addListSelectionListener(e -> {
@@ -111,7 +110,7 @@ public class CartPanel extends JPanel {
 			spinner.setEnabled(isItemSelected);
 			spinner.setValue(1);
 			if (isItemSelected)
-				spinnerModel.setMaximum(listOrderItems.getSelectedValue().getQuantity() - 1);
+				updateCurrentUpperBound();
 			else
 				spinnerModel.setMaximum(null);
 		});
@@ -151,6 +150,7 @@ public class CartPanel extends JPanel {
 		horizontalStrut = Box.createHorizontalStrut(20);
 		horizontalBox.add(horizontalStrut);
 
+		spinnerModel = new SpinnerNumberModel(1, 1, null, 1);
 		spinner = new JSpinner(spinnerModel);
 		spinner.setName("cartReturnSpinner");
 		horizontalBox.add(spinner);
@@ -222,5 +222,9 @@ public class CartPanel extends JPanel {
 
 	public JLabel getMessageLabel() {
 		return messageLabel;
+	}
+
+	private void updateCurrentUpperBound() {
+		spinnerModel.setMaximum(listOrderItems.getSelectedValue().getQuantity() - 1);
 	}
 }
