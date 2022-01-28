@@ -102,12 +102,16 @@ public class CartPanel extends JPanel {
 			}
 
 		});
+		SpinnerNumberModel spinnerModel = new SpinnerNumberModel(1, 1, null, 1);
+
 		listOrderItems = new JList<>(listOrderItemsModel);
 		listOrderItems.addListSelectionListener(e -> {
 			boolean isItemSelected = listOrderItems.getSelectedIndex() != -1;
 			btnRemoveSelected.setEnabled(isItemSelected);
 			spinner.setEnabled(isItemSelected);
 			spinner.setValue(1);
+			if (isItemSelected)
+				spinnerModel.setMaximum(listOrderItems.getSelectedValue().getQuantity() - 1);
 		});
 		listOrderItems.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		listOrderItems.setName("cartList");
@@ -145,11 +149,10 @@ public class CartPanel extends JPanel {
 		horizontalStrut = Box.createHorizontalStrut(20);
 		horizontalBox.add(horizontalStrut);
 
-		spinner = new JSpinner();
+		spinner = new JSpinner(spinnerModel);
 		spinner.setName("cartReturnSpinner");
 		horizontalBox.add(spinner);
 		spinner.setEnabled(false);
-		spinner.setModel(new SpinnerNumberModel(1, 1, null, 1));
 
 		btnReturnQuantity = new JButton("Return quantity");
 		btnReturnQuantity.setEnabled(false);

@@ -673,6 +673,21 @@ class TotemSwingViewTest {
 			cartSpinner.requireValue(1);
 		}
 
+		@Test
+		@GUITest
+		@DisplayName("The spinner upper bound should be set to the quantity of the selected item minus one")
+		void testTheSpinnerUpperBoundShouldBeSetToTheQuantityOfTheSelectedItemMinusOne() {
+			SpinnerNumberModel spinnerModel = (SpinnerNumberModel) (window.spinner("cartReturnSpinner").target()
+					.getModel());
+			int itemQuantity = 10;
+			GuiActionRunner.execute(() -> {
+				totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), itemQuantity));
+			});
+			window.list("cartList").selectItem(0);
+			assertThat((Integer) spinnerModel.getMaximum()).isEqualTo(itemQuantity - 1);
+		}
+
 	}
 
 	@Nested
