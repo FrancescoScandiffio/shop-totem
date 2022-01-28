@@ -112,6 +112,8 @@ public class CartPanel extends JPanel {
 			spinner.setValue(1);
 			if (isItemSelected)
 				spinnerModel.setMaximum(listOrderItems.getSelectedValue().getQuantity() - 1);
+			else
+				spinnerModel.setMaximum(null);
 		});
 		listOrderItems.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		listOrderItems.setName("cartList");

@@ -688,6 +688,23 @@ class TotemSwingViewTest {
 			assertThat((Integer) spinnerModel.getMaximum()).isEqualTo(itemQuantity - 1);
 		}
 
+		@Test
+		@GUITest
+		@DisplayName("The spinner upper bound should be removed when the item is deselected")
+		void testTheSpinnerUpperBoundShouldBeRemovedWhenTheItemIsDeselected() {
+			SpinnerNumberModel spinnerModel = (SpinnerNumberModel) (window.spinner("cartReturnSpinner").target()
+					.getModel());
+			int itemQuantity = 10;
+			GuiActionRunner.execute(() -> {
+				totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), itemQuantity));
+			});
+			window.list("cartList").selectItem(0);
+			spinnerModel.setMaximum(itemQuantity - 1);
+			window.list("cartList").clearSelection();
+			assertThat((Integer) spinnerModel.getMaximum()).isNull();
+		}
+
 	}
 
 	@Nested
