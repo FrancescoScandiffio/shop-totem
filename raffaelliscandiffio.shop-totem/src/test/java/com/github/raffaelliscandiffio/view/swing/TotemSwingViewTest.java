@@ -8,6 +8,7 @@ import java.util.Arrays;
 import javax.swing.DefaultListModel;
 import javax.swing.JFormattedTextField;
 import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 
 import org.assertj.swing.annotation.GUITest;
 import org.assertj.swing.core.matcher.JButtonMatcher;
@@ -416,6 +417,10 @@ class TotemSwingViewTest {
 			window.spinner("cartReturnSpinner").requireDisabled();
 			window.list("cartList");
 			window.spinner("cartReturnSpinner").requireDisabled();
+			SpinnerNumberModel spinnerModel = (SpinnerNumberModel) (window.spinner("cartReturnSpinner").target()
+					.getModel());
+			assertThat(spinnerModel.getValue()).isEqualTo(1);
+			assertThat((Integer) spinnerModel.getMinimum()).isEqualTo(1);
 		}
 
 		@Test
