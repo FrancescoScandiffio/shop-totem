@@ -10,11 +10,13 @@ import javax.swing.Box;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
+import javax.swing.JSpinner.DefaultEditor;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
@@ -168,6 +170,11 @@ public class CartPanel extends JPanel {
 		spinner.addPropertyChangeListener(arg0 -> {
 			if (!spinner.isEnabled())
 				btnReturnQuantity.setEnabled(false);
+		});
+
+		JFormattedTextField tf = ((DefaultEditor) spinner.getEditor()).getTextField();
+		tf.addCaretListener(e -> {
+			btnReturnQuantity.setEnabled(tf.isEditValid());
 		});
 
 		btnCheckout = new JButton("Checkout");

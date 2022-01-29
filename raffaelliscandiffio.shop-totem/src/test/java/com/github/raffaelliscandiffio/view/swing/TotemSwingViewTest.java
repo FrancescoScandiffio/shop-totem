@@ -724,6 +724,52 @@ class TotemSwingViewTest {
 			window.button(JButtonMatcher.withText("Return quantity")).requireDisabled();
 		}
 
+		@Test
+		@GUITest
+		@DisplayName("Button 'return quantity' should be disabled when the spinner is enabled and contains an invalid value")
+		void testButtonReturnQuantityShouldBeDisabledWhenTheSpinnerIsEnabledAndContainsAnInvalidValue() {
+			JButtonFixture returnButton = window.button(JButtonMatcher.withText("Return quantity"));
+			JSpinnerFixture spinner = window.spinner("cartReturnSpinner");
+			GuiActionRunner.execute(() -> {
+				totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 5));
+			});
+			window.list("cartList").selectItem(0);
+			spinner.enterText("foo");
+			returnButton.requireDisabled();
+			spinner.enterText("0");
+			returnButton.requireDisabled();
+			spinner.enterText("5");
+			returnButton.requireDisabled();
+		}
+
+		@Test
+		@GUITest
+		@DisplayName("Button 'return quantity' should be enabled when the spinner is enabled and its content becomes valid")
+		void testButtonReturnQuantityShouldBeEnabledWhenSpinnerIsEnabledAndItsContentBecomesValid() {
+			JSpinnerFixture spinner = window.spinner("cartReturnSpinner");
+			GuiActionRunner.execute(() -> {
+				totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 5));
+			});
+			window.list("cartList").selectItem(0);
+			spinner.enterText("foo");
+			spinner.enterText("2");
+			window.button(JButtonMatcher.withText("Return quantity")).requireEnabled();
+		}
+
+		@Test
+		@GUITest
+		@DisplayName("Button 'return quantity' should be enabled when a new item is selected")
+		void testButtonReturnQuantityShouldBeEnabledWhenANewItemIsSelected() {
+			GuiActionRunner.execute(() -> {
+				totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 5));
+			});
+			window.list("cartList").selectItem(0);
+			window.button(JButtonMatcher.withText("Return quantity")).requireEnabled();
+		}
+
 	}
 
 	@Nested
