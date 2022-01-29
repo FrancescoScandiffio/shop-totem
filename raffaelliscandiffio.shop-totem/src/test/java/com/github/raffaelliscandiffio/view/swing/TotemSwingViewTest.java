@@ -712,6 +712,18 @@ class TotemSwingViewTest {
 			assertThat((Integer) spinnerModel.getMaximum()).isEqualTo(updatedQuantity - 1);
 		}
 
+		@Test
+		@GUITest
+		@DisplayName("Button 'return quantity' should be disabled when the spinner is disabled")
+		void testButtonReturnQuantityShouldBeDisabledWhenTheSpinnerIsDisabled() {
+			GuiActionRunner.execute(() -> {
+				window.button(JButtonMatcher.withText("Return quantity")).target().setEnabled(true);
+				window.spinner("cartReturnSpinner").target().setEnabled(true);
+			});
+			GuiActionRunner.execute(() -> window.spinner("cartReturnSpinner").target().setEnabled(false));
+			window.button(JButtonMatcher.withText("Return quantity")).requireDisabled();
+		}
+
 	}
 
 	@Nested

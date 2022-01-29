@@ -146,7 +146,6 @@ public class CartPanel extends JPanel {
 
 		lblQuantity = new JLabel("Quantity");
 		horizontalBox.add(lblQuantity);
-
 		horizontalStrut = Box.createHorizontalStrut(20);
 		horizontalBox.add(horizontalStrut);
 
@@ -165,6 +164,11 @@ public class CartPanel extends JPanel {
 		gbc_btnReturnQuantity.gridx = 0;
 		gbc_btnReturnQuantity.gridy = 4;
 		add(btnReturnQuantity, gbc_btnReturnQuantity);
+
+		spinner.addPropertyChangeListener(arg0 -> {
+			if (!spinner.isEnabled())
+				btnReturnQuantity.setEnabled(false);
+		});
 
 		btnCheckout = new JButton("Checkout");
 		btnCheckout.setActionCommand("checkout");
