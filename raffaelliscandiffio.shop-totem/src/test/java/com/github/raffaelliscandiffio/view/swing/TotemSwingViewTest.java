@@ -656,10 +656,8 @@ class TotemSwingViewTest {
 		@DisplayName("The spinner value should be reset to one when an item is deselected")
 		void testTheSpinnerValueShouldBeResetToOneWhenAnItemIsDeselected() {
 			JSpinnerFixture cartSpinner = window.spinner("cartReturnSpinner");
-			GuiActionRunner.execute(() -> {
-				totemSwingView.getCartPane().getListOrderItemsModel()
-						.addElement(new OrderItem(new Product(1, "Product1", 3), 5));
-			});
+			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
 			window.list("cartList").selectItem(0);
 			cartSpinner.enterTextAndCommit("2");
 			window.list("cartList").clearSelection();
@@ -672,10 +670,8 @@ class TotemSwingViewTest {
 			SpinnerNumberModel spinnerModel = (SpinnerNumberModel) (window.spinner("cartReturnSpinner").target()
 					.getModel());
 			int itemQuantity = 10;
-			GuiActionRunner.execute(() -> {
-				totemSwingView.getCartPane().getListOrderItemsModel()
-						.addElement(new OrderItem(new Product(1, "Product1", 3), itemQuantity));
-			});
+			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+					.addElement(new OrderItem(new Product(1, "Product1", 3), itemQuantity)));
 			window.list("cartList").selectItem(0);
 			assertThat((Integer) spinnerModel.getMaximum()).isEqualTo(itemQuantity - 1);
 		}
@@ -686,10 +682,8 @@ class TotemSwingViewTest {
 			SpinnerNumberModel spinnerModel = (SpinnerNumberModel) (window.spinner("cartReturnSpinner").target()
 					.getModel());
 			int itemQuantity = 10;
-			GuiActionRunner.execute(() -> {
-				totemSwingView.getCartPane().getListOrderItemsModel()
-						.addElement(new OrderItem(new Product(1, "Product1", 3), itemQuantity));
-			});
+			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+					.addElement(new OrderItem(new Product(1, "Product1", 3), itemQuantity)));
 			window.list("cartList").selectItem(0);
 			spinnerModel.setMaximum(itemQuantity - 1);
 			window.list("cartList").clearSelection();
@@ -730,10 +724,8 @@ class TotemSwingViewTest {
 		void testButtonReturnQuantityShouldBeDisabledWhenTheSpinnerIsEnabledAndContainsAnInvalidValue() {
 			JButtonFixture returnButton = window.button(JButtonMatcher.withText("Return quantity"));
 			JSpinnerFixture spinner = window.spinner("cartReturnSpinner");
-			GuiActionRunner.execute(() -> {
-				totemSwingView.getCartPane().getListOrderItemsModel()
-						.addElement(new OrderItem(new Product(1, "Product1", 3), 5));
-			});
+			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
 			window.list("cartList").selectItem(0);
 			spinner.enterText("foo");
 			returnButton.requireDisabled();
@@ -748,10 +740,8 @@ class TotemSwingViewTest {
 		@DisplayName("Button 'return quantity' should be enabled when the spinner is enabled and its content becomes valid")
 		void testButtonReturnQuantityShouldBeEnabledWhenSpinnerIsEnabledAndItsContentBecomesValid() {
 			JSpinnerFixture spinner = window.spinner("cartReturnSpinner");
-			GuiActionRunner.execute(() -> {
-				totemSwingView.getCartPane().getListOrderItemsModel()
-						.addElement(new OrderItem(new Product(1, "Product1", 3), 5));
-			});
+			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
 			window.list("cartList").selectItem(0);
 			spinner.enterText("foo");
 			spinner.enterText("2");
@@ -762,10 +752,8 @@ class TotemSwingViewTest {
 		@GUITest
 		@DisplayName("Button 'return quantity' should be enabled when a new item is selected")
 		void testButtonReturnQuantityShouldBeEnabledWhenANewItemIsSelected() {
-			GuiActionRunner.execute(() -> {
-				totemSwingView.getCartPane().getListOrderItemsModel()
-						.addElement(new OrderItem(new Product(1, "Product1", 3), 5));
-			});
+			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
 			window.list("cartList").selectItem(0);
 			window.button(JButtonMatcher.withText("Return quantity")).requireEnabled();
 		}
