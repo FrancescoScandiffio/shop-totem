@@ -758,6 +758,18 @@ class TotemSwingViewTest {
 			window.button(JButtonMatcher.withText("Return quantity")).requireEnabled();
 		}
 
+		@Test
+		@DisplayName("Button 'return quantity' should delegate to TotemController 'returnProduct'")
+		void testButtonReturnQuantityShouldDelegateToTotemControllerReturnQuantity() {
+			OrderItem itemToReturn = new OrderItem(new Product(1, "Product1", 3), 5);
+			GuiActionRunner
+					.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel().addElement(itemToReturn));
+			window.list("cartList").selectItem(0);
+			window.spinner("cartReturnSpinner").enterTextAndCommit("3");
+			window.button(JButtonMatcher.withText("Return quantity")).click();
+			verify(totemController).returnProduct(itemToReturn, 3);
+		}
+
 	}
 
 	@Nested

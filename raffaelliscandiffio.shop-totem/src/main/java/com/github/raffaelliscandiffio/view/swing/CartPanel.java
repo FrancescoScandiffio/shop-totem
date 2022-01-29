@@ -160,6 +160,7 @@ public class CartPanel extends JPanel {
 		btnReturnQuantity = new JButton("Return quantity");
 		btnReturnQuantity.setEnabled(false);
 		btnReturnQuantity.setFocusPainted(false);
+		btnReturnQuantity.setActionCommand("returnProduct");
 		GridBagConstraints gbc_btnReturnQuantity = new GridBagConstraints();
 		gbc_btnReturnQuantity.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnReturnQuantity.insets = new Insets(0, 0, 5, 5);
@@ -221,6 +222,7 @@ public class CartPanel extends JPanel {
 		btnCancelShopping.addActionListener(listener);
 		btnCheckout.addActionListener(listener);
 		btnRemoveSelected.addActionListener(listener);
+		btnReturnQuantity.addActionListener(listener);
 	}
 
 	DefaultListModel<OrderItem> getListOrderItemsModel() {
@@ -238,4 +240,9 @@ public class CartPanel extends JPanel {
 	private void updateCurrentUpperBound() {
 		spinnerModel.setMaximum(listOrderItems.getSelectedValue().getQuantity() - 1);
 	}
+
+	JSpinner getSpinner() {
+		return spinner;
+	}
+
 }
