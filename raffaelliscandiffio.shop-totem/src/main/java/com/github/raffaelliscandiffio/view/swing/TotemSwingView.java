@@ -64,9 +64,9 @@ public class TotemSwingView extends JFrame implements TotemView {
 			String command = e.getActionCommand();
 			if ("cancelShopping".equals(command))
 				closeShoppingAction();
-			if ("buyProduct".equals(command))
+			else if ("buyProduct".equals(command))
 				buyProductAction();
-			if ("openCart".equals(command))
+			else
 				openCartAction();
 		});
 
@@ -74,13 +74,13 @@ public class TotemSwingView extends JFrame implements TotemView {
 			String command = e.getActionCommand();
 			if ("openShopping".equals(command))
 				openShoppingAction();
-			if ("cancelShopping".equals(command))
+			else if ("cancelShopping".equals(command))
 				closeShoppingAction();
-			if ("checkout".equals(command))
+			else if ("checkout".equals(command))
 				confirmOrderAction();
-			if ("removeSelected".equals(command))
+			else if ("removeSelected".equals(command))
 				removeItemAction();
-			if ("returnProduct".equals(command))
+			else
 				returnProductAction();
 		});
 
