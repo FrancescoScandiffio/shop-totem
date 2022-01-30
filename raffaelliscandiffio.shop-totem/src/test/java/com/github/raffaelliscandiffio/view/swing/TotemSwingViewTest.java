@@ -707,6 +707,25 @@ class TotemSwingViewTest {
 		}
 
 		@Test
+		@DisplayName("The spinner upper bound should not change when an item is selected and another item is updated")
+		void testTheSpinnerUpperBoundShouldNotChangeWhenAnItemIsSelectedAndAnotherItemIsUpdated() {
+			int itemQuantity = 4;
+			SpinnerNumberModel spinnerModel = (SpinnerNumberModel) (window.spinner("cartReturnSpinner").target()
+					.getModel());
+			Product product = new Product(1, "Product2", 3);
+			OrderItem selectedItem = new OrderItem(product, 10);
+			OrderItem updatedItem = new OrderItem(product, 5);
+			GuiActionRunner.execute(() -> {
+				DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+				itemsModel.addElement(new OrderItem(new Product(1, "Product1", 3), itemQuantity));
+				itemsModel.addElement(selectedItem);
+			});
+			window.list("cartList").selectItem(0);
+			GuiActionRunner.execute(() -> totemSwingView.itemModified(selectedItem, updatedItem));
+			assertThat((Integer) spinnerModel.getMaximum()).isEqualTo(itemQuantity - 1);
+		}
+
+		@Test
 		@GUITest
 		@DisplayName("Button 'return quantity' should be disabled when the spinner is disabled")
 		void testButtonReturnQuantityShouldBeDisabledWhenTheSpinnerIsDisabled() {
