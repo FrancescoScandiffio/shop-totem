@@ -770,6 +770,55 @@ class TotemSwingViewTest {
 			verify(totemController).returnProduct(itemToReturn, 3);
 		}
 
+		@Test
+		@GUITest
+		@DisplayName("Show error message when the content of the spinner is invalid")
+		void testShowErrorMessageWhenTheContentOfTheSpinnerIsInvalid() {
+			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+			window.list("cartList").selectItem(0);
+			window.spinner("cartReturnSpinner").enterText("foo");
+			window.label("cartMessageLabel")
+					.requireText("Error: the input must be an integer in range [1,4]. Received: foo");
+		}
+
+		@Test
+		@GUITest
+		@DisplayName("Reset the label message when the content of the spinner becomes valid")
+		void testResetTheLabelMessageWhenTheContentOfTheSpinnerBecomesValid() {
+			JSpinnerFixture spinner = window.spinner("cartReturnSpinner");
+			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+			window.list("cartList").selectItem(0);
+			spinner.enterText("foo");
+			spinner.enterText("2");
+			window.label("cartMessageLabel").requireText(" ");
+
+		}
+
+		@Test
+		@GUITest
+		@DisplayName("Reset the label when a new item is selected")
+		void testResetTheLabelMessageWhenAnItemIsSelected() {
+			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+			GuiActionRunner.execute(() -> window.label("cartMessageLabel").target().setText("foo"));
+			window.list("cartList").selectItem(0);
+			window.label("cartMessageLabel").requireText(" ");
+		}
+
+		@Test
+		@GUITest
+		@DisplayName("Reset the label when an item is deselected")
+		void testResetTheLabelMessageWhenAnItemIsDeselected() {
+			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+			window.list("cartList").selectItem(0);
+			GuiActionRunner.execute(() -> window.label("cartMessageLabel").target().setText("foo"));
+			window.list("cartList").clearSelection();
+			window.label("cartMessageLabel").requireText(" ");
+		}
+
 	}
 
 	@Nested

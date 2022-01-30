@@ -1,5 +1,6 @@
 package com.github.raffaelliscandiffio.view.swing;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -46,13 +47,12 @@ public class CartPanel extends JPanel {
 	private SpinnerNumberModel spinnerModel;
 
 	public CartPanel() {
-
 		this.setBorder(new EmptyBorder(5, 5, 5, 5));
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		gridBagLayout.rowHeights = new int[] { 0, 243, 0, 0, 0, 0, 0 };
+		gridBagLayout.rowHeights = new int[] { 0, 243, 0, 0, 0, 0 };
 		gridBagLayout.columnWeights = new double[] { 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, Double.MIN_VALUE };
-		gridBagLayout.rowWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gridBagLayout.rowWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0 };
 		setLayout(gridBagLayout);
 
 		btnContinueShopping = new JButton("Continue Shopping");
@@ -115,6 +115,7 @@ public class CartPanel extends JPanel {
 				updateCurrentUpperBound();
 			else
 				spinnerModel.setMaximum(null);
+			messageLabel.setText(" ");
 		});
 		listOrderItems.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		listOrderItems.setName("cartList");
@@ -175,7 +176,14 @@ public class CartPanel extends JPanel {
 
 		JFormattedTextField tf = ((DefaultEditor) spinner.getEditor()).getTextField();
 		tf.addCaretListener(e -> {
-			btnReturnQuantity.setEnabled(tf.isEditValid());
+			boolean isValueValid = tf.isEditValid();
+			btnReturnQuantity.setEnabled(isValueValid);
+			if (!isValueValid) {
+				messageLabel.setText("Error: the input must be an integer in range [1,"
+						+ spinnerModel.getMaximum().toString() + "]. Received: " + tf.getText());
+				messageLabel.setForeground(Color.RED);
+			} else
+				messageLabel.setText(" ");
 		});
 
 		btnCheckout = new JButton("Checkout");
@@ -195,7 +203,7 @@ public class CartPanel extends JPanel {
 		btnRemoveSelected.setFocusPainted(false);
 		GridBagConstraints gbc_btnRemoveSelected = new GridBagConstraints();
 		gbc_btnRemoveSelected.fill = GridBagConstraints.HORIZONTAL;
-		gbc_btnRemoveSelected.insets = new Insets(0, 0, 0, 5);
+		gbc_btnRemoveSelected.insets = new Insets(0, 0, 5, 5);
 		gbc_btnRemoveSelected.gridx = 0;
 		gbc_btnRemoveSelected.gridy = 5;
 		add(btnRemoveSelected, gbc_btnRemoveSelected);
@@ -204,11 +212,9 @@ public class CartPanel extends JPanel {
 		messageLabel.setName("cartMessageLabel");
 		GridBagConstraints gbc_messageLabel = new GridBagConstraints();
 		gbc_messageLabel.fill = GridBagConstraints.VERTICAL;
-		gbc_messageLabel.gridheight = 3;
-		gbc_messageLabel.gridwidth = 4;
-		gbc_messageLabel.insets = new Insets(0, 0, 0, 5);
-		gbc_messageLabel.gridx = 3;
-		gbc_messageLabel.gridy = 3;
+		gbc_messageLabel.gridwidth = 9;
+		gbc_messageLabel.gridx = 0;
+		gbc_messageLabel.gridy = 6;
 		add(messageLabel, gbc_messageLabel);
 	}
 
