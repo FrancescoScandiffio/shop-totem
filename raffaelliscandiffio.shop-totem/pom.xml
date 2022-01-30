@@ -37,7 +37,8 @@
 		</sonar.coverage.exclusions>
 
 		<sonar.junit.reportPaths>
-			${project.build.directory}/surefire-reports
+			${project.build.directory}/surefire-reports,
+			${project.build.directory}/failsafe-reports
 		</sonar.junit.reportPaths>
 
 		<sonar.issue.ignore.multicriteria>e1,e2,e3</sonar.issue.ignore.multicriteria>
