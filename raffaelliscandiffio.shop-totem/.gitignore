@@ -1,2 +1,3 @@
 /target/
 *~
+/failed-gui-tests/
