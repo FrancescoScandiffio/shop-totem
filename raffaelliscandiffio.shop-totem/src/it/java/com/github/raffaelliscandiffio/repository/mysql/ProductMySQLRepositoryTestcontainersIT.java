@@ -23,7 +23,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.github.raffaelliscandiffio.model.Product;
 
 @Testcontainers
-class ProductMySQLRepositoryIT {
+class ProductMySQLRepositoryTestcontainersIT {
 
 	private static final String TOTEM_DB_NAME = "totem";
 
