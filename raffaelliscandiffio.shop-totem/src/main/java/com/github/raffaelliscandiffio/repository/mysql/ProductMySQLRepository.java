@@ -18,8 +18,7 @@ public class ProductMySQLRepository implements ProductRepository{
 
 	@Override
 	public List<Product> findAll() {
-		// TODO Auto-generated method stub
-		return null;
+		return entityManager.createQuery("select p from Product p", Product.class).getResultList();
 	}
 
 	@Override

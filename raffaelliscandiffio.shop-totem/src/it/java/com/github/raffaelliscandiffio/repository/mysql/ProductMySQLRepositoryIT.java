@@ -54,7 +54,6 @@ class ProductMySQLRepositoryIT {
         entityManager.createQuery("DELETE FROM Product").executeUpdate();
         entityManager.getTransaction().commit();
 		productRepository = new ProductMySQLRepository(entityManager);
-		
 	}
 
 	@AfterEach
@@ -82,6 +81,22 @@ class ProductMySQLRepositoryIT {
 	void testFindByIdWhenIdIsNotFoundShouldThrowNoSuchElementException() {
 		assertThatThrownBy(() -> productRepository.findById(1)).isInstanceOf(NoSuchElementException.class)
 				.hasMessage("Product with id 1 not found");
+	}
+	
+	@Test
+	@DisplayName("'findAll' when the database is empty")
+	void testFindAllWhenDatabaseIsEmpty() {
+		assertThat(productRepository.findAll()).isEmpty();
+	}
+	
+	@Test
+	@DisplayName("'findAll' when the database is not empty")
+	void testFindAllWhenDatabaseIsNotEmpty() {
+		Product product1 = new Product(1, "pizza", 5.5);
+		Product product2 = new Product(2, "pasta", 2.3);
+		addTestProductToDatabase(product1); 
+		addTestProductToDatabase(product2); 
+		assertThat(productRepository.findAll()).containsExactly(product1, product2);
 	}
 	
 	private void addTestProductToDatabase(Product product) {
