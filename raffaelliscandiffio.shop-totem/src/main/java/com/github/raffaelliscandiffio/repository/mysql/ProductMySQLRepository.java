@@ -5,8 +5,12 @@ import java.util.NoSuchElementException;
 
 import javax.persistence.EntityManager;
 
+import org.apache.logging.log4j.Level;
+import org.bson.Document;
+
 import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.repository.ProductRepository;
+import com.mongodb.MongoWriteException;
 
 public class ProductMySQLRepository implements ProductRepository{
 	
@@ -32,7 +36,8 @@ public class ProductMySQLRepository implements ProductRepository{
 
 	@Override
 	public void save(Product product) {
-		// TODO Auto-generated method stub
-		
+		entityManager.getTransaction().begin();
+		entityManager.persist(product);
+		entityManager.getTransaction().commit();
 	}
 }

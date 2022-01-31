@@ -3,6 +3,7 @@ package com.github.raffaelliscandiffio.repository.mysql;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import javax.persistence.EntityManager;
@@ -99,10 +100,23 @@ class ProductMySQLRepositoryIT {
 		assertThat(productRepository.findAll()).containsExactly(product1, product2);
 	}
 	
+	@Test
+	@DisplayName("'save' product to repository")
+	void testSaveProduct() {
+		Product product = new Product(1, "pizza", 5.5);
+		productRepository.save(product);
+		assertThat(readAllProductsFromDatabase()).containsExactly(product);
+	}
+
+	
 	private void addTestProductToDatabase(Product product) {
 		entityManager.getTransaction().begin();
-		entityManager.persist(product);
+		entityManager.persist(product);  // em.merge(u); for updates
 		entityManager.getTransaction().commit();
+	}
+	
+	private List<Product> readAllProductsFromDatabase() {
+		return entityManager.createQuery("select p from Product p", Product.class).getResultList();
 	}
 
 }
