@@ -107,11 +107,22 @@ class ProductMySQLRepositoryIT {
 		productRepository.save(product);
 		assertThat(readAllProductsFromDatabase()).containsExactly(product);
 	}
+	
+	@Test
+	@DisplayName("'save' product to repository should not save if product id is already existing")
+	void testSaveProductIfIdAlreadyExistingShouldNotSave() {
+		Product product1 = new Product(1, "pasta", 3);
+		addTestProductToDatabase(product1);
+		Product product2 = new Product(1, "pizza", 5.5);
 
+		productRepository.save(product2);
+
+		assertThat(readAllProductsFromDatabase()).containsExactly(product1);
+	}
 	
 	private void addTestProductToDatabase(Product product) {
 		entityManager.getTransaction().begin();
-		entityManager.persist(product);  // em.merge(u); for updates
+		entityManager.persist(product);
 		entityManager.getTransaction().commit();
 	}
 	
