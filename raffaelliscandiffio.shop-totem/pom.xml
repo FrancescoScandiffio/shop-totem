@@ -33,8 +33,7 @@
 		<sonar.coverage.exclusions>
 			**/model/Product.java,
 			**/model/Stock.java,
-			**/utils/GUITestExtension.java,
-			**/repository/mysql/ProductMySQLRepository.java
+			**/utils/GUITestExtension.java
 		</sonar.coverage.exclusions>
 
 		<sonar.junit.reportPaths>
@@ -206,11 +205,9 @@
 					</dependencies>
 					<configuration>
 						<targetClasses>
-							<param>*repository.mongo.StockMongoRepository*</param>
 							<param>*repository.mongo.ProductMongoRepository*</param>
 						</targetClasses>
 						<targetTests>
-							<param>*repository.mongo.StockMongoRepository*</param>
 							<param>*repository.mongo.ProductMongoRepository*</param>
 						</targetTests>
 						<mutators>
@@ -229,7 +226,6 @@
 							<exclude>**/model/Product.class</exclude>
 							<exclude>**/model/Stock.class</exclude>
 							<exclude>**/utils/GUITestExtension.class</exclude>
-							<exclude>**/repository/mysql/ProductMySQLRepository.class</exclude>
 						</excludes>
 					</configuration>
 					<executions>
@@ -330,6 +326,5 @@
 				</plugins>
 			</build>
 		</profile>
-
 	</profiles>
 </project>
