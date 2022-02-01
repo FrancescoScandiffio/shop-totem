@@ -101,7 +101,9 @@ class ProductMySQLRepositoryTestcontainersIT {
 	@DisplayName("'save' product to repository")
 	void testSaveProduct() {
 		Product product = new Product(1, "pizza", 5.5);
+		entityManager.getTransaction().begin();
 		productRepository.save(product);
+		entityManager.getTransaction().commit();
 		assertThat(readAllProductsFromDatabase()).containsExactly(product);
 	}
 	

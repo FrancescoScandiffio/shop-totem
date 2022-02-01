@@ -30,8 +30,6 @@ public class ProductMySQLRepository implements ProductRepository{
 
 	@Override
 	public void save(Product product) {
-		entityManager.getTransaction().begin();
 		entityManager.persist(product);
-		entityManager.getTransaction().commit();
 	}
 }
