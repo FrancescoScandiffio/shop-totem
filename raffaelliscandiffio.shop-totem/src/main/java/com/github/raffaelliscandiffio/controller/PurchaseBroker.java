@@ -108,14 +108,11 @@ public class PurchaseBroker {
 	}
 
 	public boolean doesProductExist(long id) {
-		try {
-			productRepository.findById(id);
+		if(productRepository.findById(id) != null) {
 			return true;
-		} catch (NoSuchElementException e) {
-			LOGGER.log(Level.ERROR,
-					"Product with id {} not found \n{}", id, logUtil.getReducedStackTrace(e));
-			return false;
 		}
+		LOGGER.log(Level.ERROR, "Product with id {} not found", id);
+		return false;
 	}
 
 }

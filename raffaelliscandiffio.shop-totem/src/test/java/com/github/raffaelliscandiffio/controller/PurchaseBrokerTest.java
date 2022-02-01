@@ -124,8 +124,7 @@ class PurchaseBrokerTest {
 		@DisplayName("should return False when product is not found on repository")
 		void testDoesProductExistShouldReturnFalseWhenProductIsNotFound() {
 
-			when(productRepository.findById(PRODUCT_ID))
-					.thenThrow(new NoSuchElementException("Product with id " + PRODUCT_ID + " is not found"));
+			when(productRepository.findById(PRODUCT_ID)).thenReturn(null);
 
 			assertThat(broker.doesProductExist(PRODUCT_ID)).isFalse();
 		}
