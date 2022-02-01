@@ -1,10 +1,8 @@
 package com.github.raffaelliscandiffio.repository.mysql;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -78,10 +76,9 @@ class ProductMySQLRepositoryTestcontainersIT {
 	}
 
 	@Test
-	@DisplayName("'findById' when the id is not found should throw NoSuchElementException")
-	void testFindByIdWhenIdIsNotFoundShouldThrowNoSuchElementException() {
-		assertThatThrownBy(() -> productRepository.findById(1)).isInstanceOf(NoSuchElementException.class)
-				.hasMessage("Product with id 1 not found");
+	@DisplayName("'findById' when the id is not found should return null")
+	void testFindByIdWhenIdIsNotFoundShouldReturnNull() {
+		assertThat(productRepository.findById(1)).isNull();
 	}
 	
 	@Test
@@ -116,7 +113,6 @@ class ProductMySQLRepositoryTestcontainersIT {
 		Product product2 = new Product(1, "pizza", 5.5);
 
 		productRepository.save(product2);
-
 		assertThat(readAllProductsFromDatabase()).containsExactly(product1);
 	}
 	

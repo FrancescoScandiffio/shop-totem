@@ -1,7 +1,6 @@
 package com.github.raffaelliscandiffio.repository.mysql;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
@@ -34,8 +33,7 @@ public class ProductMySQLRepository implements ProductRepository{
 		Product product = entityManager.find(Product.class, id);
 		if (product != null)
 			return product;
-		else
-			throw new NoSuchElementException(String.format("Product with id %d not found", id));
+		return null;
 	}
 
 	@Override
