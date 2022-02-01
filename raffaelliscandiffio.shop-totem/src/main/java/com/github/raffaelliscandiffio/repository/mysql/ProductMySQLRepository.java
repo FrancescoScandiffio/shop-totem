@@ -22,10 +22,7 @@ public class ProductMySQLRepository implements ProductRepository{
 
 	@Override
 	public Product findById(long id) {
-		Product product = entityManager.find(Product.class, id);
-		if (product != null)
-			return product;
-		return null;
+		return entityManager.find(Product.class, id);
 	}
 
 	@Override
