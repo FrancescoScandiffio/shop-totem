@@ -47,6 +47,9 @@ public class PurchaseBroker {
 		if (quantity < 0) {
 			throw new IllegalArgumentException("Negative quantity: " + quantity);
 		}
+		if (productRepository.findById(id) != null) {
+			throw new IllegalArgumentException("Product with id "+ id +" already in database");
+		}
 
 		productRepository.save(new Product(id, name, price));
 		stockRepository.save(new Stock(id, quantity));

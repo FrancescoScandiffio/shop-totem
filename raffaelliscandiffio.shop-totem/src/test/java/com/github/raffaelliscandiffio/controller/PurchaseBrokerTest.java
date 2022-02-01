@@ -144,8 +144,8 @@ class PurchaseBrokerTest {
 	class SaveNewProductInStockTest {
 
 		@Test
-		@DisplayName("should 'save' new product and stock in repositories when name, price, quantity are valid")
-		void testSaveNewProductInStockWhenNamePriceQuantityAreValidShouldSaveProductAndStockInRepositories() {
+		@DisplayName("should 'save' new product and stock in repositories when id, name, price, quantity are valid")
+		void testSaveNewProductInStockWhenIdNamePriceQuantityAreValidShouldSaveProductAndStockInRepositories() {
 			broker.saveNewProductInStock(PRODUCT_ID, NAME, PRICE, QUANTITY);
 
 			verify(productRepository).save(new Product(PRODUCT_ID, NAME, PRICE));
@@ -177,6 +177,7 @@ class PurchaseBrokerTest {
 
 			assertThatThrownBy(() -> broker.saveNewProductInStock(PRODUCT_ID, NAME, -PRICE, QUANTITY))
 					.isInstanceOf(IllegalArgumentException.class).hasMessage("Negative price: " + -PRICE);
+			verifyNoMoreInteractions(stockRepository, productRepository);
 		}
 
 		@Test
@@ -185,6 +186,7 @@ class PurchaseBrokerTest {
 
 			assertThatThrownBy(() -> broker.saveNewProductInStock(PRODUCT_ID, NAME, PRICE, -QUANTITY))
 					.isInstanceOf(IllegalArgumentException.class).hasMessage("Negative quantity: " + -QUANTITY);
+			verifyNoMoreInteractions(stockRepository, productRepository);
 		}
 
 		@Test
@@ -193,6 +195,16 @@ class PurchaseBrokerTest {
 			broker.saveNewProductInStock(PRODUCT_ID, NAME, PRICE, 0);
 			verify(productRepository).save(new Product(PRODUCT_ID, NAME, PRICE));
 			verify(stockRepository).save(new Stock(PRODUCT_ID, 0));
+		}
+		
+		@Test
+		@DisplayName("throws when product with id is already in database")
+		void testSaveNewProductInStockWhenProductIsAlreadyExistingShouldThrow() {
+			when(productRepository.findById(PRODUCT_ID)).thenReturn(new Product(PRODUCT_ID, NAME, QUANTITY));
+			
+			assertThatThrownBy(() -> broker.saveNewProductInStock(PRODUCT_ID, NAME, PRICE, QUANTITY))
+					.isInstanceOf(IllegalArgumentException.class).hasMessage("Product with id "+ PRODUCT_ID +" already in database");
+			verifyNoMoreInteractions(stockRepository, productRepository);
 		}
 	}
 }
