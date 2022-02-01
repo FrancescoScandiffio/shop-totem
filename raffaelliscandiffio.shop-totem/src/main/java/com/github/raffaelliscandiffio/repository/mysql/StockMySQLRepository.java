@@ -20,7 +20,7 @@ public class StockMySQLRepository implements StockRepository {
 
 	@Override
 	public void save(Stock stock) {
-		// TODO Auto-generated method stub
+		entityManager.persist(stock);
 
 	}
 

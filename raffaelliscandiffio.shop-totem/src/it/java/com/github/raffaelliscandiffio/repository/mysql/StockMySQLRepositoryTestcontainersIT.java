@@ -1,6 +1,8 @@
 package com.github.raffaelliscandiffio.repository.mysql;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -78,11 +80,24 @@ class StockMySQLRepositoryTestcontainersIT {
 		assertThat(stockRepository.findById(2)).isEqualTo(stock2);
 	}
 	
+	@Test
+	@DisplayName("'save' stock to repository")
+	void testSaveStock() {
+		Stock stock = new Stock(1, 100);
+		entityManager.getTransaction().begin();
+		stockRepository.save(stock);
+		entityManager.getTransaction().commit();
+		assertThat(readAllStocksFromDatabase()).containsExactly(stock);
+	}
+	
 	private void addTestStockToDatabase(Stock stock) {
 		entityManager.getTransaction().begin();
 		entityManager.persist(stock);
 		entityManager.getTransaction().commit();
 	}
 	
+	private List<Stock> readAllStocksFromDatabase() {
+		return entityManager.createQuery("select s from Stock s", Stock.class).getResultList();
+	}
 
 }
