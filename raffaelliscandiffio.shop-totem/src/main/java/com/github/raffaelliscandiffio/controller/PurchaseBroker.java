@@ -35,7 +35,7 @@ public class PurchaseBroker {
 	 *                                  price is negative, quantity is negative, id
 	 *                                  is already in database
 	 */
-	public void saveNewProductInStock(long id, String name, double price, int quantity) {
+	public void saveNewProductInStock(long id, String name, double price, int quantity) throws IllegalArgumentException{
 		if (!(name != null && !name.trim().isEmpty())) {
 			throw new IllegalArgumentException("Null or empty name is not allowed");
 		}
@@ -47,6 +47,9 @@ public class PurchaseBroker {
 		}
 		if (productRepository.findById(id) != null) {
 			throw new IllegalArgumentException("Product with id " + id + " already in database");
+		}
+		if (stockRepository.findById(id) != null) {
+			throw new IllegalArgumentException("Stock with id " + id + " already in database");
 		}
 
 		productRepository.save(new Product(id, name, price));
