@@ -62,8 +62,7 @@ class PurchaseBrokerTest {
 		@Test
 		@DisplayName("should return 0 when Stock is not found")
 		void testTakeAvailableShouldReturnZeroWhenStockIsNotFound() {
-			when(stockRepository.findById(PRODUCT_ID))
-					.thenThrow(new NoSuchElementException("Stock with id " + PRODUCT_ID + " is not found"));
+			when(stockRepository.findById(PRODUCT_ID)).thenReturn(null);
 
 			assertThat(broker.takeAvailable(PRODUCT_ID, QUANTITY)).isZero();
 			verifyNoMoreInteractions(stockRepository);
