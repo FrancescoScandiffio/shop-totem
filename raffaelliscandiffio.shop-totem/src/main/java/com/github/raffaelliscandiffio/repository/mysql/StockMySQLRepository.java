@@ -15,8 +15,7 @@ public class StockMySQLRepository implements StockRepository {
 
 	@Override
 	public Stock findById(long id) {
-		// TODO Auto-generated method stub
-		return null;
+		return entityManager.find(Stock.class, id);
 	}
 
 	@Override
