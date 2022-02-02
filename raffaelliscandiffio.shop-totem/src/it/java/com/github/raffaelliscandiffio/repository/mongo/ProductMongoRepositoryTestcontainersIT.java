@@ -1,10 +1,8 @@
 package com.github.raffaelliscandiffio.repository.mongo;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -68,10 +66,9 @@ class ProductMongoRepositoryTestcontainersIT {
 	}
 
 	@Test
-	@DisplayName("'findById' when the id is not found should throw NoSuchElementException")
-	void testFindByIdWhenIdIsNotFoundShouldThrowNoSuchElementException() {
-		assertThatThrownBy(() -> productRepository.findById(1)).isInstanceOf(NoSuchElementException.class)
-				.hasMessage("Product with id 1 not found");
+	@DisplayName("'findById' when the id is not found should return null")
+	void testFindByIdWhenIdIsNotFoundShouldReturnNull() {
+		assertThat(productRepository.findById(1)).isNull();
 	}
 
 	@Test
@@ -100,5 +97,4 @@ class ProductMongoRepositoryTestcontainersIT {
 						Double.valueOf("" + d.get("price"))))
 				.collect(Collectors.toList());
 	}
-
 }

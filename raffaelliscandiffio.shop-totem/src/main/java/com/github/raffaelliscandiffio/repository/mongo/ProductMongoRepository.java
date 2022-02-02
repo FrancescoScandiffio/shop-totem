@@ -5,16 +5,11 @@ import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 
 import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.repository.ProductRepository;
-import com.github.raffaelliscandiffio.utils.LogUtility;
 import com.mongodb.MongoClient;
-import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 
@@ -41,8 +36,7 @@ public class ProductMongoRepository implements ProductRepository {
 		Document d = productCollection.find(Filters.eq("_id", id)).first();
 		if (d != null)
 			return fromDocumentToProduct(d);
-		else
-			throw new NoSuchElementException(String.format("Product with id %d not found", id));
+		return null;
 	}
 
 	@Override
