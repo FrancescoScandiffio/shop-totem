@@ -131,13 +131,6 @@
 			<version>${mongo.driver.version}</version>
 		</dependency>
 		<dependency>
-			<!-- in memory mongo -->
-			<groupId>de.bwaldvogel</groupId>
-			<artifactId>mongo-java-server</artifactId>
-			<version>${mongo.java.server.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<!-- required to see Mongo Java Driver logs -->
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
