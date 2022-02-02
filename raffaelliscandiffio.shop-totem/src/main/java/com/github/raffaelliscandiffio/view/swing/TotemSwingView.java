@@ -28,19 +28,6 @@ public class TotemSwingView extends JFrame implements TotemView {
 		this.totemController = totemController;
 	}
 
-	/**
-	 * Launch the application.
-	 * 
-	 * public static void main(String[] args) { EventQueue.invokeLater(new
-	 * Runnable() { public void run() { try { TotemSwingView frame = new
-	 * TotemSwingView(); frame.setVisible(true);
-	 * 
-	 * } catch (Exception e) { e.printStackTrace(); } } }); }
-	 */
-
-	/**
-	 * Create the frame.
-	 */
 	public TotemSwingView() {
 		setResizable(false);
 		setTitle("Totem");
