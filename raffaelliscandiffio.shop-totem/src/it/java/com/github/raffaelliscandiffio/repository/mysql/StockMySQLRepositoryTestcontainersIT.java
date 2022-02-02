@@ -90,6 +90,18 @@ class StockMySQLRepositoryTestcontainersIT {
 		assertThat(readAllStocksFromDatabase()).containsExactly(stock);
 	}
 	
+	@Test
+	@DisplayName("'update' stock to repository")
+	void testUpdateStock() {
+		addTestStockToDatabase(new Stock(1, 100));
+		Stock stock = new Stock(1, 50);
+		
+		entityManager.getTransaction().begin();
+		stockRepository.update(stock);
+		entityManager.getTransaction().commit();
+		assertThat(readAllStocksFromDatabase()).containsExactly(stock);
+	}
+	
 	private void addTestStockToDatabase(Stock stock) {
 		entityManager.getTransaction().begin();
 		entityManager.persist(stock);
