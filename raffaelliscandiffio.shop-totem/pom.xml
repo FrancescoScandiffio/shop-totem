@@ -205,10 +205,12 @@
 					</dependencies>
 					<configuration>
 						<targetClasses>
-							<param>*repository.mysql.ProductMySQLRepository*</param>
+							<param>*repository.mysql.StockMySQLRepository*</param>
+							<param>*controller.PurchaseBroker*</param>
 						</targetClasses>
 						<targetTests>
-							<param>*repository.mysql.ProductMySQLRepository*</param>
+							<param>*repository.mysql.StockMySQLRepository*</param>
+							<param>*controller.PurchaseBroker*</param>
 						</targetTests>
 						<mutators>
 							<mutator>STRONGER</mutator>
