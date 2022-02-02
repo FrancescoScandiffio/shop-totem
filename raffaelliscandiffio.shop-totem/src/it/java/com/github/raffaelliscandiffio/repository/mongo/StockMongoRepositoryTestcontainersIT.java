@@ -66,10 +66,9 @@ class StockMongoRepositoryTestcontainersIT {
 	}
 
 	@Test
-	@DisplayName("'findById' when the id is not found should throw NoSuchElementException")
-	void testFindByIdWhenIdIsNotFoundShouldThrowNoSuchElementException() {
-		assertThatThrownBy(() -> stockRepository.findById(1)).isInstanceOf(NoSuchElementException.class)
-				.hasMessage("Stock with id 1 not found");
+	@DisplayName("'findById' when the id is not found should return null")
+	void testFindByIdWhenIdIsNotFoundShouldReturnNull() {
+		assertThat(stockRepository.findById(1)).isNull();
 	}
 
 	@Test

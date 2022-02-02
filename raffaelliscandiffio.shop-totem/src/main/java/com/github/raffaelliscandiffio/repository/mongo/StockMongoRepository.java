@@ -31,8 +31,7 @@ public class StockMongoRepository implements StockRepository {
 		Document d = stockCollection.find(Filters.eq("_id", id)).first();
 		if (d != null)
 			return new Stock(Long.valueOf("" + d.get("_id")), Integer.valueOf("" + d.get("quantity")));
-		else
-			throw new NoSuchElementException(String.format("Stock with id %d not found", id));
+		return null;
 	}
 
 	@Override
