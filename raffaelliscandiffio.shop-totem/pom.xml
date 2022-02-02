@@ -131,13 +131,6 @@
 			<version>${mongo.driver.version}</version>
 		</dependency>
 		<dependency>
-			<!-- in memory mongo -->
-			<groupId>de.bwaldvogel</groupId>
-			<artifactId>mongo-java-server</artifactId>
-			<version>${mongo.java.server.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<!-- required to see Mongo Java Driver logs -->
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
@@ -152,6 +145,11 @@
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>mysql</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>mongodb</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -205,12 +203,12 @@
 					</dependencies>
 					<configuration>
 						<targetClasses>
-							<param>*repository.mysql.StockMySQLRepository*</param>
-							<param>*controller.PurchaseBroker*</param>
+							<param>*repository.mongo.StockMongoRepository*</param>
+							<param>*repository.mongo.ProductMongoRepository*</param>
 						</targetClasses>
 						<targetTests>
-							<param>*repository.mysql.StockMySQLRepository*</param>
-							<param>*controller.PurchaseBroker*</param>
+							<param>*repository.mongo.StockMongoRepository*</param>
+							<param>*repository.mongo.ProductMongoRepository*</param>
 						</targetTests>
 						<mutators>
 							<mutator>STRONGER</mutator>
