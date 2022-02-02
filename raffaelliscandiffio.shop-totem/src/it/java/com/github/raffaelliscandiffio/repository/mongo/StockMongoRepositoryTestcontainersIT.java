@@ -1,11 +1,9 @@
 package com.github.raffaelliscandiffio.repository.mongo;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.net.InetSocketAddress;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -97,18 +95,6 @@ class StockMongoRepositoryTestcontainersIT {
 		stockRepository.update(stock);
 
 		assertThat(readAllStocksFromDatabase()).containsExactly(new Stock[] { stock, new Stock(2, 55) });
-	}
-
-	@Test
-	@DisplayName("'update' should not update stock in repository when stock id is not found in repository")
-	void testUpdateShouldNotUpdateStockInRepositoryIfIdNotExisting() {
-		addTestStockToDatabase(1, 50);
-		Stock stock = new Stock(2, 100);
-
-		assertThatThrownBy(() -> stockRepository.update(stock)).isInstanceOf(NoSuchElementException.class)
-				.hasMessage("Stock with id 2 cannot be updated because not found in database");
-
-		assertThat(readAllStocksFromDatabase()).containsExactly(new Stock(1, 50));
 	}
 
 	private void addTestStockToDatabase(long id, int quantity) {
