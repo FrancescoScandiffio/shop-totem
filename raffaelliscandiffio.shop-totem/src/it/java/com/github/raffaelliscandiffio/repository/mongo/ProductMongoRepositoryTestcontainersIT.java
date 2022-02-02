@@ -90,17 +90,6 @@ class ProductMongoRepositoryTestcontainersIT {
 		assertThat(readAllProductsFromDatabase()).containsExactly(product);
 	}
 
-	@Test
-	@DisplayName("'save' product to repository should not save if product id is already existing")
-	void testSaveProductIfIdAlreadyExistingShouldNotSave() {
-		addTestProductToDatabase(1, "pasta", 3);
-		Product product = new Product(1, "pizza", 5.5);
-
-		productRepository.save(product);
-
-		assertThat(readAllProductsFromDatabase()).containsExactly(new Product(1, "pasta", 3));
-	}
-
 	private void addTestProductToDatabase(long id, String name, double price) {
 		productCollection.insertOne(new Document().append("_id", id).append("name", name).append("price", price));
 	}

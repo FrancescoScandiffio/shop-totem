@@ -21,8 +21,6 @@ import com.mongodb.client.model.Filters;
 public class ProductMongoRepository implements ProductRepository {
 
 	private MongoCollection<Document> productCollection;
-	private static final Logger LOGGER = LogManager.getLogger(ProductMongoRepository.class);
-	private static final LogUtility logUtil = new LogUtility();
 
 	public ProductMongoRepository(MongoClient client, String databaseName, String collectionName) {
 		productCollection = client.getDatabase(databaseName).getCollection(collectionName);
@@ -39,7 +37,7 @@ public class ProductMongoRepository implements ProductRepository {
 	}
 
 	@Override
-	public Product findById(long id) throws NoSuchElementException{
+	public Product findById(long id) throws NoSuchElementException {
 		Document d = productCollection.find(Filters.eq("_id", id)).first();
 		if (d != null)
 			return fromDocumentToProduct(d);
@@ -49,12 +47,7 @@ public class ProductMongoRepository implements ProductRepository {
 
 	@Override
 	public void save(Product product) {
-		try {
-			productCollection.insertOne(new Document().append("_id", product.getId()).append("name", product.getName())
-					.append("price", product.getPrice()));
-		} catch (MongoWriteException e) {
-			LOGGER.log(Level.ERROR, "Product with id {} already in database \n{}", product.getId(),
-					logUtil.getReducedStackTrace(e));
-		}
+		productCollection.insertOne(new Document().append("_id", product.getId()).append("name", product.getName())
+				.append("price", product.getPrice()));
 	}
 }
