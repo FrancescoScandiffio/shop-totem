@@ -88,17 +88,6 @@ class StockMongoRepositoryTestcontainersIT {
 	}
 
 	@Test
-	@DisplayName("'save' stock to repository should not save if stock id is already existing")
-	void testSaveStockIfIdAlreadyExistingShouldNotSave() {
-		addTestStockToDatabase(1, 20);
-		Stock stock = new Stock(1, 50);
-
-		stockRepository.save(stock);
-
-		assertThat(readAllStocksFromDatabase()).containsExactly(new Stock(1, 20));
-	}
-
-	@Test
 	@DisplayName("'update' should update stock in repository")
 	void testUpdateShouldUpdateStockInRepository() {
 		addTestStockToDatabase(1, 50);

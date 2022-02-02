@@ -36,12 +36,7 @@ public class StockMongoRepository implements StockRepository {
 
 	@Override
 	public void save(Stock stock) {
-		try {
-			stockCollection.insertOne(fromStockToDocument(stock));
-		} catch (MongoWriteException e) {
-			LOGGER.log(Level.ERROR, "Stock with id {} already in database \n{}", stock.getId(),
-					logUtil.getReducedStackTrace(e));
-		}
+		stockCollection.insertOne(fromStockToDocument(stock));
 	}
 
 	@Override
