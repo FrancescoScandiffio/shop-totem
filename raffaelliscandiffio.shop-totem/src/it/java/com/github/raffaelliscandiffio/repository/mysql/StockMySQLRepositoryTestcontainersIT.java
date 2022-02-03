@@ -1,4 +1,5 @@
 package com.github.raffaelliscandiffio.repository.mysql;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
@@ -19,7 +20,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.github.raffaelliscandiffio.model.Stock;
 
-
 @Testcontainers(disabledWithoutDocker = true)
 class StockMySQLRepositoryTestcontainersIT {
 	private static final String TOTEM_DB_NAME = "totem";
@@ -31,7 +31,6 @@ class StockMySQLRepositoryTestcontainersIT {
 	@Container
 	public static final MySQLContainer mysqlContainer = new MySQLContainer("mysql:8.0.28")
 			.withDatabaseName(TOTEM_DB_NAME).withUsername("mysql").withPassword("mysql");
-
 
 	@BeforeAll
 	public static void createEntityManagerFactory() {
@@ -49,8 +48,8 @@ class StockMySQLRepositoryTestcontainersIT {
 		entityManager = emf.createEntityManager();
 		// always starting with empty database
 		entityManager.getTransaction().begin();
-        entityManager.createQuery("DELETE FROM Stock").executeUpdate();
-        entityManager.getTransaction().commit();
+		entityManager.createQuery("DELETE FROM Stock").executeUpdate();
+		entityManager.getTransaction().commit();
 		stockRepository = new StockMySQLRepository(entityManager);
 	}
 
@@ -61,55 +60,59 @@ class StockMySQLRepositoryTestcontainersIT {
 		}
 		if (entityManager.isOpen()) {
 			entityManager.close();
-		}	
+		}
 	}
-	
+
 	@Test
 	@DisplayName("'findById' when the id is not found should return null")
 	void testFindByIdWhenIdIsNotFoundShouldReturnNull() {
 		assertThat(stockRepository.findById(1)).isNull();
 	}
-	
+
 	@Test
 	@DisplayName("'findById' when the id is found")
 	void testFindByIdWhenIdIsFound() {
 		Stock stock1 = new Stock(1, 100);
 		Stock stock2 = new Stock(2, 50);
-		addTestStockToDatabase(stock1); 
-		addTestStockToDatabase(stock2); 
+		addTestStockToDatabase(stock1);
+		addTestStockToDatabase(stock2);
 		assertThat(stockRepository.findById(2)).isEqualTo(stock2);
 	}
-	
+
 	@Test
 	@DisplayName("'save' stock to repository")
 	void testSaveStock() {
 		Stock stock = new Stock(1, 100);
-		entityManager.getTransaction().begin();
 		stockRepository.save(stock);
-		entityManager.getTransaction().commit();
+		
+		// ensure that the change has been committed
+		if (entityManager.getTransaction().isActive()) {
+			entityManager.getTransaction().rollback();
+		}
 		assertThat(readAllStocksFromDatabase()).containsExactly(stock);
 	}
-	
+
 	@Test
 	@DisplayName("'update' stock to repository")
 	void testUpdateStock() {
 		addTestStockToDatabase(new Stock(1, 100));
 		Stock stock = new Stock(1, 50);
-		
-		entityManager.getTransaction().begin();
 		stockRepository.update(stock);
-		entityManager.getTransaction().commit();
+		
+		// ensure that the change has been committed
+		if (entityManager.getTransaction().isActive()) {
+			entityManager.getTransaction().rollback();
+		}
 		assertThat(readAllStocksFromDatabase()).containsExactly(stock);
 	}
-	
+
 	private void addTestStockToDatabase(Stock stock) {
 		entityManager.getTransaction().begin();
 		entityManager.persist(stock);
 		entityManager.getTransaction().commit();
 	}
-	
+
 	private List<Stock> readAllStocksFromDatabase() {
 		return entityManager.createQuery("select s from Stock s", Stock.class).getResultList();
 	}
-
 }
