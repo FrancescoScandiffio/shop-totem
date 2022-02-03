@@ -20,12 +20,15 @@ public class StockMySQLRepository implements StockRepository {
 
 	@Override
 	public void save(Stock stock) {
+		entityManager.getTransaction().begin();
 		entityManager.persist(stock);
+		entityManager.getTransaction().commit();
 	}
 
 	@Override
 	public void update(Stock stock) {
+		entityManager.getTransaction().begin();
 		entityManager.merge(stock);
+		entityManager.getTransaction().commit();
 	}
-
 }
