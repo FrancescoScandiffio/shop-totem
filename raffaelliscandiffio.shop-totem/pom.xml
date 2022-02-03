@@ -203,12 +203,12 @@
 					</dependencies>
 					<configuration>
 						<targetClasses>
-							<param>*repository.mongo.StockMongoRepository*</param>
-							<param>*repository.mongo.ProductMongoRepository*</param>
+							<param>*repository.mysql.StockMySQLRepository*</param>
+							<param>*repository.mysql.ProductMySQLRepository*</param>
 						</targetClasses>
 						<targetTests>
-							<param>*repository.mongo.StockMongoRepository*</param>
-							<param>*repository.mongo.ProductMongoRepository*</param>
+							<param>*repository.mysql.StockMySQLRepository*</param>
+							<param>*repository.mysql.ProductMySQLRepository*</param>
 						</targetTests>
 						<mutators>
 							<mutator>STRONGER</mutator>
