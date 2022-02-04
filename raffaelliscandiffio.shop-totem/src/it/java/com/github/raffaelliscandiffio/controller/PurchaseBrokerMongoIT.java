@@ -73,10 +73,11 @@ class PurchaseBrokerMongoIT {
 	@DisplayName("'retrieveProducts' should return products in db")
 	@Test
 	void testRetrieveProducts() {
-		addTestProductToDatabase(1, "pasta", 2.3);
-		addTestProductToDatabase(2, "pizza", 5.5);
-		assertThat(broker.retrieveProducts()).containsExactly(new Product(1, "pasta", 2.3),
-				new Product(2, "pizza", 5.5));
+		Product product1 = new Product(1, "pasta", 2.3);
+		Product product2 = new Product(2, "pizza", 5.5);
+		productRepository.save(product1);
+		productRepository.save(product2);
+		assertThat(broker.retrieveProducts()).containsExactly(product1, product2);
 	}
 
 	private List<Product> readAllProductsFromDatabase() {
@@ -90,10 +91,6 @@ class PurchaseBrokerMongoIT {
 		return StreamSupport.stream(stockCollection.find().spliterator(), false)
 				.map(d -> new Stock(Long.valueOf("" + d.get("_id")), Integer.valueOf("" + d.get("quantity"))))
 				.collect(Collectors.toList());
-	}
-
-	private void addTestProductToDatabase(long id, String name, double price) {
-		productCollection.insertOne(new Document().append("_id", id).append("name", name).append("price", price));
 	}
 
 }
