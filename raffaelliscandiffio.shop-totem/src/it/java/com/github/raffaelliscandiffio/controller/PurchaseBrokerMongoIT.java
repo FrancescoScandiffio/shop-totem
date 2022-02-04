@@ -28,11 +28,11 @@ import com.mongodb.client.MongoDatabase;
 
 @Testcontainers(disabledWithoutDocker = true)
 class PurchaseBrokerMongoIT {
-	
+
 	private ProductRepository productRepository;
 	private StockRepository stockRepository;
 	private PurchaseBroker broker;
-	
+
 	@Container
 	public static final MongoDBContainer mongo = new MongoDBContainer("mongo:5.0.6");
 
@@ -61,7 +61,7 @@ class PurchaseBrokerMongoIT {
 	public void tearDown() {
 		client.close();
 	}
-	
+
 	@DisplayName("'saveNewProductInStock' should save product and stock in db")
 	@Test
 	void testsaveNewProductInStock() {
@@ -69,19 +69,31 @@ class PurchaseBrokerMongoIT {
 		assertThat(readAllProductsFromDatabase()).containsExactly(new Product(1, "pizza", 5.5));
 		assertThat(readAllStocksFromDatabase()).containsExactly(new Stock(1, 100));
 	}
-	
-	
+
+	@DisplayName("'retrieveProducts' should return products in db")
+	@Test
+	void testRetrieveProducts() {
+		addTestProductToDatabase(1, "pasta", 2.3);
+		addTestProductToDatabase(2, "pizza", 5.5);
+		assertThat(broker.retrieveProducts()).containsExactly(new Product(1, "pasta", 2.3),
+				new Product(2, "pizza", 5.5));
+	}
+
 	private List<Product> readAllProductsFromDatabase() {
 		return StreamSupport.stream(productCollection.find().spliterator(), false)
 				.map(d -> new Product(Long.valueOf("" + d.get("_id")), "" + d.get("name"),
 						Double.valueOf("" + d.get("price"))))
 				.collect(Collectors.toList());
 	}
-	
+
 	private List<Stock> readAllStocksFromDatabase() {
 		return StreamSupport.stream(stockCollection.find().spliterator(), false)
 				.map(d -> new Stock(Long.valueOf("" + d.get("_id")), Integer.valueOf("" + d.get("quantity"))))
 				.collect(Collectors.toList());
+	}
+
+	private void addTestProductToDatabase(long id, String name, double price) {
+		productCollection.insertOne(new Document().append("_id", id).append("name", name).append("price", price));
 	}
 
 }
