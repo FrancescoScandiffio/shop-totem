@@ -87,6 +87,13 @@ class PurchaseBrokerMongoIT {
 		assertThat(quantity).isEqualTo(20);
 		assertThat(readAllStocksFromDatabase()).containsExactly(new Stock(1, 80));
 	}
+	
+	@DisplayName("'doesProductExist' returns true when the id is in db")
+	@Test
+	void testDoesProductExist() {
+		productRepository.save(new Product(1, "pasta", 2.4));
+		assertThat(broker.doesProductExist(1)).isTrue();
+	}
 
 	private List<Stock> readAllStocksFromDatabase() {
 		return StreamSupport.stream(stockCollection.find().spliterator(), false)
