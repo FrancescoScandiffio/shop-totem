@@ -37,7 +37,6 @@ class PurchaseBrokerMongoIT {
 	public static final MongoDBContainer mongo = new MongoDBContainer("mongo:5.0.6");
 
 	private MongoClient client;
-	private MongoCollection<Document> productCollection;
 	private MongoCollection<Document> stockCollection;
 
 	private static final String TOTEM_DB_NAME = "totem";
@@ -52,7 +51,6 @@ class PurchaseBrokerMongoIT {
 		MongoDatabase database = client.getDatabase(TOTEM_DB_NAME);
 		// make sure we always start with a clean database
 		database.drop();
-		productCollection = database.getCollection(PRODUCT_COLLECTION_NAME);
 		stockCollection = database.getCollection(STOCK_COLLECTION_NAME);
 		broker = new PurchaseBroker(productRepository, stockRepository);
 	}
@@ -78,6 +76,16 @@ class PurchaseBrokerMongoIT {
 		productRepository.save(product1);
 		productRepository.save(product2);
 		assertThat(broker.retrieveProducts()).containsExactly(product1, product2);
+	}
+	
+	@DisplayName("'takeAvailable' should return quantity requested when available")
+	@Test
+	void testTakeAvailable() {
+		stockRepository.save(new Stock(1, 100));
+		int quantity = broker.takeAvailable(1, 20);
+
+		assertThat(quantity).isEqualTo(20);
+		assertThat(readAllStocksFromDatabase()).containsExactly(new Stock(1, 80));
 	}
 
 	private List<Stock> readAllStocksFromDatabase() {
