@@ -66,7 +66,7 @@ class PurchaseBrokerMongoIT {
 	@Test
 	void testsaveNewProductInStock() {
 		broker.saveNewProductInStock(1, "pizza", 5.5, 100);
-		assertThat(readAllProductsFromDatabase()).containsExactly(new Product(1, "pizza", 5.5));
+		assertThat(productRepository.findAll()).containsExactly(new Product(1, "pizza", 5.5));
 		assertThat(readAllStocksFromDatabase()).containsExactly(new Stock(1, 100));
 	}
 
@@ -80,17 +80,9 @@ class PurchaseBrokerMongoIT {
 		assertThat(broker.retrieveProducts()).containsExactly(product1, product2);
 	}
 
-	private List<Product> readAllProductsFromDatabase() {
-		return StreamSupport.stream(productCollection.find().spliterator(), false)
-				.map(d -> new Product(Long.valueOf("" + d.get("_id")), "" + d.get("name"),
-						Double.valueOf("" + d.get("price"))))
-				.collect(Collectors.toList());
-	}
-
 	private List<Stock> readAllStocksFromDatabase() {
 		return StreamSupport.stream(stockCollection.find().spliterator(), false)
 				.map(d -> new Stock(Long.valueOf("" + d.get("_id")), Integer.valueOf("" + d.get("quantity"))))
 				.collect(Collectors.toList());
 	}
-
 }
