@@ -80,7 +80,7 @@ class PurchaseBrokerMongoIT {
 	
 	@DisplayName("'takeAvailable' should return quantity requested when available")
 	@Test
-	void testTakeAvailable() {
+	void testTakeAvailableReturnsRequested() {
 		stockRepository.save(new Stock(1, 100));
 		int quantity = broker.takeAvailable(1, 20);
 
@@ -90,9 +90,15 @@ class PurchaseBrokerMongoIT {
 	
 	@DisplayName("'doesProductExist' returns true when the id is in db")
 	@Test
-	void testDoesProductExist() {
+	void testDoesProductExistWhenIdIsFound() {
 		productRepository.save(new Product(1, "pasta", 2.4));
 		assertThat(broker.doesProductExist(1)).isTrue();
+	}
+	
+	@DisplayName("'doesProductExist' returns false when the id is not in db")
+	@Test
+	void testDoesProductExistWhenIdIsNotFound() {
+		assertThat(broker.doesProductExist(1)).isFalse();
 	}
 
 	private List<Stock> readAllStocksFromDatabase() {
