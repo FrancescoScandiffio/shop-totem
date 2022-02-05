@@ -88,6 +88,16 @@ class PurchaseBrokerMongoIT {
 		assertThat(readAllStocksFromDatabase()).containsExactly(new Stock(1, 80));
 	}
 	
+	@DisplayName("'takeAvailable' should return quantity available when requested is not available")
+	@Test
+	void testTakeAvailableReturnsAvailable() {
+		stockRepository.save(new Stock(1, 50));
+		int quantity = broker.takeAvailable(1, 60);
+
+		assertThat(quantity).isEqualTo(50);
+		assertThat(readAllStocksFromDatabase()).containsExactly(new Stock(1, 0));
+	}
+	
 	@DisplayName("'doesProductExist' returns true when the id is in db")
 	@Test
 	void testDoesProductExistWhenIdIsFound() {
