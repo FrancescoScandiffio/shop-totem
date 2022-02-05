@@ -38,7 +38,7 @@ class PurchaseBrokerMySQLIT {
 	private static final String TOTEM_DB_NAME = "totem";
 	
 	@Container
-	public static final MySQLContainer mysqlContainer = new MySQLContainer("mysql:8.0.28")
+	public static final MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0.28")
 			.withDatabaseName(TOTEM_DB_NAME).withUsername("mysql").withPassword("mysql");
 
 	@BeforeAll
