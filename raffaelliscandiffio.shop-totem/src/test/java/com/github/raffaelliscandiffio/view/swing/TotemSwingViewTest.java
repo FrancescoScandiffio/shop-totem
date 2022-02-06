@@ -6,8 +6,6 @@ import static org.mockito.Mockito.verify;
 import java.util.Arrays;
 
 import javax.swing.DefaultListModel;
-import javax.swing.JFormattedTextField;
-import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
 import org.assertj.swing.annotation.GUITest;
@@ -25,6 +23,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -212,67 +212,30 @@ class TotemSwingViewTest {
 			spinner.requireDisabled();
 		}
 
-		@Test
 		@GUITest
-		@DisplayName("Button 'Add' should be disabled when quantity in spinner is a negative number")
-		void testAddButtonShouldBeDisabledWhenQuantityInSpinnerIsNegative() {
+		@ParameterizedTest
+		@ValueSource(strings = { "0", "01", "-1", "1 ", " ", "a", "1a", "1..", "1.1" })
+		@DisplayName("Button 'Add' should be disabled when the value in spinner is not a positive integer or starts with zero")
+		void testAddButtonShouldBeDisabledWhenValueInSpinnerIsNotAPositiveIntegerOrStartsWithZero(String input) {
 			Product product = new Product(1, "Product1", 2);
 			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
 			window.list("productList").selectItem(0);
-			window.spinner("quantitySpinner").enterText("-1");
+			window.spinner("quantitySpinner").enterText(input);
 			window.button(JButtonMatcher.withText("Add")).requireDisabled();
 		}
 
 		@Test
 		@GUITest
-		@DisplayName("Button 'Add' should be disabled when quantity in spinner is not a number")
-		void testAddButtonShouldBeDisabledWhenQuantityInSpinnerIsNaN() {
-			Product product = new Product(1, "Product1", 2);
-			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
-			window.list("productList").selectItem(0);
-			window.spinner("quantitySpinner").enterText("text");
-			window.button(JButtonMatcher.withText("Add")).requireDisabled();
-		}
-
-		@Test
-		@GUITest
-		@DisplayName("Button 'Add' should be disabled when quantity in spinner is zero")
-		void testAddButtonShouldBeDisabledWhenQuantityInSpinnerIsZero() {
-			Product product = new Product(1, "Product1", 2);
-			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
-			window.list("productList").selectItem(0);
-			window.spinner("quantitySpinner").enterText("0");
-			window.button(JButtonMatcher.withText("Add")).requireDisabled();
-		}
-
-		@Test
-		@GUITest
-		@DisplayName("Button 'Add' should be disabled when quantity in spinner is invalid and enabled when becomes valid")
+		@DisplayName("Button 'Add' should be disabled when quantity in spinner is invalid and enabled when becomes a positive integer")
 		void testAddButtonShouldBeDisabledWhenQuantityInSpinnerIsInvalidAndEnabledWhenTurnsValid() {
 			Product product = new Product(1, "Product1", 2);
+			JButtonFixture addButton = window.button(JButtonMatcher.withText("Add"));
 			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
 			window.list("productList").selectItem(0);
 			window.spinner("quantitySpinner").enterText("text");
-			window.button(JButtonMatcher.withText("Add")).requireDisabled();
-			window.spinner("quantitySpinner").enterText("2");
-			window.button(JButtonMatcher.withText("Add")).requireEnabled();
-		}
-
-		@Test
-		@GUITest
-		@DisplayName("Quantity spinner shown value should be reset to last valid value if an invalid value is inserted and the product is deselected")
-		void testQuantitySpinnerShouldBeResetToLastValidValueWhenQuantityIsInvalidAndProductIsDeselected() {
-			Product product = new Product(1, "Product1", 2);
-			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
-			// gets the spinner text field
-			JFormattedTextField tf = ((JSpinner.DefaultEditor) window.spinner("quantitySpinner").target().getEditor())
-					.getTextField();
-			window.list("productList").selectItem(0);
-			window.spinner("quantitySpinner").enterText("2");
-			window.spinner("quantitySpinner").enterText("text");
-			window.list("productList").clearSelection();
-			// asserts on the spinner current shown value
-			assertThat(tf.getText()).isEqualTo("2");
+			GuiActionRunner.execute(() -> addButton.target().setEnabled(false));
+			window.spinner("quantitySpinner").enterText("3");
+			addButton.requireEnabled();
 		}
 
 		@Test
@@ -691,6 +654,29 @@ class TotemSwingViewTest {
 		}
 
 		@Test
+		@GUITest
+		@DisplayName("Reset the label when a new item is selected")
+		void testResetTheLabelMessageWhenAnItemIsSelected() {
+			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+			GuiActionRunner.execute(() -> window.label("cartMessageLabel").target().setText("foo"));
+			window.list("cartList").selectItem(0);
+			window.label("cartMessageLabel").requireText(" ");
+		}
+
+		@Test
+		@GUITest
+		@DisplayName("Reset the label when an item is deselected")
+		void testResetTheLabelMessageWhenAnItemIsDeselected() {
+			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+			window.list("cartList").selectItem(0);
+			GuiActionRunner.execute(() -> window.label("cartMessageLabel").target().setText("foo"));
+			window.list("cartList").clearSelection();
+			window.label("cartMessageLabel").requireText(" ");
+		}
+
+		@Test
 		@DisplayName("The spinner upper bound should be updated when the quantity of the selected item changes")
 		void testTheSpinnerUpperBoundShouldBeUpdatedWhenTheQuantityOfTheSelectedItemChanges() {
 			SpinnerNumberModel spinnerModel = (SpinnerNumberModel) (window.spinner("cartReturnSpinner").target()
@@ -737,34 +723,116 @@ class TotemSwingViewTest {
 			window.button(JButtonMatcher.withText("Return quantity")).requireDisabled();
 		}
 
-		@Test
 		@GUITest
-		@DisplayName("Button 'return quantity' should be disabled when the spinner is enabled and contains an invalid value")
-		void testButtonReturnQuantityShouldBeDisabledWhenTheSpinnerIsEnabledAndContainsAnInvalidValue() {
+		@ParameterizedTest
+		@ValueSource(strings = { "0", "01", "-1", " ", "a", "1a", "1.1" })
+		@DisplayName("Button 'return quantity' should be disabled when the value in spinner is not a positive integer or starts with zero")
+		void testReturnQuantyButtonShouldBeDisabledWhenValueInSpinnerIsNotAPositiveIntegerOrStartsWithZero(
+				String input) {
 			JButtonFixture returnButton = window.button(JButtonMatcher.withText("Return quantity"));
 			JSpinnerFixture spinner = window.spinner("cartReturnSpinner");
 			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
 					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
 			window.list("cartList").selectItem(0);
-			spinner.enterText("foo");
+			spinner.enterText(input);
 			returnButton.requireDisabled();
-			spinner.enterText("0");
-			returnButton.requireDisabled();
-			spinner.enterText("5");
-			returnButton.requireDisabled();
+		}
+
+		@GUITest
+		@ParameterizedTest
+		@ValueSource(strings = { "0", "01", " ", "a", "1.1" })
+		@DisplayName("Show error message when the content of the spinner is not a positive integer or starts with zero")
+		void testShowErrorMessageWhenTheContentOfTheSpinnerIsNotPositiveIntegerOrStartsWithZero(String input) {
+			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+			window.list("cartList").selectItem(0);
+			window.spinner("cartReturnSpinner").enterText(input);
+			window.label("cartMessageLabel")
+					.requireText("Error: the input must be a positive integer. Received: " + input);
 		}
 
 		@Test
 		@GUITest
-		@DisplayName("Button 'return quantity' should be enabled when the spinner is enabled and its content becomes valid")
-		void testButtonReturnQuantityShouldBeEnabledWhenSpinnerIsEnabledAndItsContentBecomesValid() {
+		@DisplayName("Button 'return quantity' should be enabled when the spinner is enabled and its value is equal to spinner upper bound")
+		void testReturnQuantyButtonShouldBeDisabledWhenTheSpinnerIsEnabledWithValueEqualToTheSpinnerUpperBound() {
+			JButtonFixture returnButton = window.button(JButtonMatcher.withText("Return quantity"));
 			JSpinnerFixture spinner = window.spinner("cartReturnSpinner");
 			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
 					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
 			window.list("cartList").selectItem(0);
-			spinner.enterText("foo");
-			spinner.enterText("2");
-			window.button(JButtonMatcher.withText("Return quantity")).requireEnabled();
+			spinner.enterText("4");
+			returnButton.requireEnabled();
+		}
+
+		@Test
+		@GUITest
+		@DisplayName("Button 'return quantity' should be enabled when the spinner is enabled and its value is less than the spinner upper bound")
+		void testReturnQuantyButtonShouldBeDisabledWhenTheSpinnerIsEnabledWithValueLessThanTheSpinnerUpperBound() {
+			JButtonFixture returnButton = window.button(JButtonMatcher.withText("Return quantity"));
+			JSpinnerFixture spinner = window.spinner("cartReturnSpinner");
+			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+			window.list("cartList").selectItem(0);
+			spinner.enterText("3");
+			returnButton.requireEnabled();
+		}
+
+		@GUITest
+		@Test
+		@DisplayName("Reset error message when the spinner is enabled and its value is less than the quantity of the selected item")
+		void testResetErrorMessageWhenTheSpinnerIsEnabledWithValueLessThanSelectedItemQuantity() {
+			JButtonFixture returnButton = window.button(JButtonMatcher.withText("Return quantity"));
+			JSpinnerFixture spinner = window.spinner("cartReturnSpinner");
+			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+			window.list("cartList").selectItem(0);
+			spinner.enterText("10");
+			returnButton.requireDisabled();
+			window.label("cartMessageLabel")
+					.requireText("Error: the input must be an integer in range [1,4]. Received: 10");
+		}
+
+		@Test
+		@GUITest
+		@DisplayName("Button 'return quantity' should be disabled when the spinner is enabled and its is value is greater than the spinner upper bound")
+		void testReturnQuantyButtonShouldBeDisabledWhenTheSpinnerIsEnabledWithValueGreaterThanTheSpinnerUpperBound() {
+			JButtonFixture returnButton = window.button(JButtonMatcher.withText("Return quantity"));
+			JSpinnerFixture spinner = window.spinner("cartReturnSpinner");
+			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+			window.list("cartList").selectItem(0);
+			spinner.enterText("5");
+			returnButton.requireDisabled();
+		}
+
+		@GUITest
+		@Test
+		@DisplayName("Show error message when the spinner is enabled and its value is equal to the spinner upper bound")
+		void testShowErrorMessageWhenTheSpinnerIsEnabledWithValueEqualToSelectedItemQuantity() {
+			JButtonFixture returnButton = window.button(JButtonMatcher.withText("Return quantity"));
+			JSpinnerFixture spinner = window.spinner("cartReturnSpinner");
+			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+			window.list("cartList").selectItem(0);
+			spinner.enterText("5");
+			returnButton.requireDisabled();
+			window.label("cartMessageLabel")
+					.requireText("Error: the input must be an integer in range [1,4]. Received: 5");
+		}
+
+		@GUITest
+		@Test
+		@DisplayName("Show error message when the spinner is enabled and its value is greater than the quantity of the selected item")
+		void testShowErrorMessageWhenTheSpinnerIsEnabledWithValueGreaterThanSelectedItemQuantity() {
+			JButtonFixture returnButton = window.button(JButtonMatcher.withText("Return quantity"));
+			JSpinnerFixture spinner = window.spinner("cartReturnSpinner");
+			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+			window.list("cartList").selectItem(0);
+			spinner.enterText("10");
+			returnButton.requireDisabled();
+			window.label("cartMessageLabel")
+					.requireText("Error: the input must be an integer in range [1,4]. Received: 10");
 		}
 
 		@Test
@@ -787,55 +855,6 @@ class TotemSwingViewTest {
 			window.spinner("cartReturnSpinner").enterTextAndCommit("3");
 			window.button(JButtonMatcher.withText("Return quantity")).click();
 			verify(totemController).returnProduct(itemToReturn, 3);
-		}
-
-		@Test
-		@GUITest
-		@DisplayName("Show error message when the content of the spinner is invalid")
-		void testShowErrorMessageWhenTheContentOfTheSpinnerIsInvalid() {
-			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
-					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
-			window.list("cartList").selectItem(0);
-			window.spinner("cartReturnSpinner").enterText("foo");
-			window.label("cartMessageLabel")
-					.requireText("Error: the input must be an integer in range [1,4]. Received: foo");
-		}
-
-		@Test
-		@GUITest
-		@DisplayName("Reset the label message when the content of the spinner becomes valid")
-		void testResetTheLabelMessageWhenTheContentOfTheSpinnerBecomesValid() {
-			JSpinnerFixture spinner = window.spinner("cartReturnSpinner");
-			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
-					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
-			window.list("cartList").selectItem(0);
-			spinner.enterText("foo");
-			spinner.enterText("2");
-			window.label("cartMessageLabel").requireText(" ");
-
-		}
-
-		@Test
-		@GUITest
-		@DisplayName("Reset the label when a new item is selected")
-		void testResetTheLabelMessageWhenAnItemIsSelected() {
-			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
-					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
-			GuiActionRunner.execute(() -> window.label("cartMessageLabel").target().setText("foo"));
-			window.list("cartList").selectItem(0);
-			window.label("cartMessageLabel").requireText(" ");
-		}
-
-		@Test
-		@GUITest
-		@DisplayName("Reset the label when an item is deselected")
-		void testResetTheLabelMessageWhenAnItemIsDeselected() {
-			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
-					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
-			window.list("cartList").selectItem(0);
-			GuiActionRunner.execute(() -> window.label("cartMessageLabel").target().setText("foo"));
-			window.list("cartList").clearSelection();
-			window.label("cartMessageLabel").requireText(" ");
 		}
 
 	}

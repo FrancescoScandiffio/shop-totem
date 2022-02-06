@@ -161,7 +161,6 @@ public class CartPanel extends JPanel {
 		btnReturnQuantity = new JButton("Return quantity");
 		btnReturnQuantity.setEnabled(false);
 		btnReturnQuantity.setFocusPainted(false);
-		btnReturnQuantity.setActionCommand("returnProduct");
 		GridBagConstraints gbc_btnReturnQuantity = new GridBagConstraints();
 		gbc_btnReturnQuantity.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnReturnQuantity.insets = new Insets(0, 0, 5, 5);
@@ -176,14 +175,26 @@ public class CartPanel extends JPanel {
 
 		JFormattedTextField tf = ((DefaultEditor) spinner.getEditor()).getTextField();
 		tf.addCaretListener(e -> {
-			boolean isValueValid = tf.isEditValid();
-			btnReturnQuantity.setEnabled(isValueValid);
-			if (!isValueValid) {
-				messageLabel.setText("Error: the input must be an integer in range [1,"
-						+ spinnerModel.getMaximum().toString() + "]. Received: " + tf.getText());
+			boolean isPositiveInteger = tf.getText().matches("^[1-9][0-9]*$");
+			if (isPositiveInteger) {
+				if (spinner.isEnabled()) {
+					int currentValue = Integer.parseInt(tf.getText());
+					if (currentValue <= (Integer) spinnerModel.getMaximum()) {
+						btnReturnQuantity.setEnabled(true);
+						messageLabel.setText(" ");
+					} else {
+						btnReturnQuantity.setEnabled(false);
+						messageLabel.setText("Error: the input must be an integer in range [1,"
+								+ spinnerModel.getMaximum().toString() + "]. Received: " + tf.getText());
+						messageLabel.setForeground(Color.RED);
+					}
+				}
+			} else {
+				btnReturnQuantity.setEnabled(false);
+				messageLabel.setText("Error: the input must be a positive integer. Received: " + tf.getText());
 				messageLabel.setForeground(Color.RED);
-			} else
-				messageLabel.setText(" ");
+			}
+
 		});
 
 		btnCheckout = new JButton("Checkout");
@@ -228,7 +239,6 @@ public class CartPanel extends JPanel {
 		btnCancelShopping.addActionListener(listener);
 		btnCheckout.addActionListener(listener);
 		btnRemoveSelected.addActionListener(listener);
-		btnReturnQuantity.addActionListener(listener);
 	}
 
 	DefaultListModel<OrderItem> getListOrderItemsModel() {
@@ -249,6 +259,10 @@ public class CartPanel extends JPanel {
 
 	JSpinner getSpinner() {
 		return spinner;
+	}
+
+	JButton getBtnReturnQuantity() {
+		return btnReturnQuantity;
 	}
 
 }

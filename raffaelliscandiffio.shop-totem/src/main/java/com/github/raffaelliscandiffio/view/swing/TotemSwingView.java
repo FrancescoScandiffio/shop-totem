@@ -2,6 +2,8 @@ package com.github.raffaelliscandiffio.view.swing;
 
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -47,14 +49,26 @@ public class TotemSwingView extends JFrame implements TotemView {
 
 		welcomePane.addActionListener(e -> startShoppingAction());
 
+		shoppingPane.getAddProductButton().addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				buyProductAction();
+			}
+		});
+
 		shoppingPane.addActionListener(e -> {
 			String command = e.getActionCommand();
 			if ("cancelShopping".equals(command))
 				closeShoppingAction();
-			else if ("buyProduct".equals(command))
-				buyProductAction();
 			else
 				openCartAction();
+		});
+
+		cartPane.getBtnReturnQuantity().addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				returnProductAction();
+			}
 		});
 
 		cartPane.addActionListener(e -> {
@@ -65,10 +79,9 @@ public class TotemSwingView extends JFrame implements TotemView {
 				closeShoppingAction();
 			else if ("checkout".equals(command))
 				confirmOrderAction();
-			else if ("removeSelected".equals(command))
-				removeItemAction();
 			else
-				returnProductAction();
+				removeItemAction();
+
 		});
 
 		goodbyePane.addActionListener(e -> startShoppingAction());
