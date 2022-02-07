@@ -96,4 +96,5 @@ jobs:
       with:
         name: screenshots
         path: '**/failed-gui-tests'
+        if-no-files-found: ignore
         
