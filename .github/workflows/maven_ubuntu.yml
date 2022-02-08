@@ -48,7 +48,8 @@ jobs:
       if: ${{ always() && github.event_name == 'pull_request' && steps.mvnTest.outcome == 'success' }}
       working-directory: ${{ env.workdir }}
 
-    - name: Build with Maven, analysed with SonarCloud
+    - name: Build with Maven, analyse with SonarCloud
+      id: mavenBuild
       run: >
        mvn verify
        org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
@@ -65,14 +66,19 @@ jobs:
        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
 
-    - name: Generate JUnit Report
+    - name: Generate Unit Test Report
       run: mvn surefire-report:report-only site:site -DgenerateReports=false
       if: ${{ always() && (steps.mvnTest.outcome == 'failure') }}
       working-directory: ${{ env.workdir }}
+      
+    - name: Generate Integration Test Report
+      run: mvn surefire-report:failsafe-report-only site:site -DgenerateReports=false
+      if: ${{ always() && (steps.mavenBuild.outcome == 'failure') }}
+      working-directory: ${{ env.workdir }}
 
-    - name: Archive JUnit Report
+    - name: Archive JUnit Reports
       uses: actions/upload-artifact@v2
-      if: ${{ always() && (steps.mvnTest.outcome == 'failure') }}
+      if: ${{ always() && ((steps.mvnTest.outcome == 'failure') || (steps.mavenBuild.outcome == 'failure')) }}
       with:
         name: surefire-report-jdk-11
         path: '**/target/site'
@@ -86,7 +92,9 @@ jobs:
     
     - name: Archive Screenshots
       uses: actions/upload-artifact@v2
-      if: ${{ failure() }}      
+      if: ${{ always() && (steps.mvnTest.outcome == 'failure') }}
       with:
         name: screenshots
         path: '**/failed-gui-tests'
+        if-no-files-found: ignore
+        

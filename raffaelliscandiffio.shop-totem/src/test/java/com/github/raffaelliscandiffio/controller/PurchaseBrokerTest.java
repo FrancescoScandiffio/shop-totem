@@ -4,13 +4,14 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -62,8 +63,7 @@ class PurchaseBrokerTest {
 		@Test
 		@DisplayName("should return 0 when Stock is not found")
 		void testTakeAvailableShouldReturnZeroWhenStockIsNotFound() {
-			when(stockRepository.findById(PRODUCT_ID))
-					.thenThrow(new NoSuchElementException("Stock with id " + PRODUCT_ID + " is not found"));
+			when(stockRepository.findById(PRODUCT_ID)).thenReturn(null);
 
 			assertThat(broker.takeAvailable(PRODUCT_ID, QUANTITY)).isZero();
 			verifyNoMoreInteractions(stockRepository);
@@ -124,8 +124,7 @@ class PurchaseBrokerTest {
 		@DisplayName("should return False when product is not found on repository")
 		void testDoesProductExistShouldReturnFalseWhenProductIsNotFound() {
 
-			when(productRepository.findById(PRODUCT_ID))
-					.thenThrow(new NoSuchElementException("Product with id " + PRODUCT_ID + " is not found"));
+			when(productRepository.findById(PRODUCT_ID)).thenReturn(null);
 
 			assertThat(broker.doesProductExist(PRODUCT_ID)).isFalse();
 		}
@@ -145,8 +144,8 @@ class PurchaseBrokerTest {
 	class SaveNewProductInStockTest {
 
 		@Test
-		@DisplayName("should 'save' new product and stock in repositories when name, price, quantity are valid")
-		void testSaveNewProductInStockWhenNamePriceQuantityAreValidShouldSaveProductAndStockInRepositories() {
+		@DisplayName("should 'save' new product and stock in repositories when id, name, price, quantity are valid")
+		void testSaveNewProductInStockWhenIdNamePriceQuantityAreValidShouldSaveProductAndStockInRepositories() {
 			broker.saveNewProductInStock(PRODUCT_ID, NAME, PRICE, QUANTITY);
 
 			verify(productRepository).save(new Product(PRODUCT_ID, NAME, PRICE));
@@ -178,6 +177,7 @@ class PurchaseBrokerTest {
 
 			assertThatThrownBy(() -> broker.saveNewProductInStock(PRODUCT_ID, NAME, -PRICE, QUANTITY))
 					.isInstanceOf(IllegalArgumentException.class).hasMessage("Negative price: " + -PRICE);
+			verifyNoMoreInteractions(stockRepository, productRepository);
 		}
 
 		@Test
@@ -186,6 +186,7 @@ class PurchaseBrokerTest {
 
 			assertThatThrownBy(() -> broker.saveNewProductInStock(PRODUCT_ID, NAME, PRICE, -QUANTITY))
 					.isInstanceOf(IllegalArgumentException.class).hasMessage("Negative quantity: " + -QUANTITY);
+			verifyNoMoreInteractions(stockRepository, productRepository);
 		}
 
 		@Test
@@ -194,6 +195,28 @@ class PurchaseBrokerTest {
 			broker.saveNewProductInStock(PRODUCT_ID, NAME, PRICE, 0);
 			verify(productRepository).save(new Product(PRODUCT_ID, NAME, PRICE));
 			verify(stockRepository).save(new Stock(PRODUCT_ID, 0));
+		}
+		
+		@Test
+		@DisplayName("throws when product with id is already in database")
+		void testSaveNewProductInStockWhenProductIsAlreadyExistingShouldThrow() {
+			when(productRepository.findById(PRODUCT_ID)).thenReturn(new Product(PRODUCT_ID, NAME, PRICE));
+			
+			assertThatThrownBy(() -> broker.saveNewProductInStock(PRODUCT_ID, NAME, PRICE, QUANTITY))
+					.isInstanceOf(IllegalArgumentException.class).hasMessage("Product with id "+ PRODUCT_ID +" already in database");
+			verify(stockRepository, never()).save(any());
+			verify(productRepository, never()).save(any());
+		}
+		
+		@Test
+		@DisplayName("throws when stock with id is already in database")
+		void testSaveNewProductInStockWhenStockIsAlreadyExistingShouldThrow() {
+			when(stockRepository.findById(PRODUCT_ID)).thenReturn(new Stock(PRODUCT_ID, QUANTITY));
+			
+			assertThatThrownBy(() -> broker.saveNewProductInStock(PRODUCT_ID, NAME, PRICE, QUANTITY))
+					.isInstanceOf(IllegalArgumentException.class).hasMessage("Stock with id "+ PRODUCT_ID +" already in database");
+			verify(stockRepository, never()).save(any());
+			verify(productRepository, never()).save(any());
 		}
 	}
 }

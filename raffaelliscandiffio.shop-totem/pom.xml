@@ -17,21 +17,28 @@
 
 		<junit.jupiter.version>5.8.1</junit.jupiter.version>
 		<assertj.core.version>3.21.0</assertj.core.version>
+
 		<mockito.version>4.2.0</mockito.version>
 		<assertj.swing.version>3.17.1</assertj.swing.version>
+
 		<log4j.version>2.17.1</log4j.version>
 		<mongo.driver.version>3.12.10</mongo.driver.version>
 		<logback.classic>1.2.10</logback.classic>
 		<mongo.java.server.version>1.39.0</mongo.java.server.version>
 
+		<testcontainers.version>1.16.3</testcontainers.version>
+		<mysql.version>8.0.28</mysql.version>
+		<hibernate.version>5.3.23.Final</hibernate.version>
+
 		<sonar.coverage.exclusions>
 			**/model/Product.java,
 			**/model/Stock.java,
-			**/utils/GUITestExtension.java,
+			**/utils/GUITestExtension.java
 		</sonar.coverage.exclusions>
 
 		<sonar.junit.reportPaths>
-			${project.build.directory}/surefire-reports
+			${project.build.directory}/surefire-reports,
+			${project.build.directory}/failsafe-reports
 		</sonar.junit.reportPaths>
 
 		<sonar.issue.ignore.multicriteria>e1,e2,e3,e4</sonar.issue.ignore.multicriteria>
@@ -50,7 +57,7 @@
 		<sonar.issue.ignore.multicriteria.e2.resourceKey>
 			**/swing/*Test*
 		</sonar.issue.ignore.multicriteria.e2.resourceKey>
-		
+
 		<!-- disable rule on static access -->
 		<sonar.issue.ignore.multicriteria.e3.ruleKey>
 			java:S3252
@@ -76,6 +83,13 @@
 				<version>${log4j.version}</version>
 				<scope>import</scope>
 				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>testcontainers-bom</artifactId>
+				<version>${testcontainers.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -125,18 +139,44 @@
 			<version>${mongo.driver.version}</version>
 		</dependency>
 		<dependency>
-			<!-- in memory mongo -->
-			<groupId>de.bwaldvogel</groupId>
-			<artifactId>mongo-java-server</artifactId>
-			<version>${mongo.java.server.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<!-- required to see Mongo Java Driver logs -->
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>${logback.classic}</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>mysql</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>mongodb</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>${mysql.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>${hibernate.version}</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -171,8 +211,12 @@
 					</dependencies>
 					<configuration>
 						<targetClasses>
+							<param>*repository.mysql.StockMySQLRepository*</param>
+							<param>*repository.mysql.ProductMySQLRepository*</param>
 						</targetClasses>
 						<targetTests>
+							<param>*repository.mysql.StockMySQLRepository*</param>
+							<param>*repository.mysql.ProductMySQLRepository*</param>
 						</targetTests>
 						<mutators>
 							<mutator>STRONGER</mutator>
@@ -233,6 +277,38 @@
 					<skipTests>${skipUTs}</skipTests>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.3.0</version>
+				<executions>
+					<execution>
+						<id>add-test-source</id>
+						<phase>generate-test-sources</phase>
+						<goals>
+							<goal>add-test-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>src/it/java</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>3.0.0-M5</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -258,6 +334,5 @@
 				</plugins>
 			</build>
 		</profile>
-
 	</profiles>
 </project>

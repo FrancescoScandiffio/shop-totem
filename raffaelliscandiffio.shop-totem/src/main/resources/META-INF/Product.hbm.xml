@@ -1,0 +1,21 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+"-//Hibernate/Hibernate Mapping DTD//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="com.github.raffaelliscandiffio.model.Product"
+		table="PRODUCTS">
+
+		<meta attribute="class-description">
+			This class contains products details.
+		</meta>
+
+		<id name="id" type="long" column="id" access="field"></id>
+
+		<property name="name" column="name" type="string"
+			access="field" />
+		<property name="price" column="price" type="double"
+			access="field" />
+	</class>
+</hibernate-mapping>

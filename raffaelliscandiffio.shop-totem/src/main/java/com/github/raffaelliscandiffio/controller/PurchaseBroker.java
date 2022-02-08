@@ -1,7 +1,6 @@
 package com.github.raffaelliscandiffio.controller;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -12,12 +11,10 @@ import com.github.raffaelliscandiffio.model.Stock;
 import com.github.raffaelliscandiffio.repository.ProductRepository;
 import com.github.raffaelliscandiffio.repository.StockRepository;
 import com.github.raffaelliscandiffio.utils.ExcludeGeneratedFromCoverage;
-import com.github.raffaelliscandiffio.utils.LogUtility;
 
 public class PurchaseBroker {
 
 	private static final Logger LOGGER = LogManager.getLogger(PurchaseBroker.class);
-	private static final LogUtility logUtil = new LogUtility();
 	private ProductRepository productRepository;
 	private StockRepository stockRepository;
 
@@ -35,9 +32,10 @@ public class PurchaseBroker {
 	 * @param price    of the product
 	 * @param quantity of the product in stock
 	 * @throws IllegalArgumentException if the specified name is empty or null,
-	 *                                  price is negative, quantity is negative
+	 *                                  price is negative, quantity is negative, id
+	 *                                  is already in database
 	 */
-	public void saveNewProductInStock(long id, String name, double price, int quantity) {
+	public void saveNewProductInStock(long id, String name, double price, int quantity) throws IllegalArgumentException{
 		if (!(name != null && !name.trim().isEmpty())) {
 			throw new IllegalArgumentException("Null or empty name is not allowed");
 		}
@@ -47,13 +45,17 @@ public class PurchaseBroker {
 		if (quantity < 0) {
 			throw new IllegalArgumentException("Negative quantity: " + quantity);
 		}
+		if (productRepository.findById(id) != null) {
+			throw new IllegalArgumentException("Product with id " + id + " already in database");
+		}
+		if (stockRepository.findById(id) != null) {
+			throw new IllegalArgumentException("Stock with id " + id + " already in database");
+		}
 
 		productRepository.save(new Product(id, name, price));
 		stockRepository.save(new Stock(id, quantity));
-		LOGGER.log(Level.INFO, 
-				"New product with ID: {}, name: {}, price: {}", id, name, price);
-		LOGGER.log(Level.INFO, 
-				"New stock with ID: {}, quantity: {}", id, quantity);
+		LOGGER.log(Level.INFO, "New product with ID: {}, name: {}, price: {}", id, name, price);
+		LOGGER.log(Level.INFO, "New stock with ID: {}, quantity: {}", id, quantity);
 	}
 
 	public List<Product> retrieveProducts() {
@@ -65,9 +67,9 @@ public class PurchaseBroker {
 	 * quantity. If current quantity in stock is not sufficient only the available
 	 * quantity is taken.
 	 * 
-	 * @param id of the product/stock
-	 * @param quantity  positive of the product that needs to be subtracted from
-	 *                  current stock quantity
+	 * @param id       of the product/stock
+	 * @param quantity positive of the product that needs to be subtracted from
+	 *                 current stock quantity
 	 * @return the quantity available given the requested, in the following
 	 *         conditions:
 	 *         <ul>
@@ -78,16 +80,12 @@ public class PurchaseBroker {
 	 *         </ul>
 	 */
 	public int takeAvailable(long id, int quantity) {
-		Stock stock;
-		try {
-			stock = stockRepository.findById(id);
-		} catch (NoSuchElementException e) {
-			LOGGER.log(Level.ERROR,
-					"Stock with id {} not found \n{}", id, logUtil.getReducedStackTrace(e));
+		Stock stock = stockRepository.findById(id);
+		if (stock == null) {
+			LOGGER.log(Level.ERROR, "Stock with id {} not found", id);
 			return 0;
 		}
 		int stockAvailableQuantity = stock.getQuantity();
-
 		if (stockAvailableQuantity == 0) {
 			return 0;
 		} else {
@@ -101,21 +99,18 @@ public class PurchaseBroker {
 			}
 		}
 	}
-	
+
 	@ExcludeGeneratedFromCoverage
 	public void returnProduct(long id, int quantity) {
 		// TODO Auto-generated method stub
 	}
 
 	public boolean doesProductExist(long id) {
-		try {
-			productRepository.findById(id);
+		if (productRepository.findById(id) != null) {
 			return true;
-		} catch (NoSuchElementException e) {
-			LOGGER.log(Level.ERROR,
-					"Product with id {} not found \n{}", id, logUtil.getReducedStackTrace(e));
-			return false;
 		}
+		LOGGER.log(Level.ERROR, "Product with id {} not found", id);
+		return false;
 	}
 
 }

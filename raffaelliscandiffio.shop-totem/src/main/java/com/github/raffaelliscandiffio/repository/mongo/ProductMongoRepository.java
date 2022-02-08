@@ -5,24 +5,17 @@ import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 
 import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.repository.ProductRepository;
-import com.github.raffaelliscandiffio.utils.LogUtility;
 import com.mongodb.MongoClient;
-import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 
 public class ProductMongoRepository implements ProductRepository {
 
 	private MongoCollection<Document> productCollection;
-	private static final Logger LOGGER = LogManager.getLogger(ProductMongoRepository.class);
-	private static final LogUtility logUtil = new LogUtility();
 
 	public ProductMongoRepository(MongoClient client, String databaseName, String collectionName) {
 		productCollection = client.getDatabase(databaseName).getCollection(collectionName);
@@ -39,22 +32,16 @@ public class ProductMongoRepository implements ProductRepository {
 	}
 
 	@Override
-	public Product findById(long id) throws NoSuchElementException{
+	public Product findById(long id) throws NoSuchElementException {
 		Document d = productCollection.find(Filters.eq("_id", id)).first();
 		if (d != null)
 			return fromDocumentToProduct(d);
-		else
-			throw new NoSuchElementException(String.format("Product with id %d not found", id));
+		return null;
 	}
 
 	@Override
 	public void save(Product product) {
-		try {
-			productCollection.insertOne(new Document().append("_id", product.getId()).append("name", product.getName())
-					.append("price", product.getPrice()));
-		} catch (MongoWriteException e) {
-			LOGGER.log(Level.ERROR, "Product with id {} already in database \n{}", product.getId(),
-					logUtil.getReducedStackTrace(e));
-		}
+		productCollection.insertOne(new Document().append("_id", product.getId()).append("name", product.getName())
+				.append("price", product.getPrice()));
 	}
 }
