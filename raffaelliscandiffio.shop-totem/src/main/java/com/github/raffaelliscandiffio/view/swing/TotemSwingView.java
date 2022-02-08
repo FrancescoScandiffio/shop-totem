@@ -6,6 +6,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
@@ -168,8 +169,9 @@ public class TotemSwingView extends JFrame implements TotemView {
 
 	@Override
 	public void itemModified(OrderItem storedItem, OrderItem modifiedItem) {
-		getCartPane().getListOrderItemsModel().setElementAt(modifiedItem,
-				getCartPane().getListOrderItemsModel().indexOf(storedItem));
+		final DefaultListModel<OrderItem> listOrderItemsModel = getCartPane().getListOrderItemsModel();
+		listOrderItemsModel.setElementAt(modifiedItem,
+				listOrderItemsModel.indexOf(storedItem));
 	}
 
 	@Override
