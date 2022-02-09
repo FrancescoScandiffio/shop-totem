@@ -21,7 +21,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.text.DefaultFormatter;
 
 import com.github.raffaelliscandiffio.model.Product;
 
@@ -128,9 +127,9 @@ public class ShoppingPanel extends JPanel {
 		tf = ((JSpinner.DefaultEditor) editor).getTextField();
 		tf.setColumns(4);
 		tf.addCaretListener(e -> {
-			btnAddButton.setEnabled(tf.isEditValid() && listProducts.getSelectedIndex() != -1);
-
-			if (!tf.isEditValid()) {
+			boolean isValueValid = tf.getText().matches("^[1-9][0-9]*");
+			btnAddButton.setEnabled(isValueValid && listProducts.getSelectedIndex() != -1);
+			if (!isValueValid) {
 				lblMessage.setText("Invalid quantity");
 				lblMessage.setForeground(Color.RED);
 			} else {
@@ -138,13 +137,10 @@ public class ShoppingPanel extends JPanel {
 			}
 		});
 
-		DefaultFormatter formatter = (DefaultFormatter) tf.getFormatter();
-		formatter.setCommitsOnValidEdit(true);
-
 		btnAddButton = new JButton("Add");
-		btnAddButton.setActionCommand("buyProduct");
 		btnAddButton.setEnabled(false);
 		btnAddButton.setFocusPainted(false);
+
 		GridBagConstraints gbc_btnAddButton = new GridBagConstraints();
 		gbc_btnAddButton.insets = new Insets(0, 0, 5, 0);
 		gbc_btnAddButton.gridx = 8;
@@ -169,7 +165,6 @@ public class ShoppingPanel extends JPanel {
 
 	void addActionListener(ActionListener listener) {
 		btnCancelButton.addActionListener(listener);
-		btnAddButton.addActionListener(listener);
 		btnCart.addActionListener(listener);
 	}
 
@@ -187,6 +182,10 @@ public class ShoppingPanel extends JPanel {
 
 	JLabel getLblMessage() {
 		return lblMessage;
+	}
+
+	JButton getAddProductButton() {
+		return btnAddButton;
 	}
 
 }

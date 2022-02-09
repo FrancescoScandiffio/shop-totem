@@ -6,8 +6,7 @@ import static org.mockito.Mockito.verify;
 import java.util.Arrays;
 
 import javax.swing.DefaultListModel;
-import javax.swing.JFormattedTextField;
-import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 
 import org.assertj.swing.annotation.GUITest;
 import org.assertj.swing.core.matcher.JButtonMatcher;
@@ -24,6 +23,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -101,7 +102,7 @@ class TotemSwingViewTest {
 		}
 
 		@Test
-		@DisplayName("Method 'showGoodbye' should sho the goodbye panel")
+		@DisplayName("Method 'showGoodbye' should show the goodbye panel")
 		void testShowGoodbyeShouldChangePanelToGoodbyePanel() {
 			GuiActionRunner.execute(() -> totemSwingView.getCardLayout().show(totemSwingView.getContentPane(), "cart"));
 			GuiActionRunner.execute(() -> totemSwingView.showGoodbye());
@@ -120,6 +121,7 @@ class TotemSwingViewTest {
 			assertThat(totemSwingView.getWelcomePane().isShowing()).isTrue();
 			assertThat(totemSwingView.getShoppingPane().isShowing()).isFalse();
 			assertThat(totemSwingView.getCartPane().isShowing()).isFalse();
+			assertThat(totemSwingView.getGoodbyePane().isShowing()).isFalse();
 		}
 
 		@Test
@@ -133,7 +135,6 @@ class TotemSwingViewTest {
 		}
 
 		@Test
-		@GUITest
 		@DisplayName("Button 'Start Shopping' should delegate to TotemController 'startShopping'")
 		void testStartShoppingButtonShouldDelegateToTotemControllerStartShopping() {
 			GuiActionRunner
@@ -181,7 +182,6 @@ class TotemSwingViewTest {
 		}
 
 		@Test
-		@GUITest
 		@DisplayName("Button 'Cancel Shopping' should delegate to TotemController 'cancelShopping'")
 		void testCancelShoppingButtonShouldDelegateToTotemControllerCancelShopping() {
 			window.button(JButtonMatcher.withName("shopBtnCancelShopping")).click();
@@ -189,7 +189,6 @@ class TotemSwingViewTest {
 		}
 
 		@Test
-		@GUITest
 		@DisplayName("Button 'Open Cart' should delegate to TotemController 'openOrder'")
 		void testOpenCartButtonShouldDelegateToTotemControllerOpenOrder() {
 			window.button(JButtonMatcher.withText("Cart")).click();
@@ -213,67 +212,30 @@ class TotemSwingViewTest {
 			spinner.requireDisabled();
 		}
 
-		@Test
 		@GUITest
-		@DisplayName("Button 'Add' should be disabled when quantity in spinner is a negative number")
-		void testAddButtonShouldBeDisabledWhenQuantityInSpinnerIsNegative() {
+		@ParameterizedTest
+		@ValueSource(strings = { "0", "01", "-1", "1 ", " ", "a", "1a", "1..", "1.1" })
+		@DisplayName("Button 'Add' should be disabled when the value in spinner is not a positive integer or starts with zero")
+		void testAddButtonShouldBeDisabledWhenValueInSpinnerIsNotAPositiveIntegerOrStartsWithZero(String input) {
 			Product product = new Product(1, "Product1", 2);
 			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
 			window.list("productList").selectItem(0);
-			window.spinner("quantitySpinner").enterText("-1");
+			window.spinner("quantitySpinner").enterText(input);
 			window.button(JButtonMatcher.withText("Add")).requireDisabled();
 		}
 
 		@Test
 		@GUITest
-		@DisplayName("Button 'Add' should be disabled when quantity in spinner is not a number")
-		void testAddButtonShouldBeDisabledWhenQuantityInSpinnerIsNaN() {
-			Product product = new Product(1, "Product1", 2);
-			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
-			window.list("productList").selectItem(0);
-			window.spinner("quantitySpinner").enterText("text");
-			window.button(JButtonMatcher.withText("Add")).requireDisabled();
-		}
-
-		@Test
-		@GUITest
-		@DisplayName("Button 'Add' should be disabled when quantity in spinner is zero")
-		void testAddButtonShouldBeDisabledWhenQuantityInSpinnerIsZero() {
-			Product product = new Product(1, "Product1", 2);
-			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
-			window.list("productList").selectItem(0);
-			window.spinner("quantitySpinner").enterText("0");
-			window.button(JButtonMatcher.withText("Add")).requireDisabled();
-		}
-
-		@Test
-		@GUITest
-		@DisplayName("Button 'Add' should be disabled when quantity in spinner is invalid and enabled when becomes valid")
+		@DisplayName("Button 'Add' should be disabled when quantity in spinner is invalid and enabled when becomes a positive integer")
 		void testAddButtonShouldBeDisabledWhenQuantityInSpinnerIsInvalidAndEnabledWhenTurnsValid() {
 			Product product = new Product(1, "Product1", 2);
+			JButtonFixture addButton = window.button(JButtonMatcher.withText("Add"));
 			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
 			window.list("productList").selectItem(0);
 			window.spinner("quantitySpinner").enterText("text");
-			window.button(JButtonMatcher.withText("Add")).requireDisabled();
-			window.spinner("quantitySpinner").enterText("2");
-			window.button(JButtonMatcher.withText("Add")).requireEnabled();
-		}
-
-		@Test
-		@GUITest
-		@DisplayName("Quantity spinner shown value should be resetted to last valid value if an invalid value is inserted and the product is deselected")
-		void testQuantitySpinnerShouldBeResettedToLastValidValueWhenQuantityIsInvalidAndProductIsDeselected() {
-			Product product = new Product(1, "Product1", 2);
-			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
-			// gets the spinner text field
-			JFormattedTextField tf = ((JSpinner.DefaultEditor) window.spinner("quantitySpinner").target().getEditor())
-					.getTextField();
-			window.list("productList").selectItem(0);
-			window.spinner("quantitySpinner").enterText("2");
-			window.spinner("quantitySpinner").enterText("text");
-			window.list("productList").clearSelection();
-			// asserts on the spinner current shown value
-			assertThat(tf.getText()).isEqualTo("2");
+			GuiActionRunner.execute(() -> addButton.target().setEnabled(false));
+			window.spinner("quantitySpinner").enterText("3");
+			addButton.requireEnabled();
 		}
 
 		@Test
@@ -305,7 +267,6 @@ class TotemSwingViewTest {
 		}
 
 		@Test
-		@GUITest
 		@DisplayName("Button 'Add' should delegate to TotemController 'buyProduct'")
 		void testAddButtonShouldDelegateToTotemControllerBuyProduct() {
 			Product product = new Product(1, "Product1", 2);
@@ -355,8 +316,8 @@ class TotemSwingViewTest {
 
 		@Test
 		@GUITest
-		@DisplayName("Message label should be resetted to empty after Product deselection")
-		void testMessageLabelShouldBeResettedWhenProductIsDeselected() {
+		@DisplayName("Message label should be reset to empty after Product deselection")
+		void testMessageLabelShouldBeResetWhenProductIsDeselected() {
 			Product product = new Product(1, "Product1", 2);
 			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
 			window.list("productList").selectItem(0);
@@ -367,8 +328,8 @@ class TotemSwingViewTest {
 
 		@Test
 		@GUITest
-		@DisplayName("Message label should be resetted to empty after Product change of selection")
-		void testMessageLabelShouldBeResettedWhenProductIsChangedOfSelection() {
+		@DisplayName("Message label should be reset to empty after Product change of selection")
+		void testMessageLabelShouldBeResetWhenProductIsChangedOfSelection() {
 			Product product1 = new Product(1, "Product1", 2);
 			Product product2 = new Product(1, "Product2", 3);
 			GuiActionRunner.execute(() -> totemSwingView.showAllProducts(Arrays.asList(product1, product2)));
@@ -380,8 +341,8 @@ class TotemSwingViewTest {
 
 		@Test
 		@GUITest
-		@DisplayName("Message label should be resetted to empty after quantity change (to valid value)")
-		void testMessageLabelShouldBeResettedWhenQuantityIsChangedToValidValue() {
+		@DisplayName("Message label should be reset to empty after quantity change (to valid value)")
+		void testMessageLabelShouldBeResetWhenQuantityIsChangedToValidValue() {
 			Product product = new Product(1, "Product1", 2);
 			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
 			window.list("productList").selectItem(0);
@@ -415,207 +376,647 @@ class TotemSwingViewTest {
 			window.label(JLabelMatcher.withText("Quantity"));
 			window.spinner("cartReturnSpinner").requireDisabled();
 			window.list("cartList");
+			window.spinner("cartReturnSpinner").requireDisabled();
+			SpinnerNumberModel spinnerModel = (SpinnerNumberModel) (window.spinner("cartReturnSpinner").target()
+					.getModel());
+			assertThat(spinnerModel.getValue()).isEqualTo(1);
+			assertThat((Integer) spinnerModel.getMinimum()).isEqualTo(1);
+
 		}
 
-		@Test
-		@GUITest
-		@DisplayName("Button 'Continue Shopping' should delegate to TotemController 'openShopping'")
-		void testContinueShoppingButtonShouldDelegateToTotemControllerOpenShopping() {
-			window.button(JButtonMatcher.withText("Continue Shopping")).click();
-			verify(totemController).openShopping();
+		@Nested
+		@DisplayName("Test swing interface methods")
+		class TestSwingInterfaceImplementation {
+
+			@Test
+			@GUITest
+			@DisplayName("Method 'itemAdded' should add the received OrderItem element to the cart list")
+			void testItemAddedShouldAddTheOrderItemToTheCartList() {
+				OrderItem newItem = new OrderItem(new Product(2, "Product2", 2), 4);
+				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+
+				GuiActionRunner.execute(() -> totemSwingView.itemAdded(newItem));
+				String[] listContents = window.list("cartList").contents();
+				assertThat(listContents).containsExactly("Product1 - Quantity: 5 - Price: 3.0 € - Subtotal: 15.0 €",
+						"Product2 - Quantity: 4 - Price: 2.0 € - Subtotal: 8.0 €");
+			}
+
+			@Test
+			@GUITest
+			@DisplayName("Method 'itemModified' should update the specified item in the cart list")
+			void testItemModifiedShouldUpdateTheOldOrderItemWithTheNewOneInCartList() {
+				Product product = new Product(2, "Product2", 3);
+				OrderItem oldItem = new OrderItem(product, 4);
+				OrderItem updatedItem = new OrderItem(product, 5);
+				GuiActionRunner.execute(() -> {
+					DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+					itemsModel.addElement(new OrderItem(new Product(1, "Product1", 2), 5));
+					itemsModel.addElement(oldItem);
+				});
+				GuiActionRunner.execute(() -> totemSwingView.itemModified(oldItem, updatedItem));
+				String[] listContents = window.list("cartList").contents();
+				assertThat(listContents).containsExactly("Product1 - Quantity: 5 - Price: 2.0 € - Subtotal: 10.0 €",
+						"Product2 - Quantity: 5 - Price: 3.0 € - Subtotal: 15.0 €");
+
+			}
+
+			@Test
+			@GUITest
+			@DisplayName("Method 'allItemsRemoved' should remove all items from the cart list")
+			void testAllItemsRemovedShouldClearTheCartList() {
+				GuiActionRunner.execute(() -> {
+					DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+					itemsModel.addElement(new OrderItem(new Product(1, "Product1", 2), 5));
+					itemsModel.addElement(new OrderItem(new Product(1, "Product1", 2), 4));
+				});
+				GuiActionRunner.execute(() -> totemSwingView.allItemsRemoved());
+				String[] listContents = window.list("cartList").contents();
+				assertThat(listContents).isEmpty();
+			}
+
+			@Test
+			@GUITest
+			@DisplayName("Method 'showErrorItemNotFound' should set error message label and delete the item from the cart list")
+			void testShowErrorItemNotFoundShouldSetMessageLabelAndDeleteItemFromCartList() {
+				OrderItem item1 = new OrderItem(new Product(1, "Product1", 3), 5);
+				OrderItem item2 = new OrderItem(new Product(2, "Product2", 1), 4);
+				GuiActionRunner.execute(() -> {
+					DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+					itemsModel.addElement(item1);
+					itemsModel.addElement(item2);
+				});
+				GuiActionRunner.execute(() -> totemSwingView.showErrorItemNotFound("error message", item1));
+				window.label("cartMessageLabel").requireText("error message");
+				assertThat(window.list("cartList").contents())
+						.containsExactly("Product2 - Quantity: 4 - Price: 1.0 € - Subtotal: 4.0 €");
+			}
+
+			@Test
+			@GUITest
+			@DisplayName("Method 'showErrorEmptyOrder' should set error message label and clear the cart list")
+			void testShowErrorEmptyOrderShouldSetMessageLabelAndClearTheCartList() {
+				OrderItem item1 = new OrderItem(new Product(1, "Product1", 3), 5);
+				OrderItem item2 = new OrderItem(new Product(2, "Product2", 1), 4);
+				GuiActionRunner.execute(() -> {
+					DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+					itemsModel.addElement(item1);
+					itemsModel.addElement(item2);
+				});
+				GuiActionRunner.execute(() -> totemSwingView.showErrorEmptyOrder("error message"));
+				window.label("cartMessageLabel").requireText("error message");
+				assertThat(window.list("cartList").contents()).isEmpty();
+			}
+
+			@Test
+			@GUITest
+			@DisplayName("Method 'showCartMessage' should show the message in the cart label")
+			void testShowCartMessageShouldShowTheMessageInTheCartLabel() {
+				GuiActionRunner.execute(() -> totemSwingView.showCartMessage("Message"));
+				window.label("cartMessageLabel").requireText("Message");
+			}
+
+			@Test
+			@GUITest
+			@DisplayName("Method 'showCartErrorMessage' should show the error message in the cart label")
+			void testShowCartErrorMessageShouldShowTheErrorMessageInTheCartLabel() {
+				GuiActionRunner.execute(() -> totemSwingView.showCartErrorMessage("Error message"));
+				window.label("cartMessageLabel").requireText("Error message");
+			}
+
+			@Test
+			@GUITest
+			@DisplayName("Method 'itemRemoved' should remove the specified OrderItem from the cart")
+			void testItemRemovedShouldRemoveTheOrderItemFromTheCart() {
+				OrderItem toRemove = new OrderItem(new Product(2, "Product2", 2), 4);
+				GuiActionRunner.execute(() -> {
+					DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+					itemsModel.addElement(new OrderItem(new Product(1, "Product1", 3), 5));
+					itemsModel.addElement(toRemove);
+				});
+				GuiActionRunner.execute(() -> totemSwingView.itemRemoved(toRemove));
+				String[] listContents = window.list("cartList").contents();
+				assertThat(listContents).containsExactly("Product1 - Quantity: 5 - Price: 3.0 € - Subtotal: 15.0 €");
+			}
 		}
 
-		@Test
-		@GUITest
-		@DisplayName("Button 'Cancel Shopping' should delegate to TotemController 'cancelShopping'")
-		void testCancelShoppingButtonShouldDelegateToTotemControllerCancelShopping() {
-			window.button(JButtonMatcher.withName("cartBtnCancelShopping")).click();
-			verify(totemController).cancelShopping();
+		@Nested
+		@DisplayName("Test 'Continue Shopping' ")
+		class TestContinueShopping {
+
+			@Test
+			@DisplayName("Button 'Continue Shopping' should delegate to TotemController 'openShopping'")
+			void testContinueShoppingButtonShouldDelegateToTotemControllerOpenShopping() {
+				window.button(JButtonMatcher.withText("Continue Shopping")).click();
+				verify(totemController).openShopping();
+			}
 		}
 
-		@Test
-		@GUITest
-		@DisplayName("Button 'Remove selected' should be enabled only when an OrderItem is selected")
-		void testRemoveSelectedButtonShouldBeEnabledOnlyWhenAnOrderItemIsSelected() {
-			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
-					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
-			window.list("cartList").selectItem(0);
-			JButtonFixture buttonAdd = window.button(JButtonMatcher.withText("Remove selected"));
-			buttonAdd.requireEnabled();
-			window.list("cartList").clearSelection();
-			buttonAdd.requireDisabled();
+		@Nested
+		@DisplayName("Test 'Cancel Shopping'")
+		class TestCancelShopping {
+
+			@Test
+			@DisplayName("Button 'Cancel Shopping' should delegate to TotemController 'cancelShopping'")
+			void testCancelShoppingButtonShouldDelegateToTotemControllerCancelShopping() {
+				window.button(JButtonMatcher.withName("cartBtnCancelShopping")).click();
+				verify(totemController).cancelShopping();
+			}
 		}
 
-		@Test
-		@GUITest
-		@DisplayName("Button 'Remove selected' should delegate to TotemController 'removeItem'")
-		void testRemoveSelectedButtonShouldDelegateToTotemControllerRemoveItem() {
-			OrderItem item1 = new OrderItem(new Product(1, "Product1", 3), 5);
-			OrderItem item2 = new OrderItem(new Product(2, "Product2", 1), 4);
-			JButtonFixture removeButton = window.button(JButtonMatcher.withText("Remove selected"));
-			GuiActionRunner.execute(() -> {
-				DefaultListModel<OrderItem> listItemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
-				listItemsModel.addElement(item1);
-				listItemsModel.addElement(item2);
-				removeButton.target().setEnabled(true);
-			});
-			window.list("cartList").selectItem(1);
-			removeButton.click();
-			verify(totemController).removeItem(item2);
+		@Nested
+		@DisplayName("Test 'Remove selected'")
+		class TestRemoveSelected {
+
+			@Test
+			@GUITest
+			@DisplayName("Button 'Remove selected' should be enabled only when an OrderItem is selected")
+			void testRemoveSelectedButtonShouldBeEnabledOnlyWhenAnOrderItemIsSelected() {
+				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+				window.list("cartList").selectItem(0);
+				JButtonFixture buttonAdd = window.button(JButtonMatcher.withText("Remove selected"));
+				buttonAdd.requireEnabled();
+				window.list("cartList").clearSelection();
+				buttonAdd.requireDisabled();
+			}
+
+			@Test
+			@DisplayName("Button 'Remove selected' should delegate to TotemController 'removeItem'")
+			void testRemoveSelectedButtonShouldDelegateToTotemControllerRemoveItem() {
+				OrderItem item1 = new OrderItem(new Product(1, "Product1", 3), 5);
+				OrderItem item2 = new OrderItem(new Product(2, "Product2", 1), 4);
+				JButtonFixture removeButton = window.button(JButtonMatcher.withText("Remove selected"));
+				GuiActionRunner.execute(() -> {
+					DefaultListModel<OrderItem> listItemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+					listItemsModel.addElement(item1);
+					listItemsModel.addElement(item2);
+					removeButton.target().setEnabled(true);
+				});
+				window.list("cartList").selectItem(1);
+				removeButton.click();
+				verify(totemController).removeItem(item2);
+			}
+
 		}
 
-		@Test
-		@GUITest
-		@DisplayName("Button 'Checkout' should be enabled when an item is added to the cart list")
-		void testCheckoutButtonShouldBeEnabledWhenAnItemIsAddedToCartList() {
-			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
-					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
-			window.button(JButtonMatcher.withText("Checkout")).requireEnabled();
-		}
+		@Nested
+		@DisplayName("Test Checkout")
+		class TestCheckout {
 
-		@Test
-		@GUITest
-		@DisplayName("Button 'Checkout' should be disabled when the cart list is empty")
-		void testCheckoutButtonShouldBeDisabledWhenCartListIsEmpty() {
-			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel().clear());
-			window.button(JButtonMatcher.withText("Checkout")).requireDisabled();
-		}
+			@Test
+			@GUITest
+			@DisplayName("Button 'Checkout' should be enabled when an item is added to the cart list")
+			void testCheckoutButtonShouldBeEnabledWhenAnItemIsAddedToCartList() {
+				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+				window.button(JButtonMatcher.withText("Checkout")).requireEnabled();
+			}
 
-		@Test
-		@GUITest
-		@DisplayName("Button 'Checkout' should be enabled when several items are present and one is removed")
-		void testCheckoutButtonShouldBeEnabledWhenSeveralItemsArePresentAndOneIsRemoved() {
-			DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
-			JButtonFixture checkoutButton = window.button(JButtonMatcher.withText("Checkout"));
-			GuiActionRunner.execute(() -> {
-				itemsModel.addElement(new OrderItem(new Product(1, "Product1", 3), 5));
-				itemsModel.addElement(new OrderItem(new Product(2, "Product2", 3), 5));
-				checkoutButton.target().setEnabled(true);
-			});
+			@Test
+			@GUITest
+			@DisplayName("Button 'Checkout' should be disabled when the cart list is empty")
+			void testCheckoutButtonShouldBeDisabledWhenCartListIsEmpty() {
+				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel().clear());
+				window.button(JButtonMatcher.withText("Checkout")).requireDisabled();
+			}
 
-			GuiActionRunner.execute(() -> itemsModel.removeElementAt(0));
-			checkoutButton.requireEnabled();
-		}
-
-		@Test
-		@GUITest
-		@DisplayName("Button 'Checkout' should delegate to TotemController 'confirmOrder'")
-		void testCheckoutButtonShouldDelegateToTotemControllerConfirmOrder() {
-			JButtonFixture checkoutButton = window.button(JButtonMatcher.withText("Checkout"));
-			GuiActionRunner.execute(() -> checkoutButton.target().setEnabled(true));
-			checkoutButton.click();
-			verify(totemController).confirmOrder();
-		}
-
-		@Test
-		@GUITest
-		@DisplayName("Method 'itemAdded' should add the received OrderItem element to the cart list")
-		void testItemAddedShouldAddTheOrderItemToTheCartList() {
-			OrderItem newItem = new OrderItem(new Product(2, "Product2", 2), 4);
-			GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
-					.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
-
-			GuiActionRunner.execute(() -> totemSwingView.itemAdded(newItem));
-			String[] listContents = window.list("cartList").contents();
-			assertThat(listContents).containsExactly("Product1 - Quantity: 5 - Price: 3.0 € - Subtotal: 15.0 €",
-					"Product2 - Quantity: 4 - Price: 2.0 € - Subtotal: 8.0 €");
-		}
-
-		@Test
-		@GUITest
-		@DisplayName("Method 'itemRemoved' should remove the specified OrderItem from the cart")
-		void testItemRemovedShouldRemoveTheOrderItemFromTheCart() {
-			OrderItem toRemove = new OrderItem(new Product(2, "Product2", 2), 4);
-			GuiActionRunner.execute(() -> {
+			@Test
+			@GUITest
+			@DisplayName("Button 'Checkout' should be enabled when several items are present and one is removed")
+			void testCheckoutButtonShouldBeEnabledWhenSeveralItemsArePresentAndOneIsRemoved() {
 				DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
-				itemsModel.addElement(new OrderItem(new Product(1, "Product1", 3), 5));
-				itemsModel.addElement(toRemove);
-			});
-			GuiActionRunner.execute(() -> totemSwingView.itemRemoved(toRemove));
-			String[] listContents = window.list("cartList").contents();
-			assertThat(listContents).containsExactly("Product1 - Quantity: 5 - Price: 3.0 € - Subtotal: 15.0 €");
+				JButtonFixture checkoutButton = window.button(JButtonMatcher.withText("Checkout"));
+				GuiActionRunner.execute(() -> {
+					itemsModel.addElement(new OrderItem(new Product(1, "Product1", 3), 5));
+					itemsModel.addElement(new OrderItem(new Product(2, "Product2", 3), 5));
+					checkoutButton.target().setEnabled(true);
+				});
+
+				GuiActionRunner.execute(() -> itemsModel.removeElementAt(0));
+				checkoutButton.requireEnabled();
+			}
+
+			@Test
+			@DisplayName("Button 'Checkout' should delegate to TotemController 'confirmOrder'")
+			void testCheckoutButtonShouldDelegateToTotemControllerConfirmOrder() {
+				JButtonFixture checkoutButton = window.button(JButtonMatcher.withText("Checkout"));
+				GuiActionRunner.execute(() -> checkoutButton.target().setEnabled(true));
+				checkoutButton.click();
+				verify(totemController).confirmOrder();
+			}
 		}
 
-		@Test
-		@GUITest
-		@DisplayName("Method 'itemModified' should update the specified item in the cart list")
-		void testItemModifiedShouldUpdateTheOldOrderItemWithTheNewOneInCartList() {
-			Product product = new Product(2, "Product2", 3);
-			OrderItem oldItem = new OrderItem(product, 4);
-			OrderItem updatedItem = new OrderItem(product, 5);
-			GuiActionRunner.execute(() -> {
-				DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
-				itemsModel.addElement(new OrderItem(new Product(1, "Product1", 2), 5));
-				itemsModel.addElement(oldItem);
-			});
-			GuiActionRunner.execute(() -> totemSwingView.itemModified(oldItem, updatedItem));
-			String[] listContents = window.list("cartList").contents();
-			assertThat(listContents).containsExactly("Product1 - Quantity: 5 - Price: 2.0 € - Subtotal: 10.0 €",
-					"Product2 - Quantity: 5 - Price: 3.0 € - Subtotal: 15.0 €");
+		@Nested
+		@DisplayName("Test cart spinner")
+		class TestCartSpinner {
+
+			@Test
+			@GUITest
+			@DisplayName("The spinner should be enabled when an item is selected and the item quantity is greater than one")
+			void testTheSpinnerShouldBeEnabledWhenAnItemWithQuantityGreaterThanOneIsSelected() {
+				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+				window.list("cartList").selectItem(0);
+				window.spinner("cartReturnSpinner").requireEnabled();
+			}
+
+			@Test
+			@GUITest
+			@DisplayName("The spinner should be disabled when an item is selected and the item quantity is one")
+			void testTheSpinnerShouldBeDisabeldWhenAnItemWithQuantityEqualToOneIsSelected() {
+				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 1)));
+				window.list("cartList").selectItem(0);
+				window.spinner("cartReturnSpinner").requireDisabled();
+			}
+
+			@Test
+			@GUITest
+			@DisplayName("The spinner should be disabled when an item is deselected")
+			void testTheSpinnerShouldBeDisabeldWhenAnItemIsDeselected() {
+				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+				window.list("cartList").selectItem(0);
+				window.list("cartList").clearSelection();
+				window.spinner("cartReturnSpinner").requireDisabled();
+			}
+
+			@Test
+			@DisplayName("The spinner value should be reset to one when the selection changes")
+			void testTheSpinnerValueShouldBeResetToOneWhenAnItemIsSelected() {
+				JSpinnerFixture cartSpinner = window.spinner("cartReturnSpinner");
+				GuiActionRunner.execute(() -> {
+					totemSwingView.getCartPane().getListOrderItemsModel()
+							.addElement(new OrderItem(new Product(1, "Product1", 3), 5));
+					totemSwingView.getCartPane().getListOrderItemsModel()
+							.addElement(new OrderItem(new Product(1, "Product1", 3), 5));
+				});
+				window.list("cartList").selectItem(0);
+				cartSpinner.enterTextAndCommit("2");
+				window.list("cartList").selectItem(1);
+				cartSpinner.requireValue(1);
+			}
+
+			@Test
+			@DisplayName("The spinner value should be reset to one when an item is deselected")
+			void testTheSpinnerValueShouldBeResetToOneWhenAnItemIsDeselected() {
+				JSpinnerFixture cartSpinner = window.spinner("cartReturnSpinner");
+				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+				window.list("cartList").selectItem(0);
+				cartSpinner.enterTextAndCommit("2");
+				window.list("cartList").clearSelection();
+				cartSpinner.requireValue(1);
+			}
+
+			@Test
+			@DisplayName("The spinner value should be reset to one when an item is selected and the item quantity changes to one")
+			void testTheSpinnerValueShouldBeResetToOneWhenAnItemIsSelectedAndTheItemQuantityChangesToOne() {
+				Product product = new Product(1, "Product1", 3);
+				OrderItem storedItem = new OrderItem(product, 10);
+				OrderItem modifiedItem = new OrderItem(product, 1);
+				DefaultListModel<OrderItem> listOrderItemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+				JSpinnerFixture cartSpinner = window.spinner("cartReturnSpinner");
+				GuiActionRunner.execute(() -> listOrderItemsModel.addElement(storedItem));
+				window.list("cartList").selectItem(0);
+				cartSpinner.enterText("2");
+				GuiActionRunner.execute(() -> listOrderItemsModel.setElementAt(modifiedItem, 0));
+				cartSpinner.requireValue(1);
+			}
+
+			@Test
+			@DisplayName("The spinner value should not be reset to one when an item is selected and another item quantity changes to one")
+			void testTheSpinnerValueShouldNotBeResetToOneWhenAnItemIsSelectedAndAnotherItemQuantityChangesToOne() {
+				Product product = new Product(2, "Product2", 3);
+				OrderItem storedItem = new OrderItem(product, 5);
+				OrderItem modifiedItem = new OrderItem(product, 1);
+				DefaultListModel<OrderItem> listOrderItemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+				JSpinnerFixture cartSpinner = window.spinner("cartReturnSpinner");
+				GuiActionRunner.execute(() -> {
+					listOrderItemsModel.addElement(new OrderItem(new Product(1, "Product1", 3), 5));
+					listOrderItemsModel.addElement(storedItem);
+				});
+				window.list("cartList").selectItem(0);
+				window.spinner("cartReturnSpinner").enterTextAndCommit("3");
+				GuiActionRunner.execute(() -> listOrderItemsModel.setElementAt(modifiedItem, 1));
+				cartSpinner.requireValue(3);
+			}
+
+			@Test
+			@DisplayName("The spinner should be disabled when an item is selected and the item quantity changes to one")
+			void testTheSpinnerShouldBeDisabledWhenAnItemIsSelectedAndTheItemQuantityChangesToOne() {
+				Product product = new Product(1, "Product1", 3);
+				OrderItem storedItem = new OrderItem(product, 10);
+				OrderItem modifiedItem = new OrderItem(product, 1);
+				DefaultListModel<OrderItem> listOrderItemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+				JSpinnerFixture cartSpinner = window.spinner("cartReturnSpinner");
+				GuiActionRunner.execute(() -> listOrderItemsModel.addElement(storedItem));
+				window.list("cartList").selectItem(0);
+				cartSpinner.enterTextAndCommit("2");
+				GuiActionRunner.execute(() -> listOrderItemsModel.setElementAt(modifiedItem, 0));
+				cartSpinner.requireDisabled();
+			}
+
+			@Test
+			@DisplayName("The spinner should be enabled when an item with value one is selected and the item quantity increases")
+			void testTheSpinnerShouldBeEnabledWhenAnItemWithQuantityOneIsSelectedAndTheItemQuantityIncreases() {
+				Product product = new Product(1, "Product1", 3);
+				OrderItem storedItem = new OrderItem(product, 1);
+				OrderItem modifiedItem = new OrderItem(product, 5);
+				DefaultListModel<OrderItem> listOrderItemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+				JSpinnerFixture cartSpinner = window.spinner("cartReturnSpinner");
+				GuiActionRunner.execute(() -> listOrderItemsModel.addElement(storedItem));
+				window.list("cartList").selectItem(0);
+				GuiActionRunner.execute(() -> listOrderItemsModel.setElementAt(modifiedItem, 0));
+				cartSpinner.requireEnabled();
+			}
+		}
+
+		@Nested
+		@DisplayName("Test button 'return quantity'")
+		class TestReturnQuantityButton {
+
+			@Test
+			@GUITest
+			@DisplayName("Button 'return quantity' should be enabled when an item is selected and the item quantity is greater than one")
+			void testButtonReturnQuantityShouldBeEnabledWhenAnItemWithQuantityGreaterThanOneIsSelected() {
+				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+				window.list("cartList").selectItem(0);
+				window.button(JButtonMatcher.withText("Return quantity")).requireEnabled();
+			}
+
+			@Test
+			@GUITest
+			@DisplayName("Button 'return quantity' should be disabled when an item is selected and the item quantity is one")
+			void testButtonReturnQuantityShouldBeDisabledWhenAnItemWithQuantityEqualToOneIsSelected() {
+				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 1)));
+				window.list("cartList").selectItem(0);
+				window.button(JButtonMatcher.withText("Return quantity")).requireDisabled();
+			}
+
+			@Test
+			@GUITest
+			@DisplayName("Button 'return quantity' should be disabled when no item is selected")
+			void testButtonReturnQuantityShouldBeDisabledWhenNoItemIsSelected() {
+				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+				window.list("cartList").selectItem(0);
+				window.list("cartList").clearSelection();
+				window.button(JButtonMatcher.withText("Return quantity")).requireDisabled();
+			}
+
+			@GUITest
+			@ParameterizedTest
+			@ValueSource(strings = { "0", "01", "-1", " ", "a", "1a", "1.1" })
+			@DisplayName("Button 'return quantity' should be disabled when the value in spinner is not a positive integer or starts with zero")
+			void testReturnQuantityButtonShouldBeDisabledWhenValueInSpinnerIsNotAPositiveIntegerOrStartsWithZero(
+					String input) {
+				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+				window.list("cartList").selectItem(0);
+				window.spinner("cartReturnSpinner").enterText(input);
+				window.button(JButtonMatcher.withText("Return quantity")).requireDisabled();
+			}
+
+			@Test
+			@GUITest
+			@DisplayName("Button 'return quantity' should be enabled when an item is selected and the spinner text is less than the item quantity")
+			void testReturnQuantityButtonShouldBeEnabledWhenAnItemIsSelectedAndSpinnerTextIsLessThanTheSelectedItemQuantity() {
+				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+				window.list("cartList").selectItem(0);
+				window.spinner("cartReturnSpinner").enterText("4");
+				window.button(JButtonMatcher.withText("Return quantity")).requireEnabled();
+			}
+
+			@ParameterizedTest
+			@ValueSource(strings = { "5", "6" })
+			@DisplayName("Button 'return quantity' should be disabled when an item is selected and the spinner text is equal to or greater than the item quantity")
+			void testReturnQuantityButtonShouldBeDisabledWhenAnItemIsSelectedAndSpinnerTextIsEqualToOrGreaterThanTheSelectedItemQuantity(
+					String input) {
+				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+				window.list("cartList").selectItem(0);
+				window.spinner("cartReturnSpinner").enterText(input);
+				window.button(JButtonMatcher.withText("Return quantity")).requireDisabled();
+			}
+
+			@Test
+			@DisplayName("Button 'return quantity' should delegate to TotemController 'returnProduct'")
+			void testButtonReturnQuantityShouldDelegateToTotemControllerReturnQuantity() {
+				OrderItem itemToReturn = new OrderItem(new Product(1, "Product1", 3), 5);
+				GuiActionRunner
+						.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel().addElement(itemToReturn));
+				window.list("cartList").selectItem(0);
+				window.spinner("cartReturnSpinner").enterTextAndCommit("3");
+				window.button(JButtonMatcher.withText("Return quantity")).click();
+				verify(totemController).returnProduct(itemToReturn, 3);
+			}
+
+			@ParameterizedTest
+			@ValueSource(strings = { "5", "6" })
+			@GUITest
+			@DisplayName("Button 'return quantity' should be disabled when an item is selected, the item quantity changes and the spinner value is equal to or greater than the new item quantity")
+			void testReturnQuantityButtonShouldBeDisabledWhenTheQuantityOfTheSelectedItemChangesAndTheSpinnerValueIsEqualToTheSelectedItemQuantity() {
+				Product product = new Product(1, "Product1", 3);
+				OrderItem storedItem = new OrderItem(product, 10);
+				OrderItem modifiedItem = new OrderItem(product, 5);
+				DefaultListModel<OrderItem> listOrderItemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+				GuiActionRunner.execute(() -> listOrderItemsModel.addElement(storedItem));
+				window.list("cartList").selectItem(0);
+				window.spinner("cartReturnSpinner").enterText("5");
+				GuiActionRunner.execute(
+						() -> listOrderItemsModel.setElementAt(modifiedItem, listOrderItemsModel.indexOf(storedItem)));
+				window.button(JButtonMatcher.withText("Return quantity")).requireDisabled();
+			}
+
+			@Test
+			@GUITest
+			@DisplayName("Button 'return quantity' should be enabled when an item is selected, the item quantity changes and the spinner value is less than the new item quantity")
+			void testReturnQuantityButtonShouldBeEnabledWhenTheQuantityOfTheSelectedItemChangesAndTheSpinnerValueIsLessThanTheSelectedItemQuantity() {
+				Product product = new Product(1, "Product1", 3);
+				OrderItem storedItem = new OrderItem(product, 5);
+				OrderItem modifiedItem = new OrderItem(product, 10);
+				DefaultListModel<OrderItem> listOrderItemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+				GuiActionRunner.execute(() -> listOrderItemsModel.addElement(storedItem));
+				window.list("cartList").selectItem(0);
+				window.spinner("cartReturnSpinner").enterText("7");
+				GuiActionRunner.execute(
+						() -> listOrderItemsModel.setElementAt(modifiedItem, listOrderItemsModel.indexOf(storedItem)));
+				window.button(JButtonMatcher.withText("Return quantity")).requireEnabled();
+			}
+
+			@Test
+			@GUITest
+			@DisplayName("Button 'return quantity' should be disabled when an item is selected and the item quantity changes to one")
+			void testReturnQuantityButtonShouldBeDisabledWhenTheQuantityOfTheSelectedItemChangesToOne() {
+				Product product = new Product(1, "Product1", 3);
+				OrderItem storedItem = new OrderItem(product, 5);
+				OrderItem modifiedItem = new OrderItem(product, 1);
+				DefaultListModel<OrderItem> listOrderItemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+				GuiActionRunner.execute(() -> listOrderItemsModel.addElement(storedItem));
+				window.list("cartList").selectItem(0);
+				window.spinner("cartReturnSpinner").enterText("3");
+				GuiActionRunner.execute(
+						() -> listOrderItemsModel.setElementAt(modifiedItem, listOrderItemsModel.indexOf(storedItem)));
+				window.button(JButtonMatcher.withText("Return quantity")).requireDisabled();
+			}
+
+			@Test
+			@GUITest
+			@DisplayName("Button 'return quantity' should not change when an item is selected and another item quantity changes")
+			void testReturnQuantityButtonShouldNotChangeWhenAnItemIsSelectedAndAnotherItemChange() {
+				Product product = new Product(2, "Product2", 3);
+				OrderItem storedItem = new OrderItem(product, 5);
+				OrderItem modifiedItem = new OrderItem(product, 1);
+				DefaultListModel<OrderItem> listOrderItemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+				GuiActionRunner.execute(() -> {
+					listOrderItemsModel.addElement(new OrderItem(new Product(1, "Product1", 3), 5));
+					listOrderItemsModel.addElement(storedItem);
+				});
+				window.list("cartList").selectItem(0);
+				window.spinner("cartReturnSpinner").enterText("3");
+				GuiActionRunner.execute(
+						() -> listOrderItemsModel.setElementAt(modifiedItem, listOrderItemsModel.indexOf(storedItem)));
+				window.button(JButtonMatcher.withText("Return quantity")).requireEnabled();
+			}
+
+			@Test
+			@DisplayName("Reset button 'return quantity' should be disabled when the spinner is disabled")
+			void testReturnQuantityButtonShouldBeDisabledWhenTheSpinnerIsDisabled() {
+				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+				window.list("cartList").selectItem(0);
+				window.spinner("cartReturnSpinner").enterText("10");
+				GuiActionRunner.execute(() -> window.spinner("cartReturnSpinner").target().setEnabled(false));
+				window.button(JButtonMatcher.withText("Return quantity")).requireDisabled();
+			}
 
 		}
 
-		@Test
-		@GUITest
-		@DisplayName("Method 'allItemsRemoved' should remove all items from the cart list")
-		void testAllItemsRemovedShouldClearTheCartList() {
-			GuiActionRunner.execute(() -> {
-				DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
-				itemsModel.addElement(new OrderItem(new Product(1, "Product1", 2), 5));
-				itemsModel.addElement(new OrderItem(new Product(1, "Product1", 2), 4));
-			});
-			GuiActionRunner.execute(() -> totemSwingView.allItemsRemoved());
-			String[] listContents = window.list("cartList").contents();
-			assertThat(listContents).isEmpty();
-		}
+		@Nested
+		@DisplayName("Test label messages")
+		class TestLabelMessages {
 
-		@Test
-		@GUITest
-		@DisplayName("Method 'showErrorItemNotFound' should set error message label and delete the item from the cart list")
-		void testShowErrorItemNotFoundShouldSetMessageLabelAndDeleteItemFromCartList() {
-			OrderItem item1 = new OrderItem(new Product(1, "Product1", 3), 5);
-			OrderItem item2 = new OrderItem(new Product(2, "Product2", 1), 4);
-			GuiActionRunner.execute(() -> {
-				DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
-				itemsModel.addElement(item1);
-				itemsModel.addElement(item2);
-			});
-			GuiActionRunner.execute(() -> totemSwingView.showErrorItemNotFound("error message", item1));
-			window.label("cartMessageLabel").requireText("error message");
-			assertThat(window.list("cartList").contents())
-					.containsExactly("Product2 - Quantity: 4 - Price: 1.0 € - Subtotal: 4.0 €");
-		}
+			@Test
+			@DisplayName("Reset the label message when an item is selected")
+			void testResetTheLabelMessageWhenAnItemIsSelected() {
+				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+				GuiActionRunner.execute(() -> window.label("cartMessageLabel").target().setText("foo"));
+				window.list("cartList").selectItem(0);
+				window.label("cartMessageLabel").requireText(" ");
+			}
 
-		@Test
-		@GUITest
-		@DisplayName("Method 'showErrorEmptyOrder' should set error message label and clear the cart list")
-		void testShowErrorEmptyOrderShouldSetMessageLabelAndClearTheCartList() {
-			OrderItem item1 = new OrderItem(new Product(1, "Product1", 3), 5);
-			OrderItem item2 = new OrderItem(new Product(2, "Product2", 1), 4);
-			GuiActionRunner.execute(() -> {
-				DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
-				itemsModel.addElement(item1);
-				itemsModel.addElement(item2);
-			});
-			GuiActionRunner.execute(() -> totemSwingView.showErrorEmptyOrder("error message"));
-			window.label("cartMessageLabel").requireText("error message");
-			assertThat(window.list("cartList").contents()).isEmpty();
-		}
+			@Test
+			@DisplayName("Reset the label when an item is deselected")
+			void testResetTheLabelMessageWhenAnItemIsDeselected() {
+				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+				window.list("cartList").selectItem(0);
+				GuiActionRunner.execute(() -> window.label("cartMessageLabel").target().setText("foo"));
+				window.list("cartList").clearSelection();
+				window.label("cartMessageLabel").requireText(" ");
+			}
 
-		@Test
-		@GUITest
-		@DisplayName("Method 'showCartMessage' should show the message in the cart label")
-		void testShowCartMessageShouldShowTheMessageInTheCartLabel() {
-			GuiActionRunner.execute(() -> totemSwingView.showCartMessage("Message"));
-			window.label("cartMessageLabel").requireText("Message");
-		}
+			@ParameterizedTest
+			@ValueSource(strings = { "-1", "0", "01", " ", "a", "1.1" })
+			@DisplayName("Show error message when the content of the spinner is not a positive integer or starts with zero")
+			void testShowErrorMessageWhenTheContentOfTheSpinnerIsNotPositiveIntegerOrStartsWithZero(String input) {
+				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+				window.list("cartList").selectItem(0);
+				window.spinner("cartReturnSpinner").enterText(input);
+				window.label("cartMessageLabel")
+						.requireText("Error: the input must be a positive integer. Received: " + input);
+			}
 
-		@Test
-		@GUITest
-		@DisplayName("Method 'showCartErrorMessage' should show the error message in the cart label")
-		void testShowCartErrorMessageShouldShowTheErrorMessageInTheCartLabel() {
-			GuiActionRunner.execute(() -> totemSwingView.showCartErrorMessage("Error message"));
-			window.label("cartMessageLabel").requireText("Error message");
+			@Test
+			@DisplayName("Reset label message when the spinner is disabled")
+			void testResetLabelMessageWhenTheSpinnerIsDisabled() {
+				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+				window.list("cartList").selectItem(0);
+				window.spinner("cartReturnSpinner").enterText("10");
+				GuiActionRunner.execute(() -> window.spinner("cartReturnSpinner").target().setEnabled(false));
+				window.label("cartMessageLabel").requireText(" ");
+			}
+
+			@Test
+			@DisplayName("Reset label message when an item is selected and the spinner value is less than the selected item quantity")
+			void testResetLabelMessageWhenAnItemIsSelectedAndTheSpinnerValueIsLessThanTheSelectedItemQuantity() {
+				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+				window.list("cartList").selectItem(0);
+				window.spinner("cartReturnSpinner").enterText("3");
+				window.label("cartMessageLabel").requireText(" ");
+			}
+
+			@ParameterizedTest
+			@ValueSource(strings = { "5", "6" })
+			@DisplayName("Show error message when an item is selected and the spinner value is not less than the selected item quantity")
+			void testShowErrorMessageWhenAnItemIsSelectedAndTheSpinnerValueIsNotLessThanTheSelectedItemQuantity(
+					String input) {
+				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
+						.addElement(new OrderItem(new Product(1, "Product1", 3), 5)));
+				window.list("cartList").selectItem(0);
+				window.spinner("cartReturnSpinner").enterText(input);
+				window.label("cartMessageLabel")
+						.requireText("Error: the input must be an integer in range [1,4]. Received: " + input);
+			}
+
+			@ParameterizedTest
+			@ValueSource(strings = { "5", "6" })
+			@DisplayName("Show error message when an item is selected, the item quantity changes and the spinner value is not less than the new item quantity")
+			void testShowErrorMessageWhenTheQuantityOfTheSelectedItemChangesAndTheSpinnerValueIsNotLessThanTheSelectedItemQuantity(
+					String input) {
+				Product product = new Product(1, "Product1", 3);
+				OrderItem storedItem = new OrderItem(product, 10);
+				OrderItem modifiedItem = new OrderItem(product, 5);
+				DefaultListModel<OrderItem> listOrderItemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+				GuiActionRunner
+						.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel().addElement(storedItem));
+				window.list("cartList").selectItem(0);
+				window.spinner("cartReturnSpinner").enterText(input);
+				GuiActionRunner.execute(
+						() -> listOrderItemsModel.setElementAt(modifiedItem, listOrderItemsModel.indexOf(storedItem)));
+				window.label("cartMessageLabel")
+						.requireText("Error: the input must be an integer in range [1,4]. Received: " + input);
+			}
+
+			@Test
+			@DisplayName("Reset label message when an item is selected, the item quantity changes and the spinner value is less than the new item quantity")
+			void testResetLabelMessageWhenTheQuantityOfTheSelectedItemChangesAndTheSpinnerValueIsLessThanTheSelectedItemQuantity() {
+				Product product = new Product(1, "Product1", 3);
+				OrderItem storedItem = new OrderItem(product, 5);
+				OrderItem modifiedItem = new OrderItem(product, 10);
+				DefaultListModel<OrderItem> listOrderItemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+				GuiActionRunner
+						.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel().addElement(storedItem));
+				window.list("cartList").selectItem(0);
+				window.spinner("cartReturnSpinner").enterText("7");
+				GuiActionRunner.execute(() -> listOrderItemsModel.setElementAt(modifiedItem, 0));
+				window.label("cartMessageLabel").requireText(" ");
+			}
+
+			@Test
+			@DisplayName("Reset label message when an item is selected and the item quantity changes to one")
+			void testResetLabelMessageWhenTheQuantityOfTheSelectedItemChangesToOne() {
+				Product product = new Product(1, "Product1", 3);
+				OrderItem storedItem = new OrderItem(product, 5);
+				OrderItem modifiedItem = new OrderItem(product, 1);
+				DefaultListModel<OrderItem> listOrderItemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+				GuiActionRunner
+						.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel().addElement(storedItem));
+				window.list("cartList").selectItem(0);
+				window.spinner("cartReturnSpinner").enterText("7");
+				GuiActionRunner.execute(() -> listOrderItemsModel.setElementAt(modifiedItem, 0));
+				window.label("cartMessageLabel").requireText(" ");
+			}
+
 		}
 
 	}
@@ -631,16 +1032,15 @@ class TotemSwingViewTest {
 		@Test
 		@GUITest
 		@DisplayName("Goodbye panel inital state")
-		void testCartPanelInitialState() {
+		void testGoodbyePanelInitialState() {
 			window.button(JButtonMatcher.withName("goodbyeStartShopping")).requireText("Start shopping")
 					.requireEnabled();
 			window.label("byeLabel").requireText("Goodbye!");
 		}
 
 		@Test
-		@GUITest
-		@DisplayName("Button 'Start Shopping' should delegate to TotemController 'openShopping'")
-		void testStartShoppingButtonShouldDelegateToTotemControllerOpenShopping() {
+		@DisplayName("Button 'Start Shopping' should delegate to TotemController 'startShopping'")
+		void testStartShoppingButtonShouldDelegateToTotemControllerStartShopping() {
 			window.button(JButtonMatcher.withName("goodbyeStartShopping")).click();
 			verify(totemController).startShopping();
 		}

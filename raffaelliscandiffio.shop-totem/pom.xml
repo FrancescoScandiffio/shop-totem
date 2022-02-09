@@ -41,7 +41,7 @@
 			${project.build.directory}/failsafe-reports
 		</sonar.junit.reportPaths>
 
-		<sonar.issue.ignore.multicriteria>e1,e2,e3</sonar.issue.ignore.multicriteria>
+		<sonar.issue.ignore.multicriteria>e1,e2,e3,e4</sonar.issue.ignore.multicriteria>
 		<!-- disable rule on naming convention -->
 		<sonar.issue.ignore.multicriteria.e1.ruleKey>
 			java:S117
@@ -65,6 +65,14 @@
 		<sonar.issue.ignore.multicriteria.e3.resourceKey>
 			**/swing/TotemSwingView*
 		</sonar.issue.ignore.multicriteria.e3.resourceKey>
+		
+		<!-- disable rule on cognitive complexity -->
+		<sonar.issue.ignore.multicriteria.e4.ruleKey>
+			java:S3776
+		</sonar.issue.ignore.multicriteria.e4.ruleKey>
+		<sonar.issue.ignore.multicriteria.e4.resourceKey>
+			**/swing/CartPanel*
+		</sonar.issue.ignore.multicriteria.e4.resourceKey>
 	</properties>
 
 	<dependencyManagement>

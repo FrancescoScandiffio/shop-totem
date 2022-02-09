@@ -1,5 +1,6 @@
 package com.github.raffaelliscandiffio.view.swing;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -10,11 +11,13 @@ import javax.swing.Box;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
+import javax.swing.JSpinner.DefaultEditor;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
@@ -41,15 +44,16 @@ public class CartPanel extends JPanel {
 	private JLabel lblQuantity;
 	private JSpinner spinner;
 	private Component horizontalStrut;
+	private SpinnerNumberModel spinnerModel;
+	private JFormattedTextField spinnerTextField;
 
 	public CartPanel() {
-
 		this.setBorder(new EmptyBorder(5, 5, 5, 5));
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		gridBagLayout.rowHeights = new int[] { 0, 243, 0, 0, 0, 0, 0 };
+		gridBagLayout.rowHeights = new int[] { 0, 243, 0, 0, 0, 0 };
 		gridBagLayout.columnWeights = new double[] { 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, Double.MIN_VALUE };
-		gridBagLayout.rowWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gridBagLayout.rowWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0 };
 		setLayout(gridBagLayout);
 
 		btnContinueShopping = new JButton("Continue Shopping");
@@ -83,28 +87,16 @@ public class CartPanel extends JPanel {
 		add(scrollPane, gbc_scrollPane);
 
 		listOrderItemsModel = new DefaultListModel<>();
-		listOrderItemsModel.addListDataListener(new ListDataListener() {
-
-			@Override
-			public void intervalRemoved(ListDataEvent e) {
-				btnCheckout.setEnabled(!listOrderItemsModel.isEmpty());
-			}
-
-			@Override
-			public void intervalAdded(ListDataEvent e) {
-				btnCheckout.setEnabled(true);
-			}
-
-			@Override
-			public void contentsChanged(ListDataEvent e) {
-				// TODO Auto-generated method stub
-
-			}
+		listOrderItems = new JList<>(listOrderItemsModel);
+		listOrderItems.addListSelectionListener(e -> {
+			boolean isItemSelected = listOrderItems.getSelectedIndex() != -1;
+			btnRemoveSelected.setEnabled(isItemSelected);
+			boolean canReturnQuantity = isItemSelected && listOrderItems.getSelectedValue().getQuantity() > 1;
+			spinner.setEnabled(canReturnQuantity);
+			btnReturnQuantity.setEnabled(canReturnQuantity);
+			resetSpinnerForm();
 
 		});
-		listOrderItems = new JList<>(listOrderItemsModel);
-		listOrderItems
-				.addListSelectionListener(e -> btnRemoveSelected.setEnabled(listOrderItems.getSelectedIndex() != -1));
 		listOrderItems.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		listOrderItems.setName("cartList");
 		listOrderItems.setCellRenderer(new DefaultListCellRenderer() {
@@ -137,15 +129,8 @@ public class CartPanel extends JPanel {
 
 		lblQuantity = new JLabel("Quantity");
 		horizontalBox.add(lblQuantity);
-
 		horizontalStrut = Box.createHorizontalStrut(20);
 		horizontalBox.add(horizontalStrut);
-
-		spinner = new JSpinner();
-		spinner.setName("cartReturnSpinner");
-		horizontalBox.add(spinner);
-		spinner.setEnabled(false);
-		spinner.setModel(new SpinnerNumberModel(1, 1, null, 1));
 
 		btnReturnQuantity = new JButton("Return quantity");
 		btnReturnQuantity.setEnabled(false);
@@ -156,6 +141,40 @@ public class CartPanel extends JPanel {
 		gbc_btnReturnQuantity.gridx = 0;
 		gbc_btnReturnQuantity.gridy = 4;
 		add(btnReturnQuantity, gbc_btnReturnQuantity);
+		spinnerModel = new SpinnerNumberModel(1, 1, null, 1);
+		spinner = new JSpinner(spinnerModel);
+		spinner.setName("cartReturnSpinner");
+		horizontalBox.add(spinner);
+		spinner.setEnabled(false);
+		spinnerTextField = ((DefaultEditor) spinner.getEditor()).getTextField();
+
+		spinnerTextField.addCaretListener(e -> validateSpinnerContent());
+
+		listOrderItemsModel.addListDataListener(new ListDataListener() {
+
+			@Override
+			public void intervalRemoved(ListDataEvent e) {
+				btnCheckout.setEnabled(!listOrderItemsModel.isEmpty());
+			}
+
+			@Override
+			public void intervalAdded(ListDataEvent e) {
+				btnCheckout.setEnabled(true);
+			}
+
+			@Override
+			public void contentsChanged(ListDataEvent e) {
+				if (e.getIndex0() == listOrderItems.getSelectedIndex()) {
+					boolean isItemQuantityOne = listOrderItems.getSelectedValue().getQuantity() == 1;
+					spinner.setEnabled(!isItemQuantityOne);
+					if (isItemQuantityOne)
+						resetSpinnerForm();
+					else
+						validateSpinnerContent();
+				}
+			}
+
+		});
 
 		btnCheckout = new JButton("Checkout");
 		btnCheckout.setActionCommand("checkout");
@@ -174,7 +193,7 @@ public class CartPanel extends JPanel {
 		btnRemoveSelected.setFocusPainted(false);
 		GridBagConstraints gbc_btnRemoveSelected = new GridBagConstraints();
 		gbc_btnRemoveSelected.fill = GridBagConstraints.HORIZONTAL;
-		gbc_btnRemoveSelected.insets = new Insets(0, 0, 0, 5);
+		gbc_btnRemoveSelected.insets = new Insets(0, 0, 5, 5);
 		gbc_btnRemoveSelected.gridx = 0;
 		gbc_btnRemoveSelected.gridy = 5;
 		add(btnRemoveSelected, gbc_btnRemoveSelected);
@@ -183,17 +202,10 @@ public class CartPanel extends JPanel {
 		messageLabel.setName("cartMessageLabel");
 		GridBagConstraints gbc_messageLabel = new GridBagConstraints();
 		gbc_messageLabel.fill = GridBagConstraints.VERTICAL;
-		gbc_messageLabel.gridheight = 3;
-		gbc_messageLabel.gridwidth = 4;
-		gbc_messageLabel.insets = new Insets(0, 0, 0, 5);
-		gbc_messageLabel.gridx = 3;
-		gbc_messageLabel.gridy = 3;
+		gbc_messageLabel.gridwidth = 9;
+		gbc_messageLabel.gridx = 0;
+		gbc_messageLabel.gridy = 6;
 		add(messageLabel, gbc_messageLabel);
-	}
-
-	private String getDisplayRow(OrderItem orderItem) {
-		return orderItem.getProduct().getName() + " - Quantity: " + orderItem.getQuantity() + " - Price: "
-				+ orderItem.getProduct().getPrice() + " € - Subtotal: " + orderItem.getSubTotal() + " €";
 	}
 
 	public void addActionListener(ActionListener listener) {
@@ -201,6 +213,43 @@ public class CartPanel extends JPanel {
 		btnCancelShopping.addActionListener(listener);
 		btnCheckout.addActionListener(listener);
 		btnRemoveSelected.addActionListener(listener);
+	}
+
+	private void validateSpinnerContent() {
+		final String text = spinnerTextField.getText();
+		final boolean isPositiveInteger = text.matches("^[1-9][0-9]*$");
+		if (isPositiveInteger) {
+			if (!spinner.isEnabled()) {
+				messageLabel.setText(" ");
+				btnReturnQuantity.setEnabled(false);
+			} else {
+				final int itemQuantity = listOrderItems.getSelectedValue().getQuantity();
+				if (Integer.parseInt(text) < itemQuantity) {
+					btnReturnQuantity.setEnabled(true);
+					messageLabel.setText(" ");
+				} else {
+					btnReturnQuantity.setEnabled(false);
+					messageLabel.setText("Error: the input must be an integer in range [1," + (itemQuantity - 1)
+							+ "]. Received: " + text);
+					messageLabel.setForeground(Color.RED);
+				}
+			}
+		} else {
+			btnReturnQuantity.setEnabled(false);
+			messageLabel.setText("Error: the input must be a positive integer. Received: " + text);
+			messageLabel.setForeground(Color.RED);
+		}
+	}
+
+	private String getDisplayRow(OrderItem orderItem) {
+		return orderItem.getProduct().getName() + " - Quantity: " + orderItem.getQuantity() + " - Price: "
+				+ orderItem.getProduct().getPrice() + " € - Subtotal: " + orderItem.getSubTotal() + " €";
+	}
+
+	private void resetSpinnerForm() {
+		spinner.setValue(1);
+		spinnerTextField.setText("1");
+		messageLabel.setText(" ");
 	}
 
 	DefaultListModel<OrderItem> getListOrderItemsModel() {
@@ -211,7 +260,16 @@ public class CartPanel extends JPanel {
 		return listOrderItems;
 	}
 
-	public JLabel getMessageLabel() {
+	JLabel getMessageLabel() {
 		return messageLabel;
 	}
+
+	JSpinner getSpinner() {
+		return spinner;
+	}
+
+	JButton getBtnReturnQuantity() {
+		return btnReturnQuantity;
+	}
+
 }

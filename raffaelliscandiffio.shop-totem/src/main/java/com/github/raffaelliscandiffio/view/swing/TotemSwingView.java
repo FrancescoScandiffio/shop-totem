@@ -2,8 +2,11 @@ package com.github.raffaelliscandiffio.view.swing;
 
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
@@ -28,19 +31,6 @@ public class TotemSwingView extends JFrame implements TotemView {
 		this.totemController = totemController;
 	}
 
-	/**
-	 * Launch the application.
-	 * 
-	 * public static void main(String[] args) { EventQueue.invokeLater(new
-	 * Runnable() { public void run() { try { TotemSwingView frame = new
-	 * TotemSwingView(); frame.setVisible(true);
-	 * 
-	 * } catch (Exception e) { e.printStackTrace(); } } }); }
-	 */
-
-	/**
-	 * Create the frame.
-	 */
 	public TotemSwingView() {
 		setResizable(false);
 		setTitle("Totem");
@@ -60,29 +50,47 @@ public class TotemSwingView extends JFrame implements TotemView {
 
 		welcomePane.addActionListener(e -> startShoppingAction());
 
+		shoppingPane.getAddProductButton().addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				buyProductAction();
+			}
+		});
+
 		shoppingPane.addActionListener(e -> {
 			String command = e.getActionCommand();
 			if ("cancelShopping".equals(command))
 				closeShoppingAction();
-			if ("buyProduct".equals(command))
-				buyProductAction();
-			if ("openCart".equals(command))
+			else
 				openCartAction();
+		});
+
+		cartPane.getBtnReturnQuantity().addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				returnProductAction();
+			}
 		});
 
 		cartPane.addActionListener(e -> {
 			String command = e.getActionCommand();
 			if ("openShopping".equals(command))
 				openShoppingAction();
-			if ("cancelShopping".equals(command))
+			else if ("cancelShopping".equals(command))
 				closeShoppingAction();
-			if ("checkout".equals(command))
+			else if ("checkout".equals(command))
 				confirmOrderAction();
-			if ("removeSelected".equals(command))
+			else
 				removeItemAction();
+
 		});
 
 		goodbyePane.addActionListener(e -> startShoppingAction());
+	}
+
+	private void returnProductAction() {
+		int spinnerValue = ((Integer) cartPane.getSpinner().getValue()).intValue();
+		this.totemController.returnProduct(cartPane.getListOrderItems().getSelectedValue(), spinnerValue);
 	}
 
 	private void removeItemAction() {
@@ -161,8 +169,9 @@ public class TotemSwingView extends JFrame implements TotemView {
 
 	@Override
 	public void itemModified(OrderItem storedItem, OrderItem modifiedItem) {
-		getCartPane().getListOrderItemsModel().setElementAt(modifiedItem,
-				getCartPane().getListOrderItemsModel().indexOf(storedItem));
+		final DefaultListModel<OrderItem> listOrderItemsModel = getCartPane().getListOrderItemsModel();
+		listOrderItemsModel.setElementAt(modifiedItem,
+				listOrderItemsModel.indexOf(storedItem));
 	}
 
 	@Override
