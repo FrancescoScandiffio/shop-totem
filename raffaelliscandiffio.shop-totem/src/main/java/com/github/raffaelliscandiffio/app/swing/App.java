@@ -3,6 +3,7 @@ package com.github.raffaelliscandiffio.app.swing;
 import java.awt.EventQueue;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.concurrent.Callable;
 
 import javax.persistence.EntityManager;
@@ -105,12 +106,13 @@ public class App implements Callable<Void> {
 		
 		try (BufferedReader br = new BufferedReader(new FileReader("src/main/resources/initDB.csv"))) {
 		    String line;
+		    br.readLine();  // skip first line
 		    while ((line = br.readLine()) != null) {
 		        String[] values = line.split(",");
 		        insertProduct(broker, values);
 		    }
-		}  catch (Exception e) {
-			LOGGER.log(Level.ERROR, "Exception loading file", e);
+		}  catch (IOException e) {
+			LOGGER.log(Level.ERROR, "Exception reading file", e);
 		}
 	}
 
