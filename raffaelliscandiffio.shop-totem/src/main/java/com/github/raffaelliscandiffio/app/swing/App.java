@@ -2,16 +2,8 @@ package com.github.raffaelliscandiffio.app.swing;
 
 import java.awt.EventQueue;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.stream.Stream;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -56,11 +48,13 @@ public class App implements Callable<Void> {
 			switch (databaseType) {
 			case "mysql":
 				EntityManagerFactory emf;
+				
 				EntityManager entityManager;
 
 				try {
 					emf = Persistence.createEntityManagerFactory("mysql-production");
 					entityManager = emf.createEntityManager();
+					
 
 					ProductMySQLRepository productMySQLRepository = new ProductMySQLRepository(entityManager);
 					StockMySQLRepository stockMySQLRepository = new StockMySQLRepository(entityManager);
@@ -128,5 +122,4 @@ public class App implements Callable<Void> {
 			LOGGER.log(Level.ERROR, "Illegal argument exception", ie);
 		}
 	}
-
 }
