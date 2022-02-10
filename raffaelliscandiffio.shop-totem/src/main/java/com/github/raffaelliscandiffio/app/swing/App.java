@@ -41,64 +41,70 @@ public class App implements Callable<Void> {
 	public Void call() throws Exception {
 
 		EventQueue.invokeLater(() -> {
+			PurchaseBroker broker = null;
 
 			switch (databaseType) {
 			case "mysql":
+				EntityManagerFactory emf;
+				EntityManager entityManager;
+				
 				try {
-
-					EntityManagerFactory emf;
-					EntityManager entityManager;
-
 					emf = Persistence.createEntityManagerFactory("mysql-production");
 					entityManager = emf.createEntityManager();
 
 					ProductMySQLRepository productMySQLRepository = new ProductMySQLRepository(entityManager);
 					StockMySQLRepository stockMySQLRepository = new StockMySQLRepository(entityManager);
-
-					TotemSwingView totemView = new TotemSwingView();
-					PurchaseBroker broker = new PurchaseBroker(productMySQLRepository, stockMySQLRepository);
-					// fill the database each time
-					broker.saveNewProductInStock(1, "Pasta", 2.5, 300);
-					broker.saveNewProductInStock(2, "Pizza", 5.7, 700);
-					broker.saveNewProductInStock(3, "Broccoli", 2.3, 1000);
-					broker.saveNewProductInStock(4, "Tangerine", 1.1, 2000);
-
-					TotemController totemController = new TotemController(broker, totemView, null);
-					totemView.setTotemController(totemController);
-					totemView.setVisible(true);
+					broker = new PurchaseBroker(productMySQLRepository, stockMySQLRepository);
 
 				} catch (Exception e) {
 					LOGGER.log(Level.ERROR, "Exception", e);
 				}
+				
 				break;
 			case "mongo":
-
 				String dbName = "totem";
-				MongoClient client = new MongoClient(new ServerAddress("localhost", 27017));
-				// reset db at each start of the application
-				client.getDatabase(dbName).drop();
-				
-				ProductMongoRepository productMongoRepository = new ProductMongoRepository(client, dbName, "product");
-				StockMongoRepository stockMongoRepository = new StockMongoRepository(client, dbName, "stock");
-				TotemSwingView totemView = new TotemSwingView();
-				PurchaseBroker broker = new PurchaseBroker(productMongoRepository, stockMongoRepository);
+				try {
+					MongoClient client = new MongoClient(new ServerAddress("localhost", 27017));
+					// reset db at each start of the application
+					client.getDatabase(dbName).drop();
+					
+					ProductMongoRepository productMongoRepository = new ProductMongoRepository(client, dbName, "product");
+					StockMongoRepository stockMongoRepository = new StockMongoRepository(client, dbName, "stock");
+					
+					broker = new PurchaseBroker(productMongoRepository, stockMongoRepository);
 
-				// fill the database each time
-				broker.saveNewProductInStock(1, "Pasta", 2.5, 300);
-				broker.saveNewProductInStock(2, "Pizza", 5.7, 700);
-				broker.saveNewProductInStock(3, "Broccoli", 2.3, 1000);
-				broker.saveNewProductInStock(4, "Tangerine", 1.1, 2000);
-
-				TotemController totemController = new TotemController(broker, totemView, null);
-				totemView.setTotemController(totemController);
-				totemView.setVisible(true);
-
+				}catch (Exception e) {
+					LOGGER.log(Level.ERROR, "Exception", e);
+				}
 				break;
 
 			default:
 				LOGGER.log(Level.ERROR, "--database must be either 'mysql' or 'mongo'");
+				System.exit(1);
 			}
+			try {
+				TotemSwingView totemView = new TotemSwingView();
+				fillDB(broker);
+				TotemController totemController = new TotemController(broker, totemView, null);
+				totemView.setTotemController(totemController);
+				totemView.setVisible(true);
+			}catch (Exception e) {
+				LOGGER.log(Level.ERROR, "Exception", e);
+			}
+			
 		});
 		return null;
+	}
+
+	private void fillDB(PurchaseBroker broker) {
+		try {
+			// fill the database each time
+			broker.saveNewProductInStock(1, "Pasta", 2.5, 300);
+			broker.saveNewProductInStock(2, "Pizza", 5.7, 700);
+			broker.saveNewProductInStock(3, "Broccoli", 1.5, 1000);
+			broker.saveNewProductInStock(4, "Tangerine", 1.1, 2000);
+		}catch(IllegalArgumentException ie) {
+			LOGGER.log(Level.ERROR, "Exception", ie);
+		}
 	}
 }
