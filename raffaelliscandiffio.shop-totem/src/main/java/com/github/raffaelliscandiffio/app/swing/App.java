@@ -22,49 +22,57 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 @Command(mixinStandardHelpOptions = true)
-public class App implements Callable<Void>{
-	
+public class App implements Callable<Void> {
+
 	private static final Logger LOGGER = LogManager.getLogger(App.class);
-	
+
 	@Option(names = { "--database" }, description = "Either 'mongo' or 'mysql'")
 	private String databaseType = "mysql";
-	
-	
+
 	public static void main(String[] args) {
 		new CommandLine(new App()).execute(args);
 	}
-	
+
 	@Override
 	public Void call() throws Exception {
-      
+
 		EventQueue.invokeLater(() -> {
-			if(databaseType.equals("mysql")) {
+
+			switch (databaseType) {
+			case "mysql":
 				try {
-					
+
 					EntityManagerFactory emf;
 					EntityManager entityManager;
-				
-			        emf = Persistence.createEntityManagerFactory("mysql-production");
-			        entityManager = emf.createEntityManager();
-					
+
+					emf = Persistence.createEntityManagerFactory("mysql-production");
+					entityManager = emf.createEntityManager();
+
 					ProductMySQLRepository productMySQLRepository = new ProductMySQLRepository(entityManager);
 					StockMySQLRepository stockMySQLRepository = new StockMySQLRepository(entityManager);
-					
-					TotemSwingView totemView = new TotemSwingView(); 
+
+					TotemSwingView totemView = new TotemSwingView();
 					PurchaseBroker broker = new PurchaseBroker(productMySQLRepository, stockMySQLRepository);
 					// fill the database each time
 					broker.saveNewProductInStock(1, "Pasta", 2.5, 300);
 					broker.saveNewProductInStock(2, "Pizza", 5.7, 700);
 					broker.saveNewProductInStock(3, "Broccoli", 2.3, 1000);
 					broker.saveNewProductInStock(4, "Tangerine", 1.1, 2000);
-					
-					TotemController totemController = new TotemController(broker, totemView, null); 
-					totemView.setTotemController(totemController); 
+
+					TotemController totemController = new TotemController(broker, totemView, null);
+					totemView.setTotemController(totemController);
 					totemView.setVisible(true);
-					
+
 				} catch (Exception e) {
 					LOGGER.log(Level.ERROR, "Exception", e);
 				}
+				break;
+			case "mongo":
+
+				break;
+
+			default:
+				LOGGER.log(Level.ERROR, "--database must be either 'mysql' or 'mongo'");
 			}
 		});
 		return null;
