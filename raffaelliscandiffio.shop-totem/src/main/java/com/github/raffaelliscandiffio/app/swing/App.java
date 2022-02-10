@@ -1,9 +1,17 @@
 package com.github.raffaelliscandiffio.app.swing;
 
 import java.awt.EventQueue;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.stream.Stream;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -94,27 +102,31 @@ public class App implements Callable<Void> {
 			} catch (Exception e) {
 				LOGGER.log(Level.ERROR, "Exception", e);
 			}
-
 		});
 		return null;
 	}
 
 	private void fillDB(PurchaseBroker broker) {
 		// fill the database each time
-
-		List<String[]> dataLines = new ArrayList<>();
-		dataLines.add(new String[] { "1", "Pasta", "2.5", "300" });
-		dataLines.add(new String[] { "2", "Pizza", "5.7", "700" });
-		dataLines.add(new String[] { "3", "Broccoli", "1.5", "1000" });
-		dataLines.add(new String[] { "4", "Tangerine", "1.1", "2000" });
-
-		dataLines.stream().forEach(el -> {
-			try {
-				broker.saveNewProductInStock(Long.parseLong(el[0]), el[1], Double.parseDouble(el[2]),
-						Integer.parseInt(el[3]));
-			} catch (IllegalArgumentException ie) {
-				LOGGER.log(Level.ERROR, "Illegal argument exception", ie);
-			}
-		});
+		
+		try (BufferedReader br = new BufferedReader(new FileReader("src/main/resources/initDB.csv"))) {
+		    String line;
+		    while ((line = br.readLine()) != null) {
+		        String[] values = line.split(",");
+		        insertProduct(broker, values);
+		    }
+		}  catch (Exception e) {
+			LOGGER.log(Level.ERROR, "Exception loading file", e);
+		}
 	}
+
+	private void insertProduct(PurchaseBroker broker, String[] values) {
+		try {
+			broker.saveNewProductInStock(Long.parseLong(values[0]), values[1], Double.parseDouble(values[2]),
+					Integer.parseInt(values[3]));
+		}catch (IllegalArgumentException ie) {
+			LOGGER.log(Level.ERROR, "Illegal argument exception", ie);
+		}
+	}
+
 }
