@@ -13,9 +13,13 @@ import org.apache.logging.log4j.Logger;
 
 import com.github.raffaelliscandiffio.controller.PurchaseBroker;
 import com.github.raffaelliscandiffio.controller.TotemController;
+import com.github.raffaelliscandiffio.repository.mongo.ProductMongoRepository;
+import com.github.raffaelliscandiffio.repository.mongo.StockMongoRepository;
 import com.github.raffaelliscandiffio.repository.mysql.ProductMySQLRepository;
 import com.github.raffaelliscandiffio.repository.mysql.StockMySQLRepository;
 import com.github.raffaelliscandiffio.view.swing.TotemSwingView;
+import com.mongodb.MongoClient;
+import com.mongodb.ServerAddress;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -68,6 +72,26 @@ public class App implements Callable<Void> {
 				}
 				break;
 			case "mongo":
+
+				String dbName = "totem";
+				MongoClient client = new MongoClient(new ServerAddress("localhost", 27017));
+				// reset db at each start of the application
+				client.getDatabase(dbName).drop();
+				
+				ProductMongoRepository productMongoRepository = new ProductMongoRepository(client, dbName, "product");
+				StockMongoRepository stockMongoRepository = new StockMongoRepository(client, dbName, "stock");
+				TotemSwingView totemView = new TotemSwingView();
+				PurchaseBroker broker = new PurchaseBroker(productMongoRepository, stockMongoRepository);
+
+				// fill the database each time
+				broker.saveNewProductInStock(1, "Pasta", 2.5, 300);
+				broker.saveNewProductInStock(2, "Pizza", 5.7, 700);
+				broker.saveNewProductInStock(3, "Broccoli", 2.3, 1000);
+				broker.saveNewProductInStock(4, "Tangerine", 1.1, 2000);
+
+				TotemController totemController = new TotemController(broker, totemView, null);
+				totemView.setTotemController(totemController);
+				totemView.setVisible(true);
 
 				break;
 
