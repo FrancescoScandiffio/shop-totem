@@ -93,58 +93,6 @@ class OrderItemTest {
 		}
 
 		@Nested
-		@DisplayName("Test 'increaseQuantity' method")
-		class IncreaseQuantityTest {
-
-			@Nested
-			@DisplayName("Exceptional cases")
-			class ExceptionalCases {
-
-				@Test
-				@DisplayName("Don't increase quantity if the given value is negative")
-				void testIncreaseQuantityWhenAmountIsNegativeShouldThrow() {
-
-					assertThatThrownBy(() -> item.increaseQuantity(NEGATIVE_QUANTITY))
-							.isInstanceOf(IllegalArgumentException.class)
-							.hasMessage(String.format("Non-positive quantity: (%d)", NEGATIVE_QUANTITY));
-					softly.assertThat(item.getQuantity()).isEqualTo(POSITIVE_QUANTITY);
-					softly.assertThat(item.getSubTotal()).isCloseTo(POSITIVE_QUANTITY * product.getPrice(),
-							byLessThan(EPSILON));
-					softly.assertAll();
-				}
-
-				@Test
-				@DisplayName("Don't increase quantity if the given value is zero")
-				void testIncreaseQuantityWhenAmountIsZeroShouldThrow() {
-
-					assertThatThrownBy(() -> item.increaseQuantity(ZERO)).isInstanceOf(IllegalArgumentException.class)
-							.hasMessage(String.format("Non-positive quantity: (%d)", ZERO));
-					softly.assertThat(item.getQuantity()).isEqualTo(POSITIVE_QUANTITY);
-					softly.assertThat(item.getSubTotal()).isCloseTo(POSITIVE_QUANTITY * product.getPrice(),
-							byLessThan(EPSILON));
-					softly.assertAll();
-				}
-
-			}
-
-			@Nested
-			@DisplayName("Happy case")
-			class HappyCase {
-
-				@Test
-				@DisplayName("Increase quantity")
-				void testIncreaseQuantity() {
-
-					item.increaseQuantity(GREATER_POSITIVE_QUANTITY);
-					softly.assertThat(item.getQuantity()).isEqualTo(POSITIVE_QUANTITY + GREATER_POSITIVE_QUANTITY);
-					softly.assertThat(item.getSubTotal()).isCloseTo(
-							(POSITIVE_QUANTITY + GREATER_POSITIVE_QUANTITY) * product.getPrice(), byLessThan(EPSILON));
-					softly.assertAll();
-				}
-			}
-		}
-
-		@Nested
 		@DisplayName("Test 'decreaseQuantity' method")
 		class DecreaseQuantityTest {
 

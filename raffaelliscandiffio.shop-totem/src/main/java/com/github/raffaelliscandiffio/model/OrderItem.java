@@ -26,18 +26,6 @@ public class OrderItem {
 	}
 
 	/**
-	 * Increase the quantity by the specified amount.
-	 * 
-	 * @param amount the amount to be added to the current quantity
-	 * @throws IllegalArgumentException if the specified amount is non-positive
-	 */
-	public void increaseQuantity(int amount) {
-		handleNonPositiveQuantity(amount);
-		this.quantity += amount;
-		updateSubTotal();
-	}
-
-	/**
 	 * Decrease the quantity by the specified amount.
 	 * 
 	 * @param amount the amount to be removed from the current quantity
