@@ -29,7 +29,7 @@ class OrderTest {
 
 	private static final int QUANTITY = 3;
 	private static final int GREATER_QUANTITY = 15;
-	private static final long ITEM_ID = 1;
+	private static final String ITEM_ID = "1";
 
 	private Product product;
 	private Order order;
@@ -50,6 +50,21 @@ class OrderTest {
 	@Nested
 	@DisplayName("Test 'insertItem'")
 	class InsertItemTest {
+
+		@Test
+		@DisplayName("A positive number is automatically assigned as id")
+		void testIdIsAutomaticallyAssignedAsPositiveNumber() {
+			OrderItem inserted = order.insertItem(product, QUANTITY);
+			assertThat(Integer.valueOf(inserted.getId())).isPositive();
+		}
+
+		@Test
+		@DisplayName("An incremental id is automatically assigned to OrderItem")
+		void testIdsAreIncremental() {
+			OrderItem insert1 = order.insertItem(new Product(1, "product1", 1), QUANTITY);
+			OrderItem insert2 = order.insertItem(new Product(2, "product2", 1), QUANTITY);
+			assertThat(Integer.valueOf(insert1.getId())).isLessThan(Integer.valueOf(insert2.getId()));
+		}
 
 		@Test
 		@DisplayName("Construct a new OrderItem and add it to the list when the list is empty")
@@ -237,8 +252,9 @@ class OrderTest {
 		}
 
 	}
-	
+
 	private long id = 0;
+
 	// Utility method to construct new product for test
 	private Product getNewProduct() {
 		return new Product(++id, "name", 3.0);

@@ -8,9 +8,11 @@ import com.github.raffaelliscandiffio.utils.ExcludeGeneratedFromCoverage;
 public class Order {
 
 	private List<OrderItem> items;
+	private int lastItemId;
 
 	public Order(List<OrderItem> items) {
 		this.items = items;
+		lastItemId = 0;
 	}
 
 	/**
@@ -27,7 +29,8 @@ public class Order {
 		OrderItem item = items.stream().filter(obj -> obj.getProduct().getId() == product.getId()).findFirst()
 				.orElse(null);
 		if (item == null) {
-			item = new OrderItem(product, quantity);
+			lastItemId++;
+			item = new OrderItem(Integer.toString(lastItemId), product, quantity);
 			items.add(item);
 		} else
 			item.increaseQuantity(quantity);
@@ -41,7 +44,7 @@ public class Order {
 	 * @throws NoSuchElementException if the requested item is not found
 	 * @return OrderItem - the removed item
 	 */
-	public OrderItem popItemById(long itemId) {
+	public OrderItem popItemById(String itemId) {
 		OrderItem item = findItemById(itemId);
 		items.remove(item);
 		return item;
@@ -61,7 +64,7 @@ public class Order {
 	 * @throws NoSuchElementException   if the requested item is not found
 	 * @return OrderItem - the modified item
 	 */
-	public OrderItem decreaseItem(long itemId, int quantity) throws IllegalArgumentException {
+	public OrderItem decreaseItem(String itemId, int quantity) throws IllegalArgumentException {
 		OrderItem item = findItemById(itemId);
 		item.decreaseQuantity(quantity);
 		return item;
@@ -88,7 +91,7 @@ public class Order {
 		items.clear();
 	}
 
-	private OrderItem findItemById(long itemId) {
+	private OrderItem findItemById(String itemId) {
 		return items.stream().filter(obj -> obj.getId() == itemId).findFirst()
 				.orElseThrow(() -> new NoSuchElementException(String.format("Item with id (%s) not found", itemId)));
 	}

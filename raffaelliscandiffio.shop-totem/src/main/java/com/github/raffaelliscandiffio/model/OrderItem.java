@@ -2,28 +2,27 @@ package com.github.raffaelliscandiffio.model;
 
 public class OrderItem {
 
+	private final String id;
 	private Product product;
 	private int quantity;
 	private double subTotal;
-	private long id;
-	private static long lastId = 0;
 
 	/**
 	 * Constructs a new OrderItem with the specified product and quantity.
 	 * 
-	 * @param product the product to be purchased
+	 * @param product  the product to be purchased
 	 * @param quantity the quantity to be purchased
-	 * @throws NullPointerException if the specified product is null
+	 * @throws NullPointerException     if the specified product is null
 	 * @throws IllegalArgumentException if the specified quantity is non-positive
 	 */
-	public OrderItem(Product product, int quantity) {
+	public OrderItem(String id, Product product, int quantity) {
 		if (product == null)
 			throw new NullPointerException("Null product");
+		this.id = id;
 		handleNonPositiveQuantity(quantity);
 		this.product = product;
 		this.quantity = quantity;
 		updateSubTotal();
-		this.id = ++lastId;
 	}
 
 	/**
@@ -43,11 +42,14 @@ public class OrderItem {
 	 * 
 	 * @param amount the amount to be removed from the current quantity
 	 * @throws IllegalArgumentException in the following three cases:
-	 *  <ul>
-	 *  	<li>if the specified amount is non-positive</li>
-	 *  	<li>if the specified amount is equal to the current quantity</li>
-	 *  	<li>if the specified amount is greater than the current quantity</li>
-	 *  </ul>
+	 *                                  <ul>
+	 *                                  <li>if the specified amount is
+	 *                                  non-positive</li>
+	 *                                  <li>if the specified amount is equal to the
+	 *                                  current quantity</li>
+	 *                                  <li>if the specified amount is greater than
+	 *                                  the current quantity</li>
+	 *                                  </ul>
 	 */
 	public void decreaseQuantity(int amount) {
 		handleNonPositiveQuantity(amount);
@@ -59,58 +61,30 @@ public class OrderItem {
 
 	}
 
-	private void updateSubTotal() {
-		this.subTotal = this.quantity * product.getPrice();
+	public String getId() {
+		return id;
 	}
-	
-	private void handleNonPositiveQuantity(int quantity) {
-		if (quantity <= 0)
-			throw new IllegalArgumentException(String.format("Non-positive quantity: (%d)", quantity));
-	}
-	
-	//Getters and setters
-	
-	/**
-	 * Returns the current quantity
-	 * 
-	 * @return the current quantity
-	 */
+
 	public int getQuantity() {
 		return quantity;
 	}
 
-	/**
-	 * Returns the product
-	 * 
-	 * @return the product
-	 */
 	public Product getProduct() {
 		return product;
 	}
-	
-	/**
-	 * Returns the sub total of the item
-	 * 
-	 * @return subTotal
-	 */
+
 	public double getSubTotal() {
 		return subTotal;
 	}
 
-	/**
-	 * Returns the id of the item
-	 * 
-	 * @return id
-	 */
-	public long getId() {
-		return id;
+	private void updateSubTotal() {
+		this.subTotal = this.quantity * product.getPrice();
 	}
 
-
-	
-	// Package-private methods for testing
-	
-	OrderItem(){}
+	private void handleNonPositiveQuantity(int quantity) {
+		if (quantity <= 0)
+			throw new IllegalArgumentException(String.format("Non-positive quantity: (%d)", quantity));
+	}
 
 	void setQuantity(int quantity) {
 		this.quantity = quantity;
@@ -123,9 +97,9 @@ public class OrderItem {
 	void setProduct(Product product) {
 		this.product = product;
 	}
-	
-	
-	
-	
+
+	OrderItem(String id) {
+		this.id = id;
+	}
 
 }
