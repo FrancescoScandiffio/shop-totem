@@ -33,6 +33,7 @@
 		<sonar.coverage.exclusions>
 			**/model/Product.java,
 			**/model/Stock.java,
+			**/model/OrderItem.java,
 			**/utils/GUITestExtension.java
 		</sonar.coverage.exclusions>
 
@@ -233,6 +234,7 @@
 						<excludes>
 							<exclude>**/model/Product.class</exclude>
 							<exclude>**/model/Stock.class</exclude>
+							<exclude>**/model/OrderItem.class</exclude>
 							<exclude>**/utils/GUITestExtension.class</exclude>
 						</excludes>
 					</configuration>
