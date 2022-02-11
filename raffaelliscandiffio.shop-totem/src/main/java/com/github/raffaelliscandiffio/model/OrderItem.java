@@ -25,30 +25,6 @@ public class OrderItem {
 		updateSubTotal();
 	}
 
-	/**
-	 * Decrease the quantity by the specified amount.
-	 * 
-	 * @param amount the amount to be removed from the current quantity
-	 * @throws IllegalArgumentException in the following three cases:
-	 *                                  <ul>
-	 *                                  <li>if the specified amount is
-	 *                                  non-positive</li>
-	 *                                  <li>if the specified amount is equal to the
-	 *                                  current quantity</li>
-	 *                                  <li>if the specified amount is greater than
-	 *                                  the current quantity</li>
-	 *                                  </ul>
-	 */
-	public void decreaseQuantity(int amount) {
-		handleNonPositiveQuantity(amount);
-		if (amount >= this.quantity)
-			throw new IllegalArgumentException(String
-					.format("Decrease quantity (%d) must be less than available quantity (%d)", amount, this.quantity));
-		this.quantity -= amount;
-		updateSubTotal();
-
-	}
-
 	public String getId() {
 		return id;
 	}
