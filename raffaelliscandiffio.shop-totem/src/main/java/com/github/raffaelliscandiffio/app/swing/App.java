@@ -49,13 +49,12 @@ public class App implements Callable<Void> {
 			switch (databaseType) {
 			case "mysql":
 				EntityManagerFactory emf;
-				
+
 				EntityManager entityManager;
 
 				try {
 					emf = Persistence.createEntityManagerFactory("mysql-production");
 					entityManager = emf.createEntityManager();
-					
 
 					ProductMySQLRepository productMySQLRepository = new ProductMySQLRepository(entityManager);
 					StockMySQLRepository stockMySQLRepository = new StockMySQLRepository(entityManager);
@@ -104,14 +103,12 @@ public class App implements Callable<Void> {
 	private void fillDB(PurchaseBroker broker) {
 		// fill the database each time
 		
-		try (BufferedReader br = new BufferedReader(new FileReader("src/main/resources/initDB.csv"))) {
-		    String line;
-		    br.readLine();  // skip first line
-		    while ((line = br.readLine()) != null) {
-		        String[] values = line.split(",");
-		        insertProduct(broker, values);
-		    }
-		}  catch (IOException e) {
+		try(BufferedReader br = new BufferedReader(new FileReader("src/main/resources/initDB.csv"))){
+			br.lines().skip(1).forEach(line->{
+				String[] values = line.split(",");
+				insertProduct(broker, values);
+			});
+		}catch(IOException e) {
 			LOGGER.log(Level.ERROR, "Exception reading file", e);
 		}
 	}
@@ -120,7 +117,7 @@ public class App implements Callable<Void> {
 		try {
 			broker.saveNewProductInStock(Long.parseLong(values[0]), values[1], Double.parseDouble(values[2]),
 					Integer.parseInt(values[3]));
-		}catch (IllegalArgumentException ie) {
+		} catch (IllegalArgumentException ie) {
 			LOGGER.log(Level.ERROR, "Illegal argument exception", ie);
 		}
 	}
