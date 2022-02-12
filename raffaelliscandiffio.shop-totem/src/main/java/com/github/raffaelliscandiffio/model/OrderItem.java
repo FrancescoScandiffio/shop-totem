@@ -5,7 +5,7 @@ import java.util.Objects;
 public class OrderItem {
 
 	private final String id;
-	private Product product;
+	private final Product product;
 	private int quantity;
 	private double subTotal;
 
@@ -32,6 +32,30 @@ public class OrderItem {
 		OrderItem other = (OrderItem) obj;
 		return Objects.equals(id, other.id) && Objects.equals(product, other.product) && quantity == other.quantity
 				&& Double.doubleToLongBits(subTotal) == Double.doubleToLongBits(other.subTotal);
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public Product getProduct() {
+		return product;
+	}
+
+	public int getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
+	}
+
+	public double getSubTotal() {
+		return subTotal;
+	}
+
+	public void setSubTotal(double subTotal) {
+		this.subTotal = subTotal;
 	}
 
 }
