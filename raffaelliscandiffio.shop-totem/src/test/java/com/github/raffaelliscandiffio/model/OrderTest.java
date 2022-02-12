@@ -20,7 +20,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @DisplayName("Test class Order")
@@ -31,13 +30,9 @@ class OrderTest {
 	private static final int GREATER_QUANTITY = 15;
 	private static final String ITEM_ID = "1";
 
-	private Product product;
 	private Order order;
 	private List<OrderItem> items;
 	private SoftAssertions softly;
-
-	@Mock
-	private OrderItem item;
 
 	@BeforeEach
 	void setup() {
