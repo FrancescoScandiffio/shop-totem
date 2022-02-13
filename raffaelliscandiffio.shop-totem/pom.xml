@@ -36,7 +36,7 @@
 			**/model/Product.java,
 			**/model/Stock.java,
 			**/utils/GUITestExtension.java,
-			**/app/swing/App.java
+			**/app/**/*
 		</sonar.coverage.exclusions>
 
 		<sonar.junit.reportPaths>
@@ -243,7 +243,7 @@
 							<exclude>**/model/Product.class</exclude>
 							<exclude>**/model/Stock.class</exclude>
 							<exclude>**/utils/GUITestExtension.class</exclude>
-							<exclude>**/app/swing/App.class</exclude>
+							<exclude>**/app/**/*</exclude>
 						</excludes>
 					</configuration>
 					<executions>
