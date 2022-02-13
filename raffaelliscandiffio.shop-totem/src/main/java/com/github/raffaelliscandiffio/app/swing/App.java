@@ -6,23 +6,16 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.github.raffaelliscandiffio.app.dbinit.DBInitializer;
+import com.github.raffaelliscandiffio.app.dbinit.MongoInitializer;
+import com.github.raffaelliscandiffio.app.dbinit.MySQLInitializer;
 import com.github.raffaelliscandiffio.controller.PurchaseBroker;
 import com.github.raffaelliscandiffio.controller.TotemController;
-import com.github.raffaelliscandiffio.repository.mongo.ProductMongoRepository;
-import com.github.raffaelliscandiffio.repository.mongo.StockMongoRepository;
-import com.github.raffaelliscandiffio.repository.mysql.ProductMySQLRepository;
-import com.github.raffaelliscandiffio.repository.mysql.StockMySQLRepository;
 import com.github.raffaelliscandiffio.view.swing.TotemSwingView;
-import com.mongodb.MongoClient;
-import com.mongodb.ServerAddress;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -40,61 +33,46 @@ public class App implements Callable<Void> {
 		new CommandLine(new App()).execute(args);
 	}
 
+	DBInitializer dBInitializer;
+
 	@Override
 	public Void call() throws Exception {
 
 		EventQueue.invokeLater(() -> {
-			PurchaseBroker broker = null;
-
-			switch (databaseType) {
-			case "mysql":
-				EntityManagerFactory emf;
-
-				EntityManager entityManager;
-
-				try {
-					emf = Persistence.createEntityManagerFactory("mysql-production");
-					entityManager = emf.createEntityManager();
-
-					ProductMySQLRepository productMySQLRepository = new ProductMySQLRepository(entityManager);
-					StockMySQLRepository stockMySQLRepository = new StockMySQLRepository(entityManager);
-					broker = new PurchaseBroker(productMySQLRepository, stockMySQLRepository);
-
-				} catch (Exception e) {
-					LOGGER.log(Level.ERROR, "MySQL Exception", e);
-				}
-
-				break;
-			case "mongo":
-				String dbName = "totem";
-				try {
-					MongoClient client = new MongoClient(new ServerAddress("localhost", 27017));
-					// reset db at each start of the application
-					client.getDatabase(dbName).drop();
-
-					ProductMongoRepository productMongoRepository = new ProductMongoRepository(client, dbName,
-							"product");
-					StockMongoRepository stockMongoRepository = new StockMongoRepository(client, dbName, "stock");
-
-					broker = new PurchaseBroker(productMongoRepository, stockMongoRepository);
-
-				} catch (Exception e) {
-					LOGGER.log(Level.ERROR, "Mongo Exception", e);
-				}
-				break;
-
-			default:
-				LOGGER.log(Level.ERROR, "--database must be either 'mysql' or 'mongo'");
-				System.exit(1);
-			}
 			try {
+
+				switch (databaseType) {
+				case "mysql":
+
+					dBInitializer = new MySQLInitializer();
+					break;
+				case "mongo":
+					dBInitializer = new MongoInitializer();
+					break;
+
+				default:
+					LOGGER.log(Level.ERROR, "--database must be either 'mysql' or 'mongo'");
+					System.exit(1);
+				}
+				dBInitializer.startDbConnection();
 				TotemSwingView totemView = new TotemSwingView();
-				fillDB(broker);
-				TotemController totemController = new TotemController(broker, totemView, null);
+
+				fillDB(dBInitializer.getBroker());
+				
+				// TODO: Create and inject Order object to TotemController
+				TotemController totemController = new TotemController(dBInitializer.getBroker(), totemView, null);
 				totemView.setTotemController(totemController);
 				totemView.setVisible(true);
+				
 			} catch (Exception e) {
 				LOGGER.log(Level.ERROR, "Exception", e);
+			}
+		});
+
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			@Override
+			public void run() {
+				dBInitializer.closeDbConnection();
 			}
 		});
 		return null;
@@ -102,13 +80,13 @@ public class App implements Callable<Void> {
 
 	private void fillDB(PurchaseBroker broker) {
 		// fill the database each time
-		
-		try(BufferedReader br = new BufferedReader(new FileReader("src/main/resources/initDB.csv"))){
-			br.lines().skip(1).forEach(line->{
+
+		try (BufferedReader br = new BufferedReader(new FileReader("src/main/resources/initDB.csv"))) {
+			br.lines().skip(1).forEach(line -> {
 				String[] values = line.split(",");
 				insertProduct(broker, values);
 			});
-		}catch(IOException e) {
+		} catch (IOException e) {
 			LOGGER.log(Level.ERROR, "Exception reading file", e);
 		}
 	}
