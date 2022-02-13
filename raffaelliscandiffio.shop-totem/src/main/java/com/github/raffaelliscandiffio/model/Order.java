@@ -14,6 +14,11 @@ public class Order {
 	}
 
 	public OrderItem insertItem(Product product, int quantity) {
+		if (product == null)
+			throw new NullPointerException("Product cannot be null");
+		if (quantity <= 0)
+			throw new IllegalArgumentException(String.format("Quantity must be positive. Received: %s", quantity));
+
 		OrderItem storedItem = items.stream().filter(obj -> obj.getProduct().getId() == product.getId()).findFirst()
 				.orElse(null);
 		if (storedItem == null) {

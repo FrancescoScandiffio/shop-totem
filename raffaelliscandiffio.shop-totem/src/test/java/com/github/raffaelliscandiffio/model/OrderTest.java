@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Test;
 @DisplayName("Test class Order")
 class OrderTest {
 
+	private static final int ZERO = 0;
+	private static final int NEGATIVE_QUANTITY = -1;
 	private static final int POSITIVE_QUANTITY = 3;
 	private static final String ITEM_ID = "1";
 
@@ -72,6 +74,39 @@ class OrderTest {
 
 		}
 
+		@Nested
+		@DisplayName("Test exceptional cases")
+		class InsertionExceptionalCasesTest {
+
+			@Test
+			@DisplayName("Throw NullPointerException when the specified product is null")
+			void testInsertItemWhenProductIsNullShouldThrowNullPointerException() {
+				assertThatThrownBy(() -> order.insertItem(null, POSITIVE_QUANTITY))
+						.isInstanceOf(NullPointerException.class).hasMessage("Product cannot be null");
+				assertThat(items).isEmpty();
+			}
+
+			@Test
+			@DisplayName("Throw IllegalArgumentException when the specified quantity is zero")
+			void testInsertItemWhenSpecifiedQuantityIsZeroShouldThrowIllegalArgumentException() {
+				Product product = new Product(1, "product", 2.0);
+				assertThatThrownBy(() -> order.insertItem(product, ZERO)).isInstanceOf(IllegalArgumentException.class)
+						.hasMessage("Quantity must be positive. Received: 0");
+				assertThat(items).isEmpty();
+			}
+
+			@Test
+			@DisplayName("Throw IllegalArgumentException when the specified quantity is negative")
+			void testInsertItemWhenSpecifiedQuantityIsNegativeShouldThrowIllegalArgumentException() {
+				Product product = new Product(1, "product", 2.0);
+				assertThatThrownBy(() -> order.insertItem(product, NEGATIVE_QUANTITY))
+						.isInstanceOf(IllegalArgumentException.class)
+						.hasMessage("Quantity must be positive. Received: " + NEGATIVE_QUANTITY);
+				assertThat(items).isEmpty();
+			}
+
+		}
+
 	}
 
 	@Nested
@@ -91,6 +126,15 @@ class OrderTest {
 			softly.assertThat(result).isEqualTo(item);
 			softly.assertThat(items).hasSize(1).containsOnly(otherItem);
 			softly.assertAll();
+		}
+
+		@Test
+		@DisplayName("Throw exception when the specified item does not exist")
+		void testPopItemByIdWhenItemNotFoundShouldThrow() {
+
+			assertThatThrownBy(() -> order.popItemById(ITEM_ID)).isInstanceOf(NoSuchElementException.class)
+					.hasMessage(String.format("Item with id (%s) not found", ITEM_ID));
+
 		}
 
 		@Test
