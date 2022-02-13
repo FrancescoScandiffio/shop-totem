@@ -4,13 +4,12 @@ import java.util.Objects;
 
 public class OrderItem {
 
-	private final String id;
-	private final Product product;
+	private String id;
+	private Product product;
 	private int quantity;
 	private double subTotal;
 
-	public OrderItem(String id, Product product, int quantity, double subTotal) {
-		this.id = id;
+	public OrderItem(Product product, int quantity, double subTotal) {
 		this.product = product;
 		this.quantity = quantity;
 		this.subTotal = subTotal;
@@ -38,8 +37,8 @@ public class OrderItem {
 		return id;
 	}
 
-	public Product getProduct() {
-		return product;
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	public int getQuantity() {
@@ -56,6 +55,10 @@ public class OrderItem {
 
 	public void setSubTotal(double subTotal) {
 		this.subTotal = subTotal;
+	}
+
+	public Product getProduct() {
+		return product;
 	}
 
 }

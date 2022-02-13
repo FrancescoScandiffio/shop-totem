@@ -8,33 +8,22 @@ import com.github.raffaelliscandiffio.utils.ExcludeGeneratedFromCoverage;
 public class Order {
 
 	private List<OrderItem> items;
-	private int lastItemId;
 
 	public Order(List<OrderItem> items) {
 		this.items = items;
-		lastItemId = 0;
 	}
 
-	/**
-	 * Encapsulate the specified product and quantity in a new OrderItem instance.
-	 * If the product is already binded to an item, increase its quantity.
-	 * 
-	 * @param product the product to be added to the order
-	 * @param the     quantity of product to be added to the order
-	 * @throws NullPointerException     if product is null
-	 * @throws IllegalArgumentException if quantity is non-positive
-	 * @return OrderItem - the newly inserted or modified item
-	 */
-	public OrderItem insertItem(Product product, int quantity) throws NullPointerException, IllegalArgumentException {
-		OrderItem item = items.stream().filter(obj -> obj.getProduct().getId() == product.getId()).findFirst()
+	public OrderItem insertItem(Product product, int quantity) {
+		OrderItem storedItem = items.stream().filter(obj -> obj.getProduct().getId() == product.getId()).findFirst()
 				.orElse(null);
-		if (item == null) {
-			lastItemId++;
-			item = new OrderItem(Integer.toString(lastItemId), product, quantity);
-			items.add(item);
-		} else
-			item.increaseQuantity(quantity);
-		return item;
+		if (storedItem == null) {
+			storedItem = new OrderItem(product, quantity, product.getPrice() * quantity);
+			items.add(storedItem);
+		} else {
+			storedItem.setQuantity(quantity + storedItem.getQuantity());
+			storedItem.setSubTotal(storedItem.getQuantity() * storedItem.getProduct().getPrice());
+		}
+		return storedItem;
 	}
 
 	/**
