@@ -14,12 +14,9 @@ public class Order {
 	}
 
 	public OrderItem addNewProduct(Product product, int quantity) {
-		if (product == null)
-			throw new NullPointerException("Product cannot be null");
-		if (quantity <= 0)
-			throw new IllegalArgumentException(String.format("Quantity must be positive. Received: %s", quantity));
-		OrderItem storedItem = items.stream().filter(obj -> obj.getProduct().getId() == product.getId()).findFirst()
-				.orElse(null);
+		handleNullProduct(product);
+		handleNotPositiveQuantity(quantity);
+		OrderItem storedItem = getFirstItemByProductIdOrNull(product);
 		if (storedItem != null)
 			throw new IllegalArgumentException(
 					String.format("Product with id %s already exists in this Order", product.getId()));
@@ -29,13 +26,10 @@ public class Order {
 	}
 
 	public OrderItem increaseProductQuantity(Product product, int quantity) {
-		if (product == null)
-			throw new NullPointerException("Product cannot be null");
-		if (quantity <= 0)
-			throw new IllegalArgumentException(String.format("Quantity must be positive. Received: %s", quantity));
+		handleNullProduct(product);
+		handleNotPositiveQuantity(quantity);
 
-		OrderItem storedItem = items.stream().filter(obj -> obj.getProduct().getId() == product.getId()).findFirst()
-				.orElse(null);
+		OrderItem storedItem = getFirstItemByProductIdOrNull(product);
 		if (storedItem == null)
 			throw new NoSuchElementException(
 					String.format("Product with id %s not found in this Order", product.getId()));
@@ -109,6 +103,20 @@ public class Order {
 	@ExcludeGeneratedFromCoverage
 	public List<OrderItem> getItems() {
 		return items;
+	}
+
+	private void handleNullProduct(Product product) {
+		if (product == null)
+			throw new NullPointerException("Product cannot be null");
+	}
+
+	private void handleNotPositiveQuantity(int quantity) {
+		if (quantity <= 0)
+			throw new IllegalArgumentException(String.format("Quantity must be positive. Received: %s", quantity));
+	}
+
+	private OrderItem getFirstItemByProductIdOrNull(Product product) {
+		return items.stream().filter(obj -> obj.getProduct().getId() == product.getId()).findFirst().orElse(null);
 	}
 
 }
