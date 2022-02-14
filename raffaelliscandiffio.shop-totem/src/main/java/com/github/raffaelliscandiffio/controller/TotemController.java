@@ -88,7 +88,7 @@ public class TotemController {
 
 	public void returnProduct(OrderItem item, int quantity) {
 		try {
-			OrderItem modifiedItem = order.decreaseItem(item.getId(), quantity);
+			OrderItem modifiedItem = order.decreaseProductQuantity(item.getId(), quantity);
 			broker.returnProduct(item.getProduct().getId(), quantity);
 			totemView.itemModified(item, modifiedItem);
 			totemView.showCartMessage("Removed " + quantity + " " + item.getProduct().getName());

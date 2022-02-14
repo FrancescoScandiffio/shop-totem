@@ -28,7 +28,6 @@ public class Order {
 	public OrderItem increaseProductQuantity(Product product, int quantity) {
 		handleNullProduct(product);
 		handleNotPositiveQuantity(quantity);
-
 		OrderItem storedItem = getFirstItemByProductIdOrNull(product);
 		if (storedItem == null)
 			throw new NoSuchElementException(
@@ -36,6 +35,22 @@ public class Order {
 		storedItem.setQuantity(quantity + storedItem.getQuantity());
 		storedItem.setSubTotal(storedItem.getQuantity() * storedItem.getProduct().getPrice());
 		return storedItem;
+	}
+
+	public OrderItem decreaseProductQuantity(Product product, int quantity) {
+		handleNullProduct(product);
+		handleNotPositiveQuantity(quantity);
+		OrderItem storedItem = getFirstItemByProductIdOrNull(product);
+		if (storedItem == null)
+			throw new NoSuchElementException(
+					String.format("Product with id %s not found in this Order", product.getId()));
+		if (quantity >= storedItem.getQuantity())
+			throw new IllegalArgumentException(
+					String.format("Quantity must be less than %s. Received: %s", storedItem.getQuantity(), quantity));
+		storedItem.setQuantity(storedItem.getQuantity() - quantity);
+		storedItem.setSubTotal(storedItem.getQuantity() * storedItem.getProduct().getPrice());
+		return storedItem;
+
 	}
 
 	/**
@@ -48,26 +63,6 @@ public class Order {
 	public OrderItem popItemById(String itemId) {
 		OrderItem item = findItemById(itemId);
 		items.remove(item);
-		return item;
-
-	}
-
-	/**
-	 * Decrease the quantity of the specified item
-	 * 
-	 * @param itemId   the item whose quantity has to be decreased
-	 * @param quantity the quantity to be removed
-	 * @throws IllegalArgumentException in the following cases:
-	 *                                  <ul>
-	 *                                  <li>if quantity is non-positive</li>
-	 *                                  <li>if quantity is equal or greater than the
-	 *                                  available quantity</li>
-	 * @throws NoSuchElementException   if the requested item is not found
-	 * @return OrderItem - the modified item
-	 */
-	public OrderItem decreaseItem(String itemId, int quantity) throws IllegalArgumentException {
-		OrderItem item = findItemById(itemId);
-		item.decreaseQuantity(quantity);
 		return item;
 
 	}

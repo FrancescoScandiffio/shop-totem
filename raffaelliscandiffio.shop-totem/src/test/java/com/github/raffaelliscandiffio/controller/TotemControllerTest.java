@@ -259,11 +259,11 @@ class TotemControllerTest {
 			Product product = new Product(1, "pizza", 2.5);
 			OrderItem item = new OrderItem("1", product, GREATER_QUANTITY);
 			OrderItem modifiedItem = new OrderItem("1", product, QUANTITY);
-			when(order.decreaseItem(item.getId(), QUANTITY)).thenReturn(modifiedItem);
+			when(order.decreaseProductQuantity(item.getId(), QUANTITY)).thenReturn(modifiedItem);
 			totemController.setOrder(order);
 			totemController.returnProduct(item, QUANTITY);
 			InOrder inOrder = inOrder(broker, order, totemView);
-			inOrder.verify(order).decreaseItem(item.getId(), QUANTITY);
+			inOrder.verify(order).decreaseProductQuantity(item.getId(), QUANTITY);
 			inOrder.verify(broker).returnProduct(product.getId(), QUANTITY);
 			inOrder.verify(totemView).itemModified(item, modifiedItem);
 			inOrder.verify(totemView).showCartMessage("Removed 3 pizza");
@@ -273,7 +273,7 @@ class TotemControllerTest {
 		@DisplayName("Show error when item is not found")
 		void testReturnProductWhenItemIsNotFound() {
 			OrderItem notExistingItem = new OrderItem("1", new Product(1, "pizza", 2.5), QUANTITY);
-			when(order.decreaseItem(eq("1"), anyInt())).thenThrow(new NoSuchElementException());
+			when(order.decreaseProductQuantity(eq("1"), anyInt())).thenThrow(new NoSuchElementException());
 			totemController.setOrder(order);
 			totemController.returnProduct(notExistingItem, QUANTITY);
 			verify(totemView).showErrorItemNotFound("Item not found", notExistingItem);
@@ -285,7 +285,7 @@ class TotemControllerTest {
 		void testReturnProductWhenSelectedQuantityIsIllegalArgument() {
 			OrderItem existingItem = new OrderItem("1", new Product(1, "pizza", 2.5), QUANTITY);
 			String exceptionMessage = "Custom message";
-			when(order.decreaseItem(eq("1"), anyInt())).thenThrow(new IllegalArgumentException(exceptionMessage));
+			when(order.decreaseProductQuantity(eq("1"), anyInt())).thenThrow(new IllegalArgumentException(exceptionMessage));
 			totemController.setOrder(order);
 			totemController.returnProduct(existingItem, GREATER_QUANTITY);
 			verify(totemView).showCartErrorMessage(exceptionMessage);

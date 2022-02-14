@@ -2,14 +2,13 @@ package com.github.raffaelliscandiffio.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -28,6 +27,7 @@ class OrderTest {
 	private static final int ZERO = 0;
 	private static final int NEGATIVE_QUANTITY = -1;
 	private static final int POSITIVE_QUANTITY = 3;
+	private static final int GREATER_POSITIVE_QUANTITY = 10;
 	private static final String ITEM_ID = "1";
 
 	private Order order;
@@ -175,6 +175,102 @@ class OrderTest {
 	}
 
 	@Nested
+	@DisplayName("Test method 'decreaseProductQuantity'")
+	class DecreaseProductQuantityTest {
+
+		@Test
+		@DisplayName("Decrease product quantity when the specified product is found")
+		void testDecreaseProductQuantityWhenTheSpecifiedProductIsFoundShouldDecreaseItemQuantityAndTheSubtotal() {
+			Product product = new Product(1, "product1", 2.0);
+			items.add(new OrderItem(product, GREATER_POSITIVE_QUANTITY, 2.0 * GREATER_POSITIVE_QUANTITY));
+			OrderItem returned = order.decreaseProductQuantity(product, POSITIVE_QUANTITY);
+			softly.assertThat(returned.getQuantity()).isEqualTo(GREATER_POSITIVE_QUANTITY - POSITIVE_QUANTITY);
+			softly.assertThat(returned.getSubTotal()).isEqualTo(2.0 * (GREATER_POSITIVE_QUANTITY - POSITIVE_QUANTITY));
+			softly.assertThat(items).containsOnly(returned);
+			softly.assertAll();
+		}
+
+		@Nested
+		@DisplayName("Exceptional cases")
+		class ExceptionalCasesTest {
+
+			@Test
+			@DisplayName("Throw NullPointerException when the specified product is null")
+			void testDecreaseProductQuantityWhenProductIsNullShouldThrowNullPointerException() {
+				Product product = new Product(1, "product", 2.0);
+				OrderItem storedItem = spy(new OrderItem(product, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY));
+				items.add(storedItem);
+				assertThatThrownBy(() -> order.decreaseProductQuantity(null, POSITIVE_QUANTITY))
+						.isInstanceOf(NullPointerException.class).hasMessage("Product cannot be null");
+				verifyNoInteractions(storedItem);
+
+			}
+
+			@Test
+			@DisplayName("Throw IllegalArgumentException when the specified quantity is zero")
+			void testDecreaseProductQuantityWhenSpecifiedQuantityIsZeroShouldThrowIllegalArgumentException() {
+				Product product = new Product(1, "product", 2.0);
+				OrderItem storedItem = spy(new OrderItem(product, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY));
+				items.add(storedItem);
+				assertThatThrownBy(() -> order.decreaseProductQuantity(product, ZERO))
+						.isInstanceOf(IllegalArgumentException.class)
+						.hasMessage("Quantity must be positive. Received: 0");
+				verifyNoInteractions(storedItem);
+			}
+
+			@Test
+			@DisplayName("Throw IllegalArgumentException when the specified quantity is negative")
+			void testDecreaseProductQuantityWhenSpecifiedQuantityIsNegativeShouldThrowIllegalArgumentException() {
+				Product product = new Product(1, "product", 2.0);
+				OrderItem storedItem = spy(new OrderItem(product, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY));
+				items.add(storedItem);
+				assertThatThrownBy(() -> order.decreaseProductQuantity(product, NEGATIVE_QUANTITY))
+						.isInstanceOf(IllegalArgumentException.class)
+						.hasMessage("Quantity must be positive. Received: " + NEGATIVE_QUANTITY);
+				verifyNoInteractions(storedItem);
+			}
+
+			@Test
+			@DisplayName("Throw NoSuchElementException when the specified product is not found")
+			void testDecreaseProductQuantityWhenSpecifiedProductIsNotFoundShouldThrowNoSuchElementException() {
+				Product product = new Product(1, "product", 2.0);
+				assertThatThrownBy(() -> order.decreaseProductQuantity(product, POSITIVE_QUANTITY))
+						.isInstanceOf(NoSuchElementException.class)
+						.hasMessage("Product with id 1 not found in this Order");
+			}
+
+			@Test
+			@DisplayName("Throw IllegalArgumentException when the specified quantity is equal to the item quantity")
+			void testDecreaseProductQuantityWhenSpecifiedQuantityIsEqualToItemQuantityShouldThrowIllegalArgumentException() {
+				Product product = new Product(1, "product", 2.0);
+				OrderItem storedItem = spy(new OrderItem(product, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY));
+				items.add(storedItem);
+				assertThatThrownBy(() -> order.decreaseProductQuantity(product, POSITIVE_QUANTITY))
+						.isInstanceOf(IllegalArgumentException.class).hasMessage(
+								"Quantity must be less than " + POSITIVE_QUANTITY + ". Received: " + POSITIVE_QUANTITY);
+				verify(storedItem, never()).setQuantity(anyInt());
+				verify(storedItem, never()).setSubTotal(anyDouble());
+			}
+
+			@Test
+			@DisplayName("Throw IllegalArgumentException when the specified quantity is greater than the item quantity")
+			void testDecreaseProductQuantityWhenSpecifiedQuantityIsGreaterThanItemQuantityShouldThrowIllegalArgumentException() {
+				Product product = new Product(1, "product", 2.0);
+				OrderItem storedItem = spy(new OrderItem(product, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY));
+				items.add(storedItem);
+				assertThatThrownBy(() -> order.decreaseProductQuantity(product, GREATER_POSITIVE_QUANTITY))
+						.isInstanceOf(IllegalArgumentException.class).hasMessage("Quantity must be less than "
+								+ POSITIVE_QUANTITY + ". Received: " + GREATER_POSITIVE_QUANTITY);
+				verify(storedItem, never()).setQuantity(anyInt());
+				verify(storedItem, never()).setSubTotal(anyDouble());
+
+			}
+
+		}
+
+	}
+
+	@Nested
 	@DisplayName("Test 'popItemById'")
 	class PopItemByIdTest {
 
@@ -210,38 +306,6 @@ class OrderTest {
 					.hasMessage(String.format("Item with id (%s) not found", ITEM_ID));
 
 		}
-	}
-
-	@Nested
-	@DisplayName("Test 'decreaseItem'")
-	class DecreaseItemTest {
-
-		@Test
-		@DisplayName("Decrease item quantity when item exists")
-		void testDecreaseItemWhenItemIsFoundShouldDecreaseQuantity() {
-			OrderItem otherItem = mock(OrderItem.class);
-			when(item.getId()).thenReturn(ITEM_ID);
-			when(otherItem.getId()).thenReturn(ITEM_ID + 1);
-			items.add(otherItem);
-			items.add(item);
-
-			OrderItem returned = order.decreaseItem(ITEM_ID, POSITIVE_QUANTITY);
-			assertThat(returned).isEqualTo(item);
-			verify(item, times(1)).decreaseQuantity(POSITIVE_QUANTITY);
-			verify(otherItem, never()).decreaseQuantity(anyInt());
-			verifyNoMoreInteractions(item, otherItem);
-
-		}
-
-		@Test
-		@DisplayName("Throw exception when the specified item does not exist")
-		void testDecreaseItemWhenItemNotFoundShouldThrow() {
-
-			assertThatThrownBy(() -> order.decreaseItem(ITEM_ID, POSITIVE_QUANTITY))
-					.isInstanceOf(NoSuchElementException.class)
-					.hasMessage(String.format("Item with id (%s) not found", ITEM_ID));
-		}
-
 	}
 
 	@Nested
