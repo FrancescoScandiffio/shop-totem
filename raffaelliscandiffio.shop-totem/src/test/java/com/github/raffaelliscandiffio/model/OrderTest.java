@@ -271,44 +271,6 @@ class OrderTest {
 	}
 
 	@Nested
-	@DisplayName("Test 'popItemById'")
-	class PopItemByIdTest {
-
-		@Test
-		@DisplayName("Remove the specified item from the order")
-		void testPopItemByIdWhenItemIsFoundShouldRemoveFromOrder() {
-			OrderItem otherItem = mock(OrderItem.class);
-			when(item.getId()).thenReturn(ITEM_ID);
-			when(otherItem.getId()).thenReturn(ITEM_ID + 1);
-			items.add(otherItem);
-			items.add(item);
-
-			OrderItem result = order.popItemById(ITEM_ID);
-			softly.assertThat(result).isEqualTo(item);
-			softly.assertThat(items).hasSize(1).containsOnly(otherItem);
-			softly.assertAll();
-		}
-
-		@Test
-		@DisplayName("Throw exception when the specified item does not exist")
-		void testPopItemByIdWhenItemNotFoundShouldThrow() {
-
-			assertThatThrownBy(() -> order.popItemById(ITEM_ID)).isInstanceOf(NoSuchElementException.class)
-					.hasMessage(String.format("Item with id (%s) not found", ITEM_ID));
-
-		}
-
-		@Test
-		@DisplayName("Throw exception when the specified item does not exist")
-		void testPopItemByIdWhenItemNotFoundShouldThrow() {
-
-			assertThatThrownBy(() -> order.popItemById(ITEM_ID)).isInstanceOf(NoSuchElementException.class)
-					.hasMessage(String.format("Item with id (%s) not found", ITEM_ID));
-
-		}
-	}
-
-	@Nested
 	@DisplayName("Test 'findItemByProductId'")
 	class FindByProductTest {
 

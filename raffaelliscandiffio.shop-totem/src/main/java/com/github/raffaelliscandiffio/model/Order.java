@@ -45,20 +45,6 @@ public class Order {
 	}
 
 	/**
-	 * Remove the specified item from order
-	 * 
-	 * @param itemId the id of the item to be removed
-	 * @throws NoSuchElementException if the requested item is not found
-	 * @return OrderItem - the removed item
-	 */
-	public OrderItem popItemById(String itemId) {
-		OrderItem item = findItemById(itemId);
-		items.remove(item);
-		return item;
-
-	}
-
-	/**
 	 * Find the item which contains the product matching the specified id. It is
 	 * assured that there is only one match or none.
 	 * 
@@ -76,11 +62,6 @@ public class Order {
 	 */
 	public void clear() {
 		items.clear();
-	}
-
-	private OrderItem findItemById(String itemId) {
-		return items.stream().filter(obj -> obj.getId() == itemId).findFirst()
-				.orElseThrow(() -> new NoSuchElementException(String.format("Item with id (%s) not found", itemId)));
 	}
 
 	/**
