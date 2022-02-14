@@ -14,9 +14,7 @@ public class Order {
 	}
 
 	public OrderItem addNewProduct(Product product, int quantity) {
-		handleNullProduct(product);
-		handleNotPositiveQuantity(quantity);
-		OrderItem storedItem = getFirstItemByProductIdOrNull(product);
+		OrderItem storedItem = validateInputsAndFindItemByProduct(product, quantity);
 		if (storedItem != null)
 			throw new IllegalArgumentException(
 					String.format("Product with id %s already exists in this Order", product.getId()));
@@ -26,29 +24,22 @@ public class Order {
 	}
 
 	public OrderItem increaseProductQuantity(Product product, int quantity) {
-		handleNullProduct(product);
-		handleNotPositiveQuantity(quantity);
-		OrderItem storedItem = getFirstItemByProductIdOrNull(product);
-		if (storedItem == null)
-			throw new NoSuchElementException(
-					String.format("Product with id %s not found in this Order", product.getId()));
+		OrderItem storedItem = validateInputsAndFindItemByProduct(product, quantity);
+		handleProductNotFound(product, storedItem);
 		storedItem.setQuantity(quantity + storedItem.getQuantity());
-		storedItem.setSubTotal(storedItem.getQuantity() * storedItem.getProduct().getPrice());
+		updateItemSubtotal(storedItem);
 		return storedItem;
 	}
 
 	public OrderItem decreaseProductQuantity(Product product, int quantity) {
-		handleNullProduct(product);
-		handleNotPositiveQuantity(quantity);
-		OrderItem storedItem = getFirstItemByProductIdOrNull(product);
-		if (storedItem == null)
-			throw new NoSuchElementException(
-					String.format("Product with id %s not found in this Order", product.getId()));
-		if (quantity >= storedItem.getQuantity())
+		OrderItem storedItem = validateInputsAndFindItemByProduct(product, quantity);
+		handleProductNotFound(product, storedItem);
+		int storedQuantity = storedItem.getQuantity();
+		if (quantity >= storedQuantity)
 			throw new IllegalArgumentException(
-					String.format("Quantity must be less than %s. Received: %s", storedItem.getQuantity(), quantity));
-		storedItem.setQuantity(storedItem.getQuantity() - quantity);
-		storedItem.setSubTotal(storedItem.getQuantity() * storedItem.getProduct().getPrice());
+					String.format("Quantity must be less than %s. Received: %s", storedQuantity, quantity));
+		storedItem.setQuantity(storedQuantity - quantity);
+		updateItemSubtotal(storedItem);
 		return storedItem;
 
 	}
@@ -112,6 +103,22 @@ public class Order {
 
 	private OrderItem getFirstItemByProductIdOrNull(Product product) {
 		return items.stream().filter(obj -> obj.getProduct().getId() == product.getId()).findFirst().orElse(null);
+	}
+
+	private OrderItem validateInputsAndFindItemByProduct(Product product, int quantity) {
+		handleNullProduct(product);
+		handleNotPositiveQuantity(quantity);
+		return getFirstItemByProductIdOrNull(product);
+	}
+
+	private void handleProductNotFound(Product product, OrderItem storedItem) {
+		if (storedItem == null)
+			throw new NoSuchElementException(
+					String.format("Product with id %s not found in this Order", product.getId()));
+	}
+
+	private void updateItemSubtotal(OrderItem storedItem) {
+		storedItem.setSubTotal(storedItem.getQuantity() * storedItem.getProduct().getPrice());
 	}
 
 }
