@@ -163,7 +163,7 @@ class TotemControllerTest {
 			when(broker.doesProductExist(product.getId())).thenReturn(true);
 			when(broker.takeAvailable(product.getId(), QUANTITY)).thenReturn(QUANTITY);
 			when(order.findItemByProductId(product.getId())).thenReturn(null);
-			when(order.insertItem(product, QUANTITY)).thenReturn(itemToAdd);
+			when(order.increaseProductQuantity(product, QUANTITY)).thenReturn(itemToAdd);
 			totemController.setOrder(order);
 			totemController.buyProduct(product, QUANTITY);
 			verify(totemView).itemAdded(itemToAdd);
@@ -178,7 +178,7 @@ class TotemControllerTest {
 			when(broker.doesProductExist(product.getId())).thenReturn(true);
 			when(broker.takeAvailable(product.getId(), QUANTITY)).thenReturn(QUANTITY);
 			when(order.findItemByProductId(product.getId())).thenReturn(storedItem);
-			when(order.insertItem(product, QUANTITY)).thenReturn(modifiedItem);
+			when(order.increaseProductQuantity(product, QUANTITY)).thenReturn(modifiedItem);
 
 			totemController.setOrder(order);
 			totemController.buyProduct(product, QUANTITY);
@@ -193,7 +193,7 @@ class TotemControllerTest {
 			when(broker.doesProductExist(product.getId())).thenReturn(true);
 			when(broker.takeAvailable(product.getId(), QUANTITY)).thenReturn(QUANTITY);
 			when(order.findItemByProductId(product.getId())).thenReturn(null);
-			when(order.insertItem(product, QUANTITY)).thenReturn(itemToAdd);
+			when(order.increaseProductQuantity(product, QUANTITY)).thenReturn(itemToAdd);
 
 			totemController.setOrder(order);
 			totemController.buyProduct(product, QUANTITY);
@@ -208,7 +208,7 @@ class TotemControllerTest {
 			when(broker.doesProductExist(product.getId())).thenReturn(true);
 			when(broker.takeAvailable(product.getId(), GREATER_QUANTITY)).thenReturn(QUANTITY);
 			when(order.findItemByProductId(product.getId())).thenReturn(null);
-			when(order.insertItem(product, QUANTITY)).thenReturn(itemToAdd);
+			when(order.increaseProductQuantity(product, QUANTITY)).thenReturn(itemToAdd);
 
 			totemController.setOrder(order);
 			totemController.buyProduct(product, GREATER_QUANTITY);

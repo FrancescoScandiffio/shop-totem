@@ -5,8 +5,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -105,56 +107,67 @@ class OrderTest {
 	}
 
 	@Nested
-	@DisplayName("Test item insertion with 'insertItem'")
-	class InsertItemTest {
+	@DisplayName("Test method 'increaseProductQuantity'")
+	class IncreaseProductQuantityTest {
 
-		@Nested
-		@DisplayName("Good cases")
-		class InsertGoodCasesTest {
-
-			@Test
-			@DisplayName("Increase item quantity when the specified product is found")
-			void testInsertItemWhenTheSpecifiedProductIsFoundShouldIncreaseQuantity() {
-				Product product = new Product(1, "product1", 2.0);
-				items.add(new OrderItem(product, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY));
-				OrderItem returned = order.insertItem(product, POSITIVE_QUANTITY);
-				softly.assertThat(returned.getQuantity()).isEqualTo(POSITIVE_QUANTITY * 2);
-				softly.assertThat(returned.getSubTotal()).isEqualTo(POSITIVE_QUANTITY * 2 * 2.0);
-				softly.assertThat(items).containsOnly(returned);
-				softly.assertAll();
-			}
-
+		@Test
+		@DisplayName("Increase the product quantity in order when the specified product is found")
+		void testIncreaseProductQuantityWhenTheSpecifiedProductIsFoundShouldIncreaseProductQuantityAndSubtotal() {
+			Product product = new Product(1, "product1", 2.0);
+			items.add(new OrderItem(product, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY));
+			OrderItem returned = order.increaseProductQuantity(product, POSITIVE_QUANTITY);
+			softly.assertThat(returned.getQuantity()).isEqualTo(POSITIVE_QUANTITY * 2);
+			softly.assertThat(returned.getSubTotal()).isEqualTo(POSITIVE_QUANTITY * 2 * 2.0);
+			softly.assertThat(items).containsOnly(returned);
+			softly.assertAll();
 		}
 
 		@Nested
-		@DisplayName("Test exceptional cases")
-		class InsertionExceptionalCasesTest {
+		@DisplayName("Exceptional cases")
+		class IncreaseProductQuantityExceptionalCasesTest {
 
 			@Test
 			@DisplayName("Throw NullPointerException when the specified product is null")
-			void testInsertItemWhenProductIsNullShouldThrowNullPointerException() {
-				assertThatThrownBy(() -> order.insertItem(null, POSITIVE_QUANTITY))
+			void testIncreaseProductQuantityWhenProductIsNullShouldThrowNullPointerException() {
+				Product product = new Product(1, "product1", 2.0);
+				OrderItem storedItem = spy(new OrderItem(product, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY));
+				items.add(storedItem);
+				assertThatThrownBy(() -> order.increaseProductQuantity(null, POSITIVE_QUANTITY))
 						.isInstanceOf(NullPointerException.class).hasMessage("Product cannot be null");
-				assertThat(items).isEmpty();
+				verifyNoInteractions(storedItem);
 			}
 
 			@Test
 			@DisplayName("Throw IllegalArgumentException when the specified quantity is zero")
-			void testInsertItemWhenSpecifiedQuantityIsZeroShouldThrowIllegalArgumentException() {
+			void testIncreaseProductQuantityWhenSpecifiedQuantityIsZeroShouldThrowIllegalArgumentException() {
 				Product product = new Product(1, "product", 2.0);
-				assertThatThrownBy(() -> order.insertItem(product, ZERO)).isInstanceOf(IllegalArgumentException.class)
+				OrderItem storedItem = spy(new OrderItem(product, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY));
+				items.add(storedItem);
+				assertThatThrownBy(() -> order.increaseProductQuantity(product, ZERO))
+						.isInstanceOf(IllegalArgumentException.class)
 						.hasMessage("Quantity must be positive. Received: 0");
-				assertThat(items).isEmpty();
+				verifyNoInteractions(storedItem);
 			}
 
 			@Test
 			@DisplayName("Throw IllegalArgumentException when the specified quantity is negative")
-			void testInsertItemWhenSpecifiedQuantityIsNegativeShouldThrowIllegalArgumentException() {
+			void testIncreaseProductQuantityWhenSpecifiedQuantityIsNegativeShouldThrowIllegalArgumentException() {
 				Product product = new Product(1, "product", 2.0);
-				assertThatThrownBy(() -> order.insertItem(product, NEGATIVE_QUANTITY))
+				OrderItem storedItem = spy(new OrderItem(product, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY));
+				items.add(storedItem);
+				assertThatThrownBy(() -> order.increaseProductQuantity(product, NEGATIVE_QUANTITY))
 						.isInstanceOf(IllegalArgumentException.class)
 						.hasMessage("Quantity must be positive. Received: " + NEGATIVE_QUANTITY);
-				assertThat(items).isEmpty();
+				verifyNoInteractions(storedItem);
+			}
+
+			@Test
+			@DisplayName("Throw NoSuchElementException when the specified product is not found")
+			void testIncreaseProductQuantityWhenSpecifiedProductIsNotFoundShouldThrowNoSuchElementException() {
+				Product product = new Product(1, "product", 2.0);
+				assertThatThrownBy(() -> order.increaseProductQuantity(product, POSITIVE_QUANTITY))
+						.isInstanceOf(NoSuchElementException.class)
+						.hasMessage("Product with id 1 not found in this Order");
 			}
 
 		}

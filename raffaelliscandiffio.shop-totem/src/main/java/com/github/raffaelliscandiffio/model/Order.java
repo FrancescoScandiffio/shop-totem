@@ -28,7 +28,7 @@ public class Order {
 		return storedItem;
 	}
 
-	public OrderItem insertItem(Product product, int quantity) {
+	public OrderItem increaseProductQuantity(Product product, int quantity) {
 		if (product == null)
 			throw new NullPointerException("Product cannot be null");
 		if (quantity <= 0)
@@ -36,7 +36,9 @@ public class Order {
 
 		OrderItem storedItem = items.stream().filter(obj -> obj.getProduct().getId() == product.getId()).findFirst()
 				.orElse(null);
-
+		if (storedItem == null)
+			throw new NoSuchElementException(
+					String.format("Product with id %s not found in this Order", product.getId()));
 		storedItem.setQuantity(quantity + storedItem.getQuantity());
 		storedItem.setSubTotal(storedItem.getQuantity() * storedItem.getProduct().getPrice());
 		return storedItem;
