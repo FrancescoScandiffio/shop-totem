@@ -13,6 +13,21 @@ public class Order {
 		this.items = items;
 	}
 
+	public OrderItem addNewProduct(Product product, int quantity) {
+		if (product == null)
+			throw new NullPointerException("Product cannot be null");
+		if (quantity <= 0)
+			throw new IllegalArgumentException(String.format("Quantity must be positive. Received: %s", quantity));
+		OrderItem storedItem = items.stream().filter(obj -> obj.getProduct().getId() == product.getId()).findFirst()
+				.orElse(null);
+		if (storedItem != null)
+			throw new IllegalArgumentException(
+					String.format("Product with id %s already exists in this Order", product.getId()));
+		storedItem = new OrderItem(product, quantity, product.getPrice() * quantity);
+		items.add(storedItem);
+		return storedItem;
+	}
+
 	public OrderItem insertItem(Product product, int quantity) {
 		if (product == null)
 			throw new NullPointerException("Product cannot be null");
@@ -21,13 +36,9 @@ public class Order {
 
 		OrderItem storedItem = items.stream().filter(obj -> obj.getProduct().getId() == product.getId()).findFirst()
 				.orElse(null);
-		if (storedItem == null) {
-			storedItem = new OrderItem(product, quantity, product.getPrice() * quantity);
-			items.add(storedItem);
-		} else {
-			storedItem.setQuantity(quantity + storedItem.getQuantity());
-			storedItem.setSubTotal(storedItem.getQuantity() * storedItem.getProduct().getPrice());
-		}
+
+		storedItem.setQuantity(quantity + storedItem.getQuantity());
+		storedItem.setSubTotal(storedItem.getQuantity() * storedItem.getProduct().getPrice());
 		return storedItem;
 	}
 
