@@ -48,17 +48,10 @@ public class Order {
 		return getFirstItemByProductIdOrNull(product);
 	}
 
-	/**
-	 * Removes all the elements from items list. The list will be empty after this
-	 * call returns.
-	 */
 	public void clear() {
 		items.clear();
 	}
 
-	/**
-	 * @return the items
-	 */
 	@ExcludeGeneratedFromCoverage
 	public List<OrderItem> getItems() {
 		return items;

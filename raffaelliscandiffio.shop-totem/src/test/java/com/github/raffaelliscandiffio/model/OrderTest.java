@@ -299,13 +299,15 @@ class OrderTest {
 	}
 
 	@Nested
-	@DisplayName("Test 'clear'")
+	@DisplayName("Test method 'clear'")
 	class ClearTest {
 
 		@Test
-		@DisplayName("Clear the list of items")
+		@DisplayName("Remove all items from the order")
 		void testClear() {
-			items.add(item);
+			Product product = new Product(1, "product", 2.0);
+			OrderItem storedItem = new OrderItem(product, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY);
+			items.add(storedItem);
 			order.clear();
 			assertThat(items).isEmpty();
 		}
