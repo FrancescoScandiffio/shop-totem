@@ -4,12 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -271,29 +269,31 @@ class OrderTest {
 	}
 
 	@Nested
-	@DisplayName("Test 'findItemByProductId'")
-	class FindByProductTest {
+	@DisplayName("Test method 'findItemByProduct'")
+	class FindItemByProductTest {
 
 		@Test
-		@DisplayName("Return the item when the product is found")
-		void testFindItemByProductIdWhenProductIsFound() {
-			OrderItem otherItem = mock(OrderItem.class);
-			when(otherItem.getProduct()).thenReturn(getNewProduct());
-			when(item.getProduct()).thenReturn(product);
-			items.add(otherItem);
-			items.add(item);
-
-			OrderItem itemReturned = order.findItemByProductId(product.getId());
-			assertThat(itemReturned).isEqualTo(item);
+		@DisplayName("Return the item when the specified product is found")
+		void testFindItemByProductWhenTheSpecifiedProductIsFoundShouldReturnTheItem() {
+			Product product1 = new Product(1, "product1", 2.0);
+			Product product2 = new Product(2, "product2", 2.0);
+			OrderItem storedItem = new OrderItem(product1, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY);
+			OrderItem itemToFind = new OrderItem(product2, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY);
+			items.add(storedItem);
+			items.add(itemToFind);
+			OrderItem itemReturned = order.findItemByProduct(product2);
+			assertThat(itemReturned).isEqualTo(itemToFind);
 		}
 
 		@Test
-		@DisplayName("Return null when the product is not found")
-		void testFindItemByProductIdWhenProductIsNotFoundShouldReturnNull() {
-			OrderItem itemReturned = order.findItemByProductId(product.getId());
-			items.add(item);
+		@DisplayName("Return null when the specified product is not found")
+		void testFindItemByProductWhenTheSpecifiedProductIsNotFoundShouldReturnNull() {
+			Product product1 = new Product(1, "product1", 2.0);
+			Product product2 = new Product(2, "product2", 2.0);
+			OrderItem storedItem = new OrderItem(product1, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY);
+			items.add(storedItem);
+			OrderItem itemReturned = order.findItemByProduct(product2);
 			assertThat(itemReturned).isNull();
-
 		}
 
 	}

@@ -61,7 +61,7 @@ public class TotemController {
 			return;
 		}
 
-		OrderItem storedItem = order.findItemByProductId(product.getId());
+		OrderItem storedItem = order.findItemByProduct(product);
 		OrderItem modifiedItem = order.increaseProductQuantity(product, provided);
 		if (storedItem == null)
 			totemView.itemAdded(modifiedItem);

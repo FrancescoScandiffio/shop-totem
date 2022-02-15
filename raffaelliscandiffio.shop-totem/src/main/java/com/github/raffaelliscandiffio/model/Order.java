@@ -44,16 +44,8 @@ public class Order {
 
 	}
 
-	/**
-	 * Find the item which contains the product matching the specified id. It is
-	 * assured that there is only one match or none.
-	 * 
-	 * @param productId the id of the product
-	 * @return The item which contains the specified product, else null
-	 */
-	public OrderItem findItemByProductId(long productId) {
-		return items.stream().filter(obj -> obj.getProduct().getId() == productId).findFirst().orElse(null);
-
+	public OrderItem findItemByProduct(Product product) {
+		return getFirstItemByProductIdOrNull(product);
 	}
 
 	/**
