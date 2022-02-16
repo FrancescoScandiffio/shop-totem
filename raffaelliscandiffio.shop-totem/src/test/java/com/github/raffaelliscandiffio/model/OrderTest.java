@@ -296,6 +296,18 @@ class OrderTest {
 			assertThat(itemReturned).isNull();
 		}
 
+		@Nested
+		@DisplayName("Exceptional cases")
+		class ExceptionalCasesTest {
+
+			@Test
+			@DisplayName("Throw NullPointerException when the specified product is null")
+			void testFindItemByProductWhenProductIsNullShouldThrowNullPointerException() {
+				assertThatThrownBy(() -> order.findItemByProduct(null)).isInstanceOf(NullPointerException.class)
+						.hasMessage("Product cannot be null");
+			}
+		}
+
 	}
 
 	@Nested

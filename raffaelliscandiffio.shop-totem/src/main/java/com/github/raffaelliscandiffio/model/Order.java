@@ -45,6 +45,7 @@ public class Order {
 	}
 
 	public OrderItem findItemByProduct(Product product) {
+		handleNullProduct(product);
 		return getFirstItemByProductIdOrNull(product);
 	}
 
