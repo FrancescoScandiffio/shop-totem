@@ -303,12 +303,12 @@ class TotemControllerTest {
 	}
 
 	@Nested
-	@DisplayName("Test 'cancelShopping'")
+	@DisplayName("Test method 'cancelShopping'")
 	class CancelShoppingTest {
 
 		@Test
-		@DisplayName("Cancel shopping when no item is present")
-		void testCancelShoppingWhenNoItemsArePresent() {
+		@DisplayName("Cancel shopping when Order is empty")
+		void testCancelShoppingWhenOrderIsEmpty() {
 			totemController.setOrder(order);
 			when(order.getItems()).thenReturn(emptyList());
 			totemController.cancelShopping();
@@ -317,10 +317,10 @@ class TotemControllerTest {
 		}
 
 		@Test
-		@DisplayName("Cancel shopping when one item is present")
-		void testCancelShoppingWhenOneItemIsPresent() {
-			Product product = new Product(1, "foo", 1);
-			OrderItem item = new OrderItem("1", product, QUANTITY);
+		@DisplayName("Cancel shopping when one item is in Order")
+		void testCancelShoppingWhenOneItemIsInOrder() {
+			Product product = new Product(1, "pizza", 2.5);
+			OrderItem item = new OrderItem(product, QUANTITY, 2.5 * QUANTITY);
 			totemController.setOrder(order);
 			when(order.getItems()).thenReturn(asList(item));
 			totemController.cancelShopping();
@@ -332,19 +332,18 @@ class TotemControllerTest {
 		}
 
 		@Test
-		@DisplayName("Cancel shopping when multiple items are present")
-		void testCancelShoppingWhenSeveralItemArePresent() {
-			Product product = new Product(1, "foo", 1);
-			Product product_2 = new Product(2, "foo", 1);
-			OrderItem item = new OrderItem("1", product, QUANTITY);
-			OrderItem item_2 = new OrderItem("2", product_2, QUANTITY);
-
+		@DisplayName("Cancel shopping when multiple items are in Order")
+		void testCancelShoppingWhenSeveralItemAreInOrder() {
+			Product product1 = new Product(1, "pizza", 2.5);
+			Product product2 = new Product(2, "pasta", 1.0);
+			OrderItem item1 = new OrderItem(product1, QUANTITY, 2.5 * QUANTITY);
+			OrderItem item2 = new OrderItem(product2, QUANTITY, 1.0 * QUANTITY);
 			totemController.setOrder(order);
-			when(order.getItems()).thenReturn(asList(item, item_2));
+			when(order.getItems()).thenReturn(asList(item1, item2));
 			totemController.cancelShopping();
 			verify(order).clear();
-			verify(broker).returnProduct(product.getId(), QUANTITY);
-			verify(broker).returnProduct(product_2.getId(), QUANTITY);
+			verify(broker).returnProduct(product1.getId(), QUANTITY);
+			verify(broker).returnProduct(product2.getId(), QUANTITY);
 			verify(totemView).allItemsRemoved();
 			verify(totemView).showWelcome();
 		}
@@ -358,8 +357,8 @@ class TotemControllerTest {
 		@Test
 		@DisplayName("Reset the order view, save the items and show goodbye view")
 		void testConfirmOrderWhenOrderIsNotEmpty() {
-			Product product = new Product(1, "foo", 1);
-			OrderItem item = new OrderItem("1", product, QUANTITY);
+			Product product = new Product(1, "pizza", 2.5);
+			OrderItem item = new OrderItem(product, QUANTITY, 2.5 * QUANTITY);
 			totemController.setOrder(order);
 			when(order.getItems()).thenReturn(asList(item));
 			totemController.confirmOrder();
