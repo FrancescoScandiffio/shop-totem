@@ -88,10 +88,11 @@ public class TotemController {
 
 	public void returnProduct(OrderItem item, int quantity) {
 		try {
-			OrderItem modifiedItem = order.decreaseProductQuantity(item.getId(), quantity);
-			broker.returnProduct(item.getProduct().getId(), quantity);
+			Product itemProduct = item.getProduct();
+			OrderItem modifiedItem = order.decreaseProductQuantity(itemProduct, quantity);
+			broker.returnProduct(itemProduct.getId(), quantity);
 			totemView.itemModified(item, modifiedItem);
-			totemView.showCartMessage("Removed " + quantity + " " + item.getProduct().getName());
+			totemView.showCartMessage("Removed " + quantity + " " + itemProduct.getName());
 		} catch (NoSuchElementException exception) {
 			totemView.showErrorItemNotFound("Item not found", item);
 		} catch (IllegalArgumentException exception) {

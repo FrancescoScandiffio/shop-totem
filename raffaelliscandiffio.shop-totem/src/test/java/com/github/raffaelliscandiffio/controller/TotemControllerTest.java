@@ -249,47 +249,55 @@ class TotemControllerTest {
 	}
 
 	@Nested
-	@DisplayName("Test 'returnProduct'")
+	@DisplayName("Test method 'returnProduct'")
 	class ReturnProductTest {
 
 		@Test
-		@DisplayName("Return a quantity of product")
+		@DisplayName("Return a quantity of a product from Order")
 		void testReturnProduct() {
 			Product product = new Product(1, "pizza", 2.5);
-			OrderItem item = new OrderItem("1", product, GREATER_QUANTITY);
-			OrderItem modifiedItem = new OrderItem("1", product, QUANTITY);
-			when(order.decreaseProductQuantity(item.getId(), QUANTITY)).thenReturn(modifiedItem);
+			OrderItem item = new OrderItem(product, GREATER_QUANTITY, 2.5 * GREATER_QUANTITY);
+			int decreasedQuantity = GREATER_QUANTITY - QUANTITY;
+			OrderItem modifiedItem = new OrderItem(product, decreasedQuantity, 2.5 * decreasedQuantity);
+			when(order.decreaseProductQuantity(product, QUANTITY)).thenReturn(modifiedItem);
 			totemController.setOrder(order);
 			totemController.returnProduct(item, QUANTITY);
-			InOrder inOrder = inOrder(broker, order, totemView);
-			inOrder.verify(order).decreaseProductQuantity(item.getId(), QUANTITY);
+			InOrder inOrder = inOrder(broker, totemView);
 			inOrder.verify(broker).returnProduct(product.getId(), QUANTITY);
 			inOrder.verify(totemView).itemModified(item, modifiedItem);
-			inOrder.verify(totemView).showCartMessage("Removed 3 pizza");
+			inOrder.verify(totemView).showCartMessage("Removed " + QUANTITY + " pizza");
 		}
 
-		@Test
-		@DisplayName("Show error when item is not found")
-		void testReturnProductWhenItemIsNotFound() {
-			OrderItem notExistingItem = new OrderItem("1", new Product(1, "pizza", 2.5), QUANTITY);
-			when(order.decreaseProductQuantity(eq("1"), anyInt())).thenThrow(new NoSuchElementException());
-			totemController.setOrder(order);
-			totemController.returnProduct(notExistingItem, QUANTITY);
-			verify(totemView).showErrorItemNotFound("Item not found", notExistingItem);
-			verifyNoMoreInteractions(order, broker, totemView);
-		}
+		@Nested
+		@DisplayName("Exceptional cases")
+		class ExceptionalCasesTest {
 
-		@Test
-		@DisplayName("Show error when order throws IllegalArgumentException")
-		void testReturnProductWhenSelectedQuantityIsIllegalArgument() {
-			OrderItem existingItem = new OrderItem("1", new Product(1, "pizza", 2.5), QUANTITY);
-			String exceptionMessage = "Custom message";
-			when(order.decreaseProductQuantity(eq("1"), anyInt()))
-					.thenThrow(new IllegalArgumentException(exceptionMessage));
-			totemController.setOrder(order);
-			totemController.returnProduct(existingItem, GREATER_QUANTITY);
-			verify(totemView).showCartErrorMessage(exceptionMessage);
-			verifyNoMoreInteractions(order, broker, totemView);
+			@Test
+			@DisplayName("Show error when the product to remove is not found")
+			void testReturnProductWhenTheProductIsNotFoundShouldShowError() {
+				Product product = new Product(1, "pizza", 2.5);
+				OrderItem notExistingItem = new OrderItem(product, QUANTITY, 2.5 * QUANTITY);
+				when(order.decreaseProductQuantity(product, QUANTITY)).thenThrow(new NoSuchElementException());
+				totemController.setOrder(order);
+				totemController.returnProduct(notExistingItem, QUANTITY);
+				verify(totemView).showErrorItemNotFound("Item not found", notExistingItem);
+				verifyNoMoreInteractions(order, broker, totemView);
+			}
+
+			@Test
+			@DisplayName("Show error when Order throws IllegalArgumentException")
+			void testReturnProductWhenOrderThrowsIllegalArgumentExceptionShouldShowAnError() {
+				Product product = new Product(1, "pizza", 2.5);
+				OrderItem item = new OrderItem(product, QUANTITY, 2.5 * QUANTITY);
+				String exceptionMessage = "Custom exception message";
+				when(order.decreaseProductQuantity(product, GREATER_QUANTITY))
+						.thenThrow(new IllegalArgumentException(exceptionMessage));
+				totemController.setOrder(order);
+				totemController.returnProduct(item, GREATER_QUANTITY);
+				verify(totemView).showCartErrorMessage(exceptionMessage);
+				verifyNoMoreInteractions(order, broker, totemView);
+			}
+
 		}
 
 	}
