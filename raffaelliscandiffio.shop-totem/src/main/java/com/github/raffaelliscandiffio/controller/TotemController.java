@@ -48,25 +48,24 @@ public class TotemController {
 			totemView.showShoppingErrorMessage("Buy quantity must be positive: received " + requested);
 			return;
 		}
-
 		if (!broker.doesProductExist(product.getId())) {
 			totemView.showErrorProductNotFound("Product not found", product);
 			return;
 		}
-
 		int provided = broker.takeAvailable(product.getId(), requested);
-
 		if (provided == 0) {
 			totemView.showWarning("Item out of stock: " + product.getName());
 			return;
 		}
 
 		OrderItem storedItem = order.findItemByProduct(product);
-		OrderItem modifiedItem = order.increaseProductQuantity(product, provided);
-		if (storedItem == null)
-			totemView.itemAdded(modifiedItem);
-		else
-			totemView.itemModified(storedItem, modifiedItem);
+		if (storedItem == null) {
+			storedItem = order.addNewProduct(product, provided);
+			totemView.itemAdded(storedItem);
+		} else {
+			OrderItem itemModified = order.increaseProductQuantity(product, provided);
+			totemView.itemModified(storedItem, itemModified);
+		}
 
 		if (provided < requested)
 			totemView.showWarning("Not enough " + product.getName() + " in stock: added only " + provided);

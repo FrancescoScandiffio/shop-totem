@@ -111,12 +111,12 @@ class TotemControllerTest {
 	}
 
 	@Nested
-	@DisplayName("Test 'buyProduct'")
+	@DisplayName("Test method 'buyProduct'")
 	class BuyProductTest {
 
 		@Test
-		@DisplayName("Show error when product does not exist")
-		void testBuyProductWhenRequestedProductDoesNotExist() {
+		@DisplayName("Show error when product does not exist in repository")
+		void testBuyProductWhenRequestedProductDoesNotExistInRepository() {
 			Product product = new Product(1, "pizza", 2.5);
 			when(broker.doesProductExist(anyLong())).thenReturn(false);
 			totemController.buyProduct(product, QUANTITY);
@@ -156,45 +156,44 @@ class TotemControllerTest {
 		}
 
 		@Test
-		@DisplayName("Insert new item when item does not already exist")
-		void testBuyProductWhenItemDoesNotExist() {
+		@DisplayName("Add new product to the order when the product is not found in order")
+		void testBuyProductWhenTheProductIsNotFoundInOrderShouldDelegateToOrder() {
 			Product product = new Product(1, "pizza", 2.5);
-			OrderItem itemToAdd = new OrderItem("1", product, QUANTITY);
+			OrderItem itemToAdd = new OrderItem(product, QUANTITY, 2.5 * QUANTITY);
 			when(broker.doesProductExist(product.getId())).thenReturn(true);
 			when(broker.takeAvailable(product.getId(), QUANTITY)).thenReturn(QUANTITY);
-			when(order.findItemByProductId(product.getId())).thenReturn(null);
-			when(order.increaseProductQuantity(product, QUANTITY)).thenReturn(itemToAdd);
+			when(order.findItemByProduct(product)).thenReturn(null);
+			when(order.addNewProduct(product, QUANTITY)).thenReturn(itemToAdd);
 			totemController.setOrder(order);
 			totemController.buyProduct(product, QUANTITY);
 			verify(totemView).itemAdded(itemToAdd);
 		}
 
 		@Test
-		@DisplayName("Modify item when the requested product is already in order")
-		void testBuyProductWhenProductIsAlreadyInOrder() {
+		@DisplayName("Increase product quantity when the specified product is found in order")
+		void testBuyProductWhenProductIsAlreadyInOrderShouldIncreaseItsQuantity() {
 			Product product = new Product(1, "pizza", 2.5);
-			OrderItem storedItem = new OrderItem("1", product, QUANTITY);
-			OrderItem modifiedItem = new OrderItem("2", product, QUANTITY * 2);
+			OrderItem storedItem = new OrderItem(product, QUANTITY, 2.5 * QUANTITY);
+			OrderItem modifiedItem = new OrderItem(product, QUANTITY + GREATER_QUANTITY,
+					2.5 * (QUANTITY + GREATER_QUANTITY));
 			when(broker.doesProductExist(product.getId())).thenReturn(true);
-			when(broker.takeAvailable(product.getId(), QUANTITY)).thenReturn(QUANTITY);
-			when(order.findItemByProductId(product.getId())).thenReturn(storedItem);
-			when(order.increaseProductQuantity(product, QUANTITY)).thenReturn(modifiedItem);
-
+			when(broker.takeAvailable(product.getId(), GREATER_QUANTITY)).thenReturn(GREATER_QUANTITY);
+			when(order.findItemByProduct(product)).thenReturn(storedItem);
+			when(order.increaseProductQuantity(product, GREATER_QUANTITY)).thenReturn(modifiedItem);
 			totemController.setOrder(order);
-			totemController.buyProduct(product, QUANTITY);
+			totemController.buyProduct(product, GREATER_QUANTITY);
 			verify(totemView).itemModified(storedItem, modifiedItem);
 		}
 
 		@Test
 		@DisplayName("Show confirm message when requested quantity is available")
-		void testBuyProductWhenRequestedQuantityIsAvailable() {
+		void testBuyProductWhenRequestedQuantityIsAvailableShouldShowConfirmMessage() {
 			Product product = new Product(1, "pizza", 2.5);
-			OrderItem itemToAdd = new OrderItem("1", product, QUANTITY);
+			OrderItem itemToAdd = new OrderItem(product, QUANTITY, 2.5 * QUANTITY);
 			when(broker.doesProductExist(product.getId())).thenReturn(true);
 			when(broker.takeAvailable(product.getId(), QUANTITY)).thenReturn(QUANTITY);
-			when(order.findItemByProductId(product.getId())).thenReturn(null);
-			when(order.increaseProductQuantity(product, QUANTITY)).thenReturn(itemToAdd);
-
+			when(order.findItemByProduct(product)).thenReturn(null);
+			when(order.addNewProduct(product, QUANTITY)).thenReturn(itemToAdd);
 			totemController.setOrder(order);
 			totemController.buyProduct(product, QUANTITY);
 			verify(totemView).showShoppingMessage("Added " + QUANTITY + " pizza");
@@ -202,14 +201,13 @@ class TotemControllerTest {
 
 		@Test
 		@DisplayName("Show warning when provided quantity is not as much as requested")
-		void testBuyProductWhenProvidedQuantityIsLessThanRequested() {
+		void testBuyProductWhenProvidedQuantityIsLessThanRequestedShouldShowWarning() {
 			Product product = new Product(1, "pizza", 2.5);
-			OrderItem itemToAdd = new OrderItem("1", product, QUANTITY);
+			OrderItem itemToAdd = new OrderItem(product, QUANTITY, 2.5 * QUANTITY);
 			when(broker.doesProductExist(product.getId())).thenReturn(true);
 			when(broker.takeAvailable(product.getId(), GREATER_QUANTITY)).thenReturn(QUANTITY);
-			when(order.findItemByProductId(product.getId())).thenReturn(null);
-			when(order.increaseProductQuantity(product, QUANTITY)).thenReturn(itemToAdd);
-
+			when(order.findItemByProduct(product)).thenReturn(null);
+			when(order.addNewProduct(product, QUANTITY)).thenReturn(itemToAdd);
 			totemController.setOrder(order);
 			totemController.buyProduct(product, GREATER_QUANTITY);
 			verify(totemView).showWarning("Not enough pizza in stock: added only " + QUANTITY);
@@ -285,7 +283,8 @@ class TotemControllerTest {
 		void testReturnProductWhenSelectedQuantityIsIllegalArgument() {
 			OrderItem existingItem = new OrderItem("1", new Product(1, "pizza", 2.5), QUANTITY);
 			String exceptionMessage = "Custom message";
-			when(order.decreaseProductQuantity(eq("1"), anyInt())).thenThrow(new IllegalArgumentException(exceptionMessage));
+			when(order.decreaseProductQuantity(eq("1"), anyInt()))
+					.thenThrow(new IllegalArgumentException(exceptionMessage));
 			totemController.setOrder(order);
 			totemController.returnProduct(existingItem, GREATER_QUANTITY);
 			verify(totemView).showCartErrorMessage(exceptionMessage);
