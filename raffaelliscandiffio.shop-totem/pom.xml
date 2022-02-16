@@ -29,12 +29,15 @@
 		<testcontainers.version>1.16.3</testcontainers.version>
 		<mysql.version>8.0.28</mysql.version>
 		<hibernate.version>5.3.23.Final</hibernate.version>
+		
+		<picocli.version>4.6.2</picocli.version>
 
 		<sonar.coverage.exclusions>
 			**/model/Product.java,
 			**/model/Stock.java,
 			**/model/OrderItem.java,
-			**/utils/GUITestExtension.java
+			**/utils/GUITestExtension.java,
+			**/app/**/*
 		</sonar.coverage.exclusions>
 
 		<sonar.junit.reportPaths>
@@ -177,6 +180,12 @@
 			<artifactId>hibernate-core</artifactId>
 			<version>${hibernate.version}</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/info.picocli/picocli -->
+		<dependency>
+			<groupId>info.picocli</groupId>
+			<artifactId>picocli</artifactId>
+			<version>${picocli.version}</version>
+		</dependency>
 
 	</dependencies>
 
@@ -236,6 +245,7 @@
 							<exclude>**/model/Stock.class</exclude>
 							<exclude>**/model/OrderItem.class</exclude>
 							<exclude>**/utils/GUITestExtension.class</exclude>
+							<exclude>**/app/**/*</exclude>
 						</excludes>
 					</configuration>
 					<executions>
