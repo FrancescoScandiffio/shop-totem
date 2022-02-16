@@ -76,10 +76,11 @@ public class TotemController {
 
 	public void removeItem(OrderItem item) {
 		try {
-			order.popItemById(item.getId());
-			broker.returnProduct(item.getProduct().getId(), item.getQuantity());
+			Product itemProduct = item.getProduct();
+			order.removeProduct(itemProduct);
+			broker.returnProduct(itemProduct.getId(), item.getQuantity());
 			totemView.itemRemoved(item);
-			totemView.showCartMessage("Removed all " + item.getProduct().getName());
+			totemView.showCartMessage("Removed all " + itemProduct.getName());
 		} catch (NoSuchElementException exception) {
 			totemView.showErrorItemNotFound("Item not found", item);
 		}

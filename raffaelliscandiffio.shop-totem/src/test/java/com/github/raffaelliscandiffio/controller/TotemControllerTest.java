@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -216,29 +217,29 @@ class TotemControllerTest {
 	}
 
 	@Nested
-	@DisplayName("Test 'removeItem'")
+	@DisplayName("Test method 'removeItem'")
 	class RemoveItemTest {
 
 		@Test
-		@DisplayName("Remove item from order")
-		void testRemoveItem() {
+		@DisplayName("Remove the specified item from Order")
+		void testRemoveItemWhenTheLinkedProductIsFoundShouldRemoveTheItem() {
 			Product product = new Product(1, "pizza", 2.5);
-			OrderItem item = new OrderItem("1", product, QUANTITY);
-			when(order.popItemById(item.getId())).thenReturn(item);
+			OrderItem item = new OrderItem(product, QUANTITY, 2.5 * QUANTITY);
 			totemController.setOrder(order);
 			totemController.removeItem(item);
 			InOrder inOrder = inOrder(broker, order, totemView);
-			inOrder.verify(order).popItemById(item.getId());
+			inOrder.verify(order).removeProduct(product);
 			inOrder.verify(broker).returnProduct(product.getId(), QUANTITY);
 			inOrder.verify(totemView).itemRemoved(item);
 			inOrder.verify(totemView).showCartMessage("Removed all pizza");
 		}
 
 		@Test
-		@DisplayName("Show error when item is not found in order")
-		void testRemoveItemWhenItemIsNotFound() {
-			OrderItem notExistingItem = new OrderItem("1", new Product(1, "pizza", 2.5), QUANTITY);
-			when(order.popItemById("1")).thenThrow(new NoSuchElementException());
+		@DisplayName("Show an error when the product linked to the specified item is not found in Order")
+		void testRemoveItemWhenTheLinkedProductIsNotFoundShouldShowAnError() {
+			Product product = new Product(1, "pizza", 2.5);
+			OrderItem notExistingItem = new OrderItem(product, QUANTITY, 2.5 * QUANTITY);
+			doThrow(new NoSuchElementException()).when(order).removeProduct(product);
 			totemController.setOrder(order);
 			totemController.removeItem(notExistingItem);
 			verify(totemView).showErrorItemNotFound("Item not found", notExistingItem);
