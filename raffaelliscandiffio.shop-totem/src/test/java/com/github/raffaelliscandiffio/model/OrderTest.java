@@ -353,8 +353,8 @@ class OrderTest {
 				Product product = new Product(1, "product", 2.0);
 				OrderItem storedItem = new OrderItem(product, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY);
 				items.add(storedItem);
-				assertThatThrownBy(() -> order.decreaseProductQuantity(null, POSITIVE_QUANTITY))
-						.isInstanceOf(NullPointerException.class).hasMessage("Product cannot be null");
+				assertThatThrownBy(() -> order.removeProduct(null)).isInstanceOf(NullPointerException.class)
+						.hasMessage("Product cannot be null");
 				assertThat(items).containsOnly(storedItem);
 
 			}
@@ -363,8 +363,7 @@ class OrderTest {
 			@DisplayName("Throw NoSuchElementException when the specified product is not found")
 			void testRemoveProductWhenTheSpecifiedProductIsNotFoundShouldThrowNoSuchElementException() {
 				Product product = new Product(1, "product", 2.0);
-				assertThatThrownBy(() -> order.decreaseProductQuantity(product, POSITIVE_QUANTITY))
-						.isInstanceOf(NoSuchElementException.class)
+				assertThatThrownBy(() -> order.removeProduct(product)).isInstanceOf(NoSuchElementException.class)
 						.hasMessage("Product with id 1 not found in this Order");
 
 			}
