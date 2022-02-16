@@ -52,6 +52,13 @@ public class Order {
 		items.clear();
 	}
 
+	public void removeProduct(Product product) {
+		handleNullProduct(product);
+		OrderItem itemToRemove = getFirstItemByProductIdOrNull(product);
+		handleProductNotFound(product, itemToRemove);
+		items.remove(itemToRemove);
+	}
+
 	@ExcludeGeneratedFromCoverage
 	public List<OrderItem> getItems() {
 		return items;

@@ -314,4 +314,50 @@ class OrderTest {
 
 	}
 
+	@Nested
+	@DisplayName("Test method 'removeProduct'")
+	class RemoveProductTest {
+
+		@Test
+		@DisplayName("Remove the item when the specified product is found")
+		void testRemoveProductWhenTheSpecifiedProductIsFoundShouldRemoveTheItem() {
+			Product product1 = new Product(1, "product1", 2.0);
+			Product product2 = new Product(2, "product2", 2.0);
+			OrderItem storedItem = new OrderItem(product1, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY);
+			OrderItem itemToRemove = new OrderItem(product2, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY);
+			items.add(storedItem);
+			items.add(itemToRemove);
+			order.removeProduct(product2);
+			assertThat(items).containsOnly(storedItem);
+		}
+
+		@Nested
+		@DisplayName("Exceptional cases")
+		class ExceptionalCasesTest {
+
+			@Test
+			@DisplayName("Throw NullPointerException when the specified product is null")
+			void testRemoveProductWhenTheSpecifiedProductIsNullShouldThrowNullPointerException() {
+				Product product = new Product(1, "product", 2.0);
+				OrderItem storedItem = new OrderItem(product, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY);
+				items.add(storedItem);
+				assertThatThrownBy(() -> order.decreaseProductQuantity(null, POSITIVE_QUANTITY))
+						.isInstanceOf(NullPointerException.class).hasMessage("Product cannot be null");
+				assertThat(items).containsOnly(storedItem);
+
+			}
+
+			@Test
+			@DisplayName("Throw NoSuchElementException when the specified product is not found")
+			void testRemoveProductWhenTheSpecifiedProductIsNotFoundShouldThrowNoSuchElementException() {
+				Product product = new Product(1, "product", 2.0);
+				assertThatThrownBy(() -> order.decreaseProductQuantity(product, POSITIVE_QUANTITY))
+						.isInstanceOf(NoSuchElementException.class)
+						.hasMessage("Product with id 1 not found in this Order");
+
+			}
+
+		}
+	}
+
 }
