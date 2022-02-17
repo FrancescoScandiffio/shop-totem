@@ -116,34 +116,6 @@ class TotemControllerTest {
 	class BuyProductTest {
 
 		@Test
-		@DisplayName("Show error when product does not exist in repository")
-		void testBuyProductWhenRequestedProductDoesNotExistInRepository() {
-			Product product = new Product(1, "pizza", 2.5);
-			when(broker.doesProductExist(anyLong())).thenReturn(false);
-			totemController.buyProduct(product, QUANTITY);
-			verify(totemView).showErrorProductNotFound("Product not found", product);
-			verifyNoMoreInteractions(totemView, broker, order);
-		}
-
-		@Test
-		@DisplayName("Show error when requested quantity is negative")
-		void testBuyProductWhenRequestedQuantityIsNegative() {
-			Product product = new Product(1, "pizza", 2.5);
-			totemController.buyProduct(product, -3);
-			verify(totemView).showShoppingErrorMessage("Buy quantity must be positive: received -3");
-			verifyNoMoreInteractions(totemView, broker, order);
-		}
-
-		@Test
-		@DisplayName("Show error when requested quantity is zero")
-		void testBuyProductWhenRequestedQuantityIsZero() {
-			Product product = new Product(1, "pizza", 2.5);
-			totemController.buyProduct(product, 0);
-			verify(totemView).showShoppingErrorMessage("Buy quantity must be positive: received 0");
-			verifyNoMoreInteractions(totemView, broker, order);
-		}
-
-		@Test
 		@DisplayName("Don't buy product when it is out of stock")
 		void testBuyProductWhenRequestedProductIsOutOfStock() {
 			Product product = new Product(1, "pizza", 2.5);
@@ -212,6 +184,48 @@ class TotemControllerTest {
 			totemController.setOrder(order);
 			totemController.buyProduct(product, GREATER_QUANTITY);
 			verify(totemView).showWarning("Not enough pizza in stock: added only " + QUANTITY);
+		}
+
+		@Nested
+		@DisplayName("Error cases")
+		class ErrorCasesTest {
+
+			@Test
+			@DisplayName("Show error when product does not exist in repository")
+			void testBuyProductWhenRequestedProductDoesNotExistInRepository() {
+				Product product = new Product(1, "pizza", 2.5);
+				when(broker.doesProductExist(anyLong())).thenReturn(false);
+				totemController.buyProduct(product, QUANTITY);
+				verify(totemView).showErrorProductNotFound("Product not found", product);
+				verifyNoMoreInteractions(totemView, broker, order);
+			}
+
+			@Test
+			@DisplayName("Show error when requested quantity is negative")
+			void testBuyProductWhenRequestedQuantityIsNegative() {
+				Product product = new Product(1, "pizza", 2.5);
+				totemController.buyProduct(product, -3);
+				verify(totemView).showShoppingErrorMessage("Buy quantity must be positive: received -3");
+				verifyNoMoreInteractions(totemView, broker, order);
+			}
+
+			@Test
+			@DisplayName("Show error when requested quantity is zero")
+			void testBuyProductWhenRequestedQuantityIsZero() {
+				Product product = new Product(1, "pizza", 2.5);
+				totemController.buyProduct(product, 0);
+				verify(totemView).showShoppingErrorMessage("Buy quantity must be positive: received 0");
+				verifyNoMoreInteractions(totemView, broker, order);
+			}
+
+			@Test
+			@DisplayName("Show error when the specified product is null")
+			void testBuyProductWhenTheSpecifiedProductIsNull() {
+				totemController.buyProduct(null, QUANTITY);
+				verify(totemView).showShoppingErrorMessage("Product not found");
+				verifyNoMoreInteractions(totemView, broker, order);
+			}
+
 		}
 
 	}

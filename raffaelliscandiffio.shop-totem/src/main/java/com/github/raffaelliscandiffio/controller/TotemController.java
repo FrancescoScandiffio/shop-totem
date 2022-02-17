@@ -44,6 +44,10 @@ public class TotemController {
 	}
 
 	public void buyProduct(Product product, int requested) {
+		if (product == null) {
+			totemView.showShoppingErrorMessage("Product not found");
+			return;
+		}
 		if (requested <= 0) {
 			totemView.showShoppingErrorMessage("Buy quantity must be positive: received " + requested);
 			return;
