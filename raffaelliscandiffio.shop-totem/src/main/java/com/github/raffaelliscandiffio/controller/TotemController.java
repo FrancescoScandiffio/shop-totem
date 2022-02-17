@@ -48,25 +48,24 @@ public class TotemController {
 			totemView.showShoppingErrorMessage("Buy quantity must be positive: received " + requested);
 			return;
 		}
-
 		if (!broker.doesProductExist(product.getId())) {
 			totemView.showErrorProductNotFound("Product not found", product);
 			return;
 		}
-
 		int provided = broker.takeAvailable(product.getId(), requested);
-
 		if (provided == 0) {
 			totemView.showWarning("Item out of stock: " + product.getName());
 			return;
 		}
 
-		OrderItem storedItem = order.findItemByProductId(product.getId());
-		OrderItem modifiedItem = order.insertItem(product, provided);
-		if (storedItem == null)
-			totemView.itemAdded(modifiedItem);
-		else
-			totemView.itemModified(storedItem, modifiedItem);
+		OrderItem storedItem = order.findItemByProduct(product);
+		if (storedItem == null) {
+			storedItem = order.addNewProduct(product, provided);
+			totemView.itemAdded(storedItem);
+		} else {
+			OrderItem itemModified = order.increaseProductQuantity(product, provided);
+			totemView.itemModified(storedItem, itemModified);
+		}
 
 		if (provided < requested)
 			totemView.showWarning("Not enough " + product.getName() + " in stock: added only " + provided);
@@ -77,10 +76,11 @@ public class TotemController {
 
 	public void removeItem(OrderItem item) {
 		try {
-			order.popItemById(item.getId());
-			broker.returnProduct(item.getProduct().getId(), item.getQuantity());
+			Product itemProduct = item.getProduct();
+			order.removeProduct(itemProduct);
+			broker.returnProduct(itemProduct.getId(), item.getQuantity());
 			totemView.itemRemoved(item);
-			totemView.showCartMessage("Removed all " + item.getProduct().getName());
+			totemView.showCartMessage("Removed all " + itemProduct.getName());
 		} catch (NoSuchElementException exception) {
 			totemView.showErrorItemNotFound("Item not found", item);
 		}
@@ -88,10 +88,11 @@ public class TotemController {
 
 	public void returnProduct(OrderItem item, int quantity) {
 		try {
-			OrderItem modifiedItem = order.decreaseItem(item.getId(), quantity);
-			broker.returnProduct(item.getProduct().getId(), quantity);
+			Product itemProduct = item.getProduct();
+			OrderItem modifiedItem = order.decreaseProductQuantity(itemProduct, quantity);
+			broker.returnProduct(itemProduct.getId(), quantity);
 			totemView.itemModified(item, modifiedItem);
-			totemView.showCartMessage("Removed " + quantity + " " + item.getProduct().getName());
+			totemView.showCartMessage("Removed " + quantity + " " + itemProduct.getName());
 		} catch (NoSuchElementException exception) {
 			totemView.showErrorItemNotFound("Item not found", item);
 		} catch (IllegalArgumentException exception) {

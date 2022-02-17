@@ -13,92 +13,86 @@ public class Order {
 		this.items = items;
 	}
 
-	/**
-	 * Encapsulate the specified product and quantity in a new OrderItem instance.
-	 * If the product is already binded to an item, increase its quantity.
-	 * 
-	 * @param product the product to be added to the order
-	 * @param the     quantity of product to be added to the order
-	 * @throws NullPointerException     if product is null
-	 * @throws IllegalArgumentException if quantity is non-positive
-	 * @return OrderItem - the newly inserted or modified item
-	 */
-	public OrderItem insertItem(Product product, int quantity) throws NullPointerException, IllegalArgumentException {
-		OrderItem item = items.stream().filter(obj -> obj.getProduct().getId() == product.getId()).findFirst()
-				.orElse(null);
-		if (item == null) {
-			item = new OrderItem(product, quantity);
-			items.add(item);
-		} else
-			item.increaseQuantity(quantity);
-		return item;
+	public OrderItem addNewProduct(Product product, int quantity) {
+		OrderItem storedItem = validateInputsAndFindItemByProduct(product, quantity);
+		if (storedItem != null)
+			throw new IllegalArgumentException(
+					String.format("Product with id %s already exists in this Order", product.getId()));
+		storedItem = new OrderItem(product, quantity, product.getPrice() * quantity);
+		items.add(storedItem);
+		return storedItem;
 	}
 
-	/**
-	 * Remove the specified item from order
-	 * 
-	 * @param itemId the id of the item to be removed
-	 * @throws NoSuchElementException if the requested item is not found
-	 * @return OrderItem - the removed item
-	 */
-	public OrderItem popItemById(long itemId) {
-		OrderItem item = findItemById(itemId);
-		items.remove(item);
-		return item;
+	public OrderItem increaseProductQuantity(Product product, int quantity) {
+		OrderItem storedItem = validateInputsAndFindItemByProduct(product, quantity);
+		handleProductNotFound(product, storedItem);
+		storedItem.setQuantity(quantity + storedItem.getQuantity());
+		updateItemSubtotal(storedItem);
+		return storedItem;
+	}
+
+	public OrderItem decreaseProductQuantity(Product product, int quantity) {
+		OrderItem storedItem = validateInputsAndFindItemByProduct(product, quantity);
+		handleProductNotFound(product, storedItem);
+		int storedQuantity = storedItem.getQuantity();
+		if (quantity >= storedQuantity)
+			throw new IllegalArgumentException(
+					String.format("Quantity must be less than %s. Received: %s", storedQuantity, quantity));
+		storedItem.setQuantity(storedQuantity - quantity);
+		updateItemSubtotal(storedItem);
+		return storedItem;
 
 	}
 
-	/**
-	 * Decrease the quantity of the specified item
-	 * 
-	 * @param itemId   the item whose quantity has to be decreased
-	 * @param quantity the quantity to be removed
-	 * @throws IllegalArgumentException in the following cases:
-	 *                                  <ul>
-	 *                                  <li>if quantity is non-positive</li>
-	 *                                  <li>if quantity is equal or greater than the
-	 *                                  available quantity</li>
-	 * @throws NoSuchElementException   if the requested item is not found
-	 * @return OrderItem - the modified item
-	 */
-	public OrderItem decreaseItem(long itemId, int quantity) throws IllegalArgumentException {
-		OrderItem item = findItemById(itemId);
-		item.decreaseQuantity(quantity);
-		return item;
-
+	public OrderItem findItemByProduct(Product product) {
+		handleNullProduct(product);
+		return getFirstItemByProductIdOrNull(product);
 	}
 
-	/**
-	 * Find the item which contains the product matching the specified id. It is
-	 * assured that there is only one match or none.
-	 * 
-	 * @param productId the id of the product
-	 * @return The item which contains the specified product, else null
-	 */
-	public OrderItem findItemByProductId(long productId) {
-		return items.stream().filter(obj -> obj.getProduct().getId() == productId).findFirst().orElse(null);
-
-	}
-
-	/**
-	 * Removes all the elements from items list. The list will be empty after this
-	 * call returns.
-	 */
 	public void clear() {
 		items.clear();
 	}
 
-	private OrderItem findItemById(long itemId) {
-		return items.stream().filter(obj -> obj.getId() == itemId).findFirst()
-				.orElseThrow(() -> new NoSuchElementException(String.format("Item with id (%s) not found", itemId)));
+	public void removeProduct(Product product) {
+		handleNullProduct(product);
+		OrderItem itemToRemove = getFirstItemByProductIdOrNull(product);
+		handleProductNotFound(product, itemToRemove);
+		items.remove(itemToRemove);
 	}
 
-	/**
-	 * @return the items
-	 */
 	@ExcludeGeneratedFromCoverage
 	public List<OrderItem> getItems() {
 		return items;
+	}
+
+	private void handleNullProduct(Product product) {
+		if (product == null)
+			throw new NullPointerException("Product cannot be null");
+	}
+
+	private void handleNotPositiveQuantity(int quantity) {
+		if (quantity <= 0)
+			throw new IllegalArgumentException(String.format("Quantity must be positive. Received: %s", quantity));
+	}
+
+	private OrderItem getFirstItemByProductIdOrNull(Product product) {
+		return items.stream().filter(obj -> obj.getProduct().getId() == product.getId()).findFirst().orElse(null);
+	}
+
+	private OrderItem validateInputsAndFindItemByProduct(Product product, int quantity) {
+		handleNullProduct(product);
+		handleNotPositiveQuantity(quantity);
+		return getFirstItemByProductIdOrNull(product);
+	}
+
+	private void handleProductNotFound(Product product, OrderItem storedItem) {
+		if (storedItem == null)
+			throw new NoSuchElementException(
+					String.format("Product with id %s not found in this Order", product.getId()));
+	}
+
+	private void updateItemSubtotal(OrderItem storedItem) {
+		storedItem.setSubTotal(storedItem.getQuantity() * storedItem.getProduct().getPrice());
 	}
 
 }

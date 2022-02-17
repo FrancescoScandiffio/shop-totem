@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -111,12 +112,12 @@ class TotemControllerTest {
 	}
 
 	@Nested
-	@DisplayName("Test 'buyProduct'")
+	@DisplayName("Test method 'buyProduct'")
 	class BuyProductTest {
 
 		@Test
-		@DisplayName("Show error when product does not exist")
-		void testBuyProductWhenRequestedProductDoesNotExist() {
+		@DisplayName("Show error when product does not exist in repository")
+		void testBuyProductWhenRequestedProductDoesNotExistInRepository() {
 			Product product = new Product(1, "pizza", 2.5);
 			when(broker.doesProductExist(anyLong())).thenReturn(false);
 			totemController.buyProduct(product, QUANTITY);
@@ -156,45 +157,44 @@ class TotemControllerTest {
 		}
 
 		@Test
-		@DisplayName("Insert new item when item does not already exist")
-		void testBuyProductWhenItemDoesNotExist() {
+		@DisplayName("Add new product to the order when the product is not found in order")
+		void testBuyProductWhenTheProductIsNotFoundInOrderShouldDelegateToOrder() {
 			Product product = new Product(1, "pizza", 2.5);
-			OrderItem itemToAdd = new OrderItem(product, QUANTITY);
+			OrderItem itemToAdd = new OrderItem(product, QUANTITY, 2.5 * QUANTITY);
 			when(broker.doesProductExist(product.getId())).thenReturn(true);
 			when(broker.takeAvailable(product.getId(), QUANTITY)).thenReturn(QUANTITY);
-			when(order.findItemByProductId(product.getId())).thenReturn(null);
-			when(order.insertItem(product, QUANTITY)).thenReturn(itemToAdd);
+			when(order.findItemByProduct(product)).thenReturn(null);
+			when(order.addNewProduct(product, QUANTITY)).thenReturn(itemToAdd);
 			totemController.setOrder(order);
 			totemController.buyProduct(product, QUANTITY);
 			verify(totemView).itemAdded(itemToAdd);
 		}
 
 		@Test
-		@DisplayName("Modify item when the requested product is already in order")
-		void testBuyProductWhenProductIsAlreadyInOrder() {
+		@DisplayName("Increase product quantity when the specified product is found in order")
+		void testBuyProductWhenProductIsAlreadyInOrderShouldIncreaseItsQuantity() {
 			Product product = new Product(1, "pizza", 2.5);
-			OrderItem storedItem = new OrderItem(product, QUANTITY);
-			OrderItem modifiedItem = new OrderItem(product, QUANTITY * 2);
+			OrderItem storedItem = new OrderItem(product, QUANTITY, 2.5 * QUANTITY);
+			OrderItem modifiedItem = new OrderItem(product, QUANTITY + GREATER_QUANTITY,
+					2.5 * (QUANTITY + GREATER_QUANTITY));
 			when(broker.doesProductExist(product.getId())).thenReturn(true);
-			when(broker.takeAvailable(product.getId(), QUANTITY)).thenReturn(QUANTITY);
-			when(order.findItemByProductId(product.getId())).thenReturn(storedItem);
-			when(order.insertItem(product, QUANTITY)).thenReturn(modifiedItem);
-
+			when(broker.takeAvailable(product.getId(), GREATER_QUANTITY)).thenReturn(GREATER_QUANTITY);
+			when(order.findItemByProduct(product)).thenReturn(storedItem);
+			when(order.increaseProductQuantity(product, GREATER_QUANTITY)).thenReturn(modifiedItem);
 			totemController.setOrder(order);
-			totemController.buyProduct(product, QUANTITY);
+			totemController.buyProduct(product, GREATER_QUANTITY);
 			verify(totemView).itemModified(storedItem, modifiedItem);
 		}
 
 		@Test
 		@DisplayName("Show confirm message when requested quantity is available")
-		void testBuyProductWhenRequestedQuantityIsAvailable() {
+		void testBuyProductWhenRequestedQuantityIsAvailableShouldShowConfirmMessage() {
 			Product product = new Product(1, "pizza", 2.5);
-			OrderItem itemToAdd = new OrderItem(product, QUANTITY);
+			OrderItem itemToAdd = new OrderItem(product, QUANTITY, 2.5 * QUANTITY);
 			when(broker.doesProductExist(product.getId())).thenReturn(true);
 			when(broker.takeAvailable(product.getId(), QUANTITY)).thenReturn(QUANTITY);
-			when(order.findItemByProductId(product.getId())).thenReturn(null);
-			when(order.insertItem(product, QUANTITY)).thenReturn(itemToAdd);
-
+			when(order.findItemByProduct(product)).thenReturn(null);
+			when(order.addNewProduct(product, QUANTITY)).thenReturn(itemToAdd);
 			totemController.setOrder(order);
 			totemController.buyProduct(product, QUANTITY);
 			verify(totemView).showShoppingMessage("Added " + QUANTITY + " pizza");
@@ -202,14 +202,13 @@ class TotemControllerTest {
 
 		@Test
 		@DisplayName("Show warning when provided quantity is not as much as requested")
-		void testBuyProductWhenProvidedQuantityIsLessThanRequested() {
+		void testBuyProductWhenProvidedQuantityIsLessThanRequestedShouldShowWarning() {
 			Product product = new Product(1, "pizza", 2.5);
-			OrderItem itemToAdd = new OrderItem(product, QUANTITY);
+			OrderItem itemToAdd = new OrderItem(product, QUANTITY, 2.5 * QUANTITY);
 			when(broker.doesProductExist(product.getId())).thenReturn(true);
 			when(broker.takeAvailable(product.getId(), GREATER_QUANTITY)).thenReturn(QUANTITY);
-			when(order.findItemByProductId(product.getId())).thenReturn(null);
-			when(order.insertItem(product, QUANTITY)).thenReturn(itemToAdd);
-
+			when(order.findItemByProduct(product)).thenReturn(null);
+			when(order.addNewProduct(product, QUANTITY)).thenReturn(itemToAdd);
 			totemController.setOrder(order);
 			totemController.buyProduct(product, GREATER_QUANTITY);
 			verify(totemView).showWarning("Not enough pizza in stock: added only " + QUANTITY);
@@ -218,29 +217,29 @@ class TotemControllerTest {
 	}
 
 	@Nested
-	@DisplayName("Test 'removeItem'")
+	@DisplayName("Test method 'removeItem'")
 	class RemoveItemTest {
 
 		@Test
-		@DisplayName("Remove item from order")
-		void testRemoveItem() {
+		@DisplayName("Remove the specified item from Order")
+		void testRemoveItemWhenTheLinkedProductIsFoundShouldRemoveTheItem() {
 			Product product = new Product(1, "pizza", 2.5);
-			OrderItem item = new OrderItem(product, QUANTITY);
-			when(order.popItemById(item.getId())).thenReturn(item);
+			OrderItem item = new OrderItem(product, QUANTITY, 2.5 * QUANTITY);
 			totemController.setOrder(order);
 			totemController.removeItem(item);
 			InOrder inOrder = inOrder(broker, order, totemView);
-			inOrder.verify(order).popItemById(item.getId());
+			inOrder.verify(order).removeProduct(product);
 			inOrder.verify(broker).returnProduct(product.getId(), QUANTITY);
 			inOrder.verify(totemView).itemRemoved(item);
 			inOrder.verify(totemView).showCartMessage("Removed all pizza");
 		}
 
 		@Test
-		@DisplayName("Show error when item is not found in order")
-		void testRemoveItemWhenItemIsNotFound() {
-			OrderItem notExistingItem = new OrderItem(new Product(1, "pizza", 2.5), QUANTITY);
-			when(order.popItemById(anyLong())).thenThrow(new NoSuchElementException());
+		@DisplayName("Show an error when the product linked to the specified item is not found in Order")
+		void testRemoveItemWhenTheLinkedProductIsNotFoundShouldShowAnError() {
+			Product product = new Product(1, "pizza", 2.5);
+			OrderItem notExistingItem = new OrderItem(product, QUANTITY, 2.5 * QUANTITY);
+			doThrow(new NoSuchElementException()).when(order).removeProduct(product);
 			totemController.setOrder(order);
 			totemController.removeItem(notExistingItem);
 			verify(totemView).showErrorItemNotFound("Item not found", notExistingItem);
@@ -250,57 +249,66 @@ class TotemControllerTest {
 	}
 
 	@Nested
-	@DisplayName("Test 'returnProduct'")
+	@DisplayName("Test method 'returnProduct'")
 	class ReturnProductTest {
 
 		@Test
-		@DisplayName("Return a quantity of product")
+		@DisplayName("Return a quantity of a product from Order")
 		void testReturnProduct() {
 			Product product = new Product(1, "pizza", 2.5);
-			OrderItem item = new OrderItem(product, GREATER_QUANTITY);
-			OrderItem modifiedItem = new OrderItem(product, QUANTITY);
-			when(order.decreaseItem(item.getId(), QUANTITY)).thenReturn(modifiedItem);
+			OrderItem item = new OrderItem(product, GREATER_QUANTITY, 2.5 * GREATER_QUANTITY);
+			int decreasedQuantity = GREATER_QUANTITY - QUANTITY;
+			OrderItem modifiedItem = new OrderItem(product, decreasedQuantity, 2.5 * decreasedQuantity);
+			when(order.decreaseProductQuantity(product, QUANTITY)).thenReturn(modifiedItem);
 			totemController.setOrder(order);
 			totemController.returnProduct(item, QUANTITY);
-			InOrder inOrder = inOrder(broker, order, totemView);
-			inOrder.verify(order).decreaseItem(item.getId(), QUANTITY);
+			InOrder inOrder = inOrder(broker, totemView);
 			inOrder.verify(broker).returnProduct(product.getId(), QUANTITY);
 			inOrder.verify(totemView).itemModified(item, modifiedItem);
-			inOrder.verify(totemView).showCartMessage("Removed 3 pizza");
+			inOrder.verify(totemView).showCartMessage("Removed " + QUANTITY + " pizza");
 		}
 
-		@Test
-		@DisplayName("Show error when item is not found")
-		void testReturnProductWhenItemIsNotFound() {
-			OrderItem notExistingItem = new OrderItem(new Product(1, "pizza", 2.5), QUANTITY);
-			when(order.decreaseItem(anyLong(), anyInt())).thenThrow(new NoSuchElementException());
-			totemController.setOrder(order);
-			totemController.returnProduct(notExistingItem, QUANTITY);
-			verify(totemView).showErrorItemNotFound("Item not found", notExistingItem);
-			verifyNoMoreInteractions(order, broker, totemView);
-		}
+		@Nested
+		@DisplayName("Exceptional cases")
+		class ExceptionalCasesTest {
 
-		@Test
-		@DisplayName("Show error when order throws IllegalArgumentException")
-		void testReturnProductWhenSelectedQuantityIsIllegalArgument() {
-			OrderItem existingItem = new OrderItem(new Product(1, "pizza", 2.5), QUANTITY);
-			String exceptionMessage = "Custom message";
-			when(order.decreaseItem(anyLong(), anyInt())).thenThrow(new IllegalArgumentException(exceptionMessage));
-			totemController.setOrder(order);
-			totemController.returnProduct(existingItem, GREATER_QUANTITY);
-			verify(totemView).showCartErrorMessage(exceptionMessage);
-			verifyNoMoreInteractions(order, broker, totemView);
+			@Test
+			@DisplayName("Show error when the product to remove is not found")
+			void testReturnProductWhenTheProductIsNotFoundShouldShowError() {
+				Product product = new Product(1, "pizza", 2.5);
+				OrderItem notExistingItem = new OrderItem(product, QUANTITY, 2.5 * QUANTITY);
+				when(order.decreaseProductQuantity(product, QUANTITY)).thenThrow(new NoSuchElementException());
+				totemController.setOrder(order);
+				totemController.returnProduct(notExistingItem, QUANTITY);
+				verify(totemView).showErrorItemNotFound("Item not found", notExistingItem);
+				verifyNoMoreInteractions(order, broker, totemView);
+			}
+
+			@Test
+			@DisplayName("Show error when Order throws IllegalArgumentException")
+			void testReturnProductWhenOrderThrowsIllegalArgumentExceptionShouldShowAnError() {
+				Product product = new Product(1, "pizza", 2.5);
+				OrderItem item = new OrderItem(product, QUANTITY, 2.5 * QUANTITY);
+				String exceptionMessage = "Custom exception message";
+				when(order.decreaseProductQuantity(product, GREATER_QUANTITY))
+						.thenThrow(new IllegalArgumentException(exceptionMessage));
+				totemController.setOrder(order);
+				totemController.returnProduct(item, GREATER_QUANTITY);
+				verify(totemView).showCartErrorMessage(exceptionMessage);
+				verifyNoMoreInteractions(order, broker, totemView);
+			}
+
 		}
 
 	}
 
 	@Nested
-	@DisplayName("Test 'cancelShopping'")
+	@DisplayName("Test method 'cancelShopping'")
 	class CancelShoppingTest {
 
 		@Test
-		@DisplayName("Cancel shopping when no item is present")
-		void testCancelShoppingWhenNoItemsArePresent() {
+		@DisplayName("Cancel shopping when Order is empty")
+		void testCancelShoppingWhenOrderIsEmpty() {
 			totemController.setOrder(order);
 			when(order.getItems()).thenReturn(emptyList());
 			totemController.cancelShopping();
@@ -309,10 +317,10 @@ class TotemControllerTest {
 		}
 
 		@Test
-		@DisplayName("Cancel shopping when one item is present")
-		void testCancelShoppingWhenOneItemIsPresent() {
-			Product product = new Product(1, "foo", 1);
-			OrderItem item = new OrderItem(product, QUANTITY);
+		@DisplayName("Cancel shopping when one item is in Order")
+		void testCancelShoppingWhenOneItemIsInOrder() {
+			Product product = new Product(1, "pizza", 2.5);
+			OrderItem item = new OrderItem(product, QUANTITY, 2.5 * QUANTITY);
 			totemController.setOrder(order);
 			when(order.getItems()).thenReturn(asList(item));
 			totemController.cancelShopping();
@@ -324,19 +332,18 @@ class TotemControllerTest {
 		}
 
 		@Test
-		@DisplayName("Cancel shopping when multiple items are present")
-		void testCancelShoppingWhenSeveralItemArePresent() {
-			Product product = new Product(1, "foo", 1);
-			Product product_2 = new Product(2, "foo", 1);
-			OrderItem item = new OrderItem(product, QUANTITY);
-			OrderItem item_2 = new OrderItem(product_2, QUANTITY);
-
+		@DisplayName("Cancel shopping when multiple items are in Order")
+		void testCancelShoppingWhenSeveralItemAreInOrder() {
+			Product product1 = new Product(1, "pizza", 2.5);
+			Product product2 = new Product(2, "pasta", 1.0);
+			OrderItem item1 = new OrderItem(product1, QUANTITY, 2.5 * QUANTITY);
+			OrderItem item2 = new OrderItem(product2, QUANTITY, 1.0 * QUANTITY);
 			totemController.setOrder(order);
-			when(order.getItems()).thenReturn(asList(item, item_2));
+			when(order.getItems()).thenReturn(asList(item1, item2));
 			totemController.cancelShopping();
 			verify(order).clear();
-			verify(broker).returnProduct(product.getId(), QUANTITY);
-			verify(broker).returnProduct(product_2.getId(), QUANTITY);
+			verify(broker).returnProduct(product1.getId(), QUANTITY);
+			verify(broker).returnProduct(product2.getId(), QUANTITY);
 			verify(totemView).allItemsRemoved();
 			verify(totemView).showWelcome();
 		}
@@ -350,8 +357,8 @@ class TotemControllerTest {
 		@Test
 		@DisplayName("Reset the order view, save the items and show goodbye view")
 		void testConfirmOrderWhenOrderIsNotEmpty() {
-			Product product = new Product(1, "foo", 1);
-			OrderItem item = new OrderItem(product, QUANTITY);
+			Product product = new Product(1, "pizza", 2.5);
+			OrderItem item = new OrderItem(product, QUANTITY, 2.5 * QUANTITY);
 			totemController.setOrder(order);
 			when(order.getItems()).thenReturn(asList(item));
 			totemController.confirmOrder();
