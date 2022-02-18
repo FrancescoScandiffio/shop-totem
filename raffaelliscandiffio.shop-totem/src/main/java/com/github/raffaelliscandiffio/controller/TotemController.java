@@ -91,6 +91,10 @@ public class TotemController {
 	}
 
 	public void returnProduct(OrderItem item, int quantity) {
+		if (quantity <= 0) {
+			totemView.showCartErrorMessage("Input quantity must be positive: received " + quantity);
+			return;
+		}
 		try {
 			Product itemProduct = item.getProduct();
 			OrderItem modifiedItem = order.decreaseProductQuantity(itemProduct, quantity);

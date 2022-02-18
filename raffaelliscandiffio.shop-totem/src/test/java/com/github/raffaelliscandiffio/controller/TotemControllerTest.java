@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -20,6 +21,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -280,6 +283,18 @@ class TotemControllerTest {
 			inOrder.verify(broker).returnProduct(product.getId(), QUANTITY);
 			inOrder.verify(totemView).itemModified(item, modifiedItem);
 			inOrder.verify(totemView).showCartMessage("Removed " + QUANTITY + " pizza");
+		}
+
+		@ParameterizedTest
+		@ValueSource(ints = { -1, 0 })
+		@DisplayName("Test return product when quantity is not positive")
+		void testReturnProductWhenQuantityIsNotPositive(int input) {
+			Product product = new Product(1, "pizza", 2.5);
+			OrderItem item = new OrderItem(product, QUANTITY, 2.5 * QUANTITY);
+			totemController.setOrder(order);
+			totemController.returnProduct(item, input);
+			verify(totemView).showCartErrorMessage("Input quantity must be positive: received " + input);
+			verifyNoInteractions(order, broker);
 		}
 
 		@Nested
