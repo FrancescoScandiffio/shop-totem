@@ -44,6 +44,10 @@ public class TotemController {
 	}
 
 	public void buyProduct(Product product, int requested) {
+		if (product == null) {
+			totemView.showShoppingErrorMessage("Product not found");
+			return;
+		}
 		if (requested <= 0) {
 			totemView.showShoppingErrorMessage("Buy quantity must be positive: received " + requested);
 			return;
@@ -81,12 +85,16 @@ public class TotemController {
 			broker.returnProduct(itemProduct.getId(), item.getQuantity());
 			totemView.itemRemoved(item);
 			totemView.showCartMessage("Removed all " + itemProduct.getName());
-		} catch (NoSuchElementException exception) {
+		} catch (NoSuchElementException | NullPointerException exception) {
 			totemView.showErrorItemNotFound("Item not found", item);
 		}
 	}
 
 	public void returnProduct(OrderItem item, int quantity) {
+		if (quantity <= 0) {
+			totemView.showCartErrorMessage("Input quantity must be positive: received " + quantity);
+			return;
+		}
 		try {
 			Product itemProduct = item.getProduct();
 			OrderItem modifiedItem = order.decreaseProductQuantity(itemProduct, quantity);
@@ -97,10 +105,11 @@ public class TotemController {
 			totemView.showErrorItemNotFound("Item not found", item);
 		} catch (IllegalArgumentException exception) {
 			totemView.showCartErrorMessage(exception.getMessage());
+		} catch (NullPointerException exception) {
+			totemView.showErrorItemNotFound(exception.getMessage(), item);
 		}
 	}
 
-	// TODO after returnProduct is implemented: check if a try-catch is needed here
 	public void cancelShopping() {
 		List<OrderItem> items = order.getItems();
 		if (!items.isEmpty()) {
