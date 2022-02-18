@@ -110,7 +110,6 @@ public class TotemController {
 		}
 	}
 
-	// TODO after returnProduct is implemented: check if a try-catch is needed here
 	public void cancelShopping() {
 		List<OrderItem> items = order.getItems();
 		if (!items.isEmpty()) {
