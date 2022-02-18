@@ -263,6 +263,17 @@ class TotemControllerTest {
 			verifyNoMoreInteractions(order, broker, totemView);
 		}
 
+		@Test
+		@DisplayName("Show an error when Order throws NullPointerException")
+		void testRemoveItemWhenOrderThrowsNullPointerExceptionShouldShowAnError() {
+			OrderItem item = new OrderItem(null, QUANTITY, 2.5 * QUANTITY);
+			doThrow(new NoSuchElementException()).when(order).removeProduct(null);
+			totemController.setOrder(order);
+			totemController.removeItem(item);
+			verify(totemView).showErrorItemNotFound("Item not found", item);
+			verifyNoMoreInteractions(order, broker, totemView);
+		}
+
 	}
 
 	@Nested

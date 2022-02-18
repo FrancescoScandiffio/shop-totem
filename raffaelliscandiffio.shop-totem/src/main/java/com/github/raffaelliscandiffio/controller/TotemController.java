@@ -85,7 +85,7 @@ public class TotemController {
 			broker.returnProduct(itemProduct.getId(), item.getQuantity());
 			totemView.itemRemoved(item);
 			totemView.showCartMessage("Removed all " + itemProduct.getName());
-		} catch (NoSuchElementException exception) {
+		} catch (NoSuchElementException | NullPointerException exception) {
 			totemView.showErrorItemNotFound("Item not found", item);
 		}
 	}
