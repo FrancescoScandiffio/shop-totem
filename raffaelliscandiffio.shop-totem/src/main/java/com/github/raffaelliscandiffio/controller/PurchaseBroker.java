@@ -10,7 +10,6 @@ import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.model.Stock;
 import com.github.raffaelliscandiffio.repository.ProductRepository;
 import com.github.raffaelliscandiffio.repository.StockRepository;
-import com.github.raffaelliscandiffio.utils.ExcludeGeneratedFromCoverage;
 
 public class PurchaseBroker {
 
@@ -35,7 +34,8 @@ public class PurchaseBroker {
 	 *                                  price is negative, quantity is negative, id
 	 *                                  is already in database
 	 */
-	public void saveNewProductInStock(long id, String name, double price, int quantity) throws IllegalArgumentException{
+	public void saveNewProductInStock(long id, String name, double price, int quantity)
+			throws IllegalArgumentException {
 		if (!(name != null && !name.trim().isEmpty())) {
 			throw new IllegalArgumentException("Null or empty name is not allowed");
 		}
@@ -100,9 +100,14 @@ public class PurchaseBroker {
 		}
 	}
 
-	@ExcludeGeneratedFromCoverage
 	public void returnProduct(long id, int quantity) {
-		// TODO Auto-generated method stub
+		Stock stock = stockRepository.findById(id);
+		if (stock == null) {
+			LOGGER.log(Level.ERROR, "Stock with id {} not found", id);
+			return;
+		}
+		stock.setQuantity(stock.getQuantity() + quantity);
+		stockRepository.update(stock);
 	}
 
 	public boolean doesProductExist(long id) {

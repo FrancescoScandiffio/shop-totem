@@ -3,9 +3,9 @@ package com.github.raffaelliscandiffio.controller;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -196,27 +196,54 @@ class PurchaseBrokerTest {
 			verify(productRepository).save(new Product(PRODUCT_ID, NAME, PRICE));
 			verify(stockRepository).save(new Stock(PRODUCT_ID, 0));
 		}
-		
+
 		@Test
 		@DisplayName("throws when product with id is already in database")
 		void testSaveNewProductInStockWhenProductIsAlreadyExistingShouldThrow() {
 			when(productRepository.findById(PRODUCT_ID)).thenReturn(new Product(PRODUCT_ID, NAME, PRICE));
-			
+
 			assertThatThrownBy(() -> broker.saveNewProductInStock(PRODUCT_ID, NAME, PRICE, QUANTITY))
-					.isInstanceOf(IllegalArgumentException.class).hasMessage("Product with id "+ PRODUCT_ID +" already in database");
+					.isInstanceOf(IllegalArgumentException.class)
+					.hasMessage("Product with id " + PRODUCT_ID + " already in database");
 			verify(stockRepository, never()).save(any());
 			verify(productRepository, never()).save(any());
 		}
-		
+
 		@Test
 		@DisplayName("throws when stock with id is already in database")
 		void testSaveNewProductInStockWhenStockIsAlreadyExistingShouldThrow() {
 			when(stockRepository.findById(PRODUCT_ID)).thenReturn(new Stock(PRODUCT_ID, QUANTITY));
-			
+
 			assertThatThrownBy(() -> broker.saveNewProductInStock(PRODUCT_ID, NAME, PRICE, QUANTITY))
-					.isInstanceOf(IllegalArgumentException.class).hasMessage("Stock with id "+ PRODUCT_ID +" already in database");
+					.isInstanceOf(IllegalArgumentException.class)
+					.hasMessage("Stock with id " + PRODUCT_ID + " already in database");
 			verify(stockRepository, never()).save(any());
 			verify(productRepository, never()).save(any());
 		}
 	}
+
+	@Nested
+	@DisplayName("Test method 'returnProduct")
+	class ReturnProductTest {
+
+		@Test
+		@DisplayName("Return the product when the stock of the specified product is found")
+		void testReturnProductWhenStockIsFound() {
+			Stock storedStock = spy(new Stock(PRODUCT_ID, QUANTITY));
+			when(stockRepository.findById(PRODUCT_ID)).thenReturn(storedStock);
+			broker.returnProduct(PRODUCT_ID, GREATER_QUANTITY);
+			verify(storedStock).setQuantity(QUANTITY + GREATER_QUANTITY);
+			verify(stockRepository).update(storedStock);
+		}
+
+		@Test
+		@DisplayName("Don't return the product when the stock of the specified product is not found")
+		void testReturnStockWhenStockIsNotFound() {
+			when(stockRepository.findById(PRODUCT_ID)).thenReturn(null);
+			broker.returnProduct(PRODUCT_ID, QUANTITY);
+			verifyNoMoreInteractions(stockRepository);
+		}
+
+	}
+
 }
