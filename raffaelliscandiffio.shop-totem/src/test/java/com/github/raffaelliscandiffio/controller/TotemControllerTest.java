@@ -327,6 +327,20 @@ class TotemControllerTest {
 				verifyNoMoreInteractions(order, broker, totemView);
 			}
 
+			@Test
+			@DisplayName("Show error when Order throws NullPointerException")
+			void testReturnProductWhenOrderThrowsNullPointerExceptionShouldShowAnError() {
+				Product product = new Product(1, "pizza", 2.5);
+				OrderItem item = new OrderItem(product, GREATER_QUANTITY, 2.5 * GREATER_QUANTITY);
+				String exceptionMessage = "Custom exception message";
+				when(order.decreaseProductQuantity(product, QUANTITY))
+						.thenThrow(new NullPointerException(exceptionMessage));
+				totemController.setOrder(order);
+				totemController.returnProduct(item, QUANTITY);
+				verify(totemView).showErrorItemNotFound(exceptionMessage, item);
+				verifyNoMoreInteractions(order, broker, totemView);
+			}
+
 		}
 
 	}

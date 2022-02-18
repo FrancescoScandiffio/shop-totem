@@ -105,6 +105,8 @@ public class TotemController {
 			totemView.showErrorItemNotFound("Item not found", item);
 		} catch (IllegalArgumentException exception) {
 			totemView.showCartErrorMessage(exception.getMessage());
+		} catch (NullPointerException exception) {
+			totemView.showErrorItemNotFound(exception.getMessage(), item);
 		}
 	}
 
