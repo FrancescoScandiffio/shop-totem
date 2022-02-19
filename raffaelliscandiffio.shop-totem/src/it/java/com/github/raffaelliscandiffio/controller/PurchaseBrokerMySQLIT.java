@@ -108,7 +108,7 @@ class PurchaseBrokerMySQLIT {
 		int quantity = broker.takeAvailable(1, 60);
 
 		assertThat(quantity).isEqualTo(50);
-		assertThat(stockRepository.findById(1).getQuantity()).isEqualTo(0);
+		assertThat(stockRepository.findById(1).getQuantity()).isZero();
 	}
 
 	@DisplayName("'doesProductExist' returns true when the id is in db")
