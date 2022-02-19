@@ -124,4 +124,12 @@ class PurchaseBrokerMySQLIT {
 		assertThat(broker.doesProductExist(1)).isFalse();
 	}
 
+	@Test
+	@DisplayName("'returnProduct' increases the stock quantity by the specified amount")
+	void testReturnProduct() {
+		stockRepository.save(new Stock(1, 90));
+		broker.returnProduct(1, 10);
+		assertThat(stockRepository.findById(1).getQuantity()).isEqualTo(100);
+	}
+
 }
