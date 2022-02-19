@@ -77,7 +77,7 @@ class PurchaseBrokerMongoIT {
 		productRepository.save(product2);
 		assertThat(broker.retrieveProducts()).containsExactly(product1, product2);
 	}
-	
+
 	@DisplayName("'takeAvailable' should return quantity requested when available")
 	@Test
 	void testTakeAvailableReturnsRequested() {
@@ -87,7 +87,7 @@ class PurchaseBrokerMongoIT {
 		assertThat(quantity).isEqualTo(20);
 		assertThat(readAllStocksFromDatabase()).containsExactly(new Stock(1, 80));
 	}
-	
+
 	@DisplayName("'takeAvailable' should return quantity available when requested is not available")
 	@Test
 	void testTakeAvailableReturnsAvailable() {
@@ -97,18 +97,26 @@ class PurchaseBrokerMongoIT {
 		assertThat(quantity).isEqualTo(50);
 		assertThat(readAllStocksFromDatabase()).containsExactly(new Stock(1, 0));
 	}
-	
+
 	@DisplayName("'doesProductExist' returns true when the id is in db")
 	@Test
 	void testDoesProductExistWhenIdIsFound() {
 		productRepository.save(new Product(1, "pasta", 2.4));
 		assertThat(broker.doesProductExist(1)).isTrue();
 	}
-	
+
 	@DisplayName("'doesProductExist' returns false when the id is not in db")
 	@Test
 	void testDoesProductExistWhenIdIsNotFound() {
 		assertThat(broker.doesProductExist(1)).isFalse();
+	}
+
+	@Test
+	@DisplayName("'returnProduct' increases the stock quantity by the specified amount")
+	void testReturnProduct() {
+		stockRepository.save(new Stock(1, 90));
+		broker.returnProduct(1, 10);
+		assertThat(stockRepository.findById(1).getQuantity()).isEqualTo(100);
 	}
 
 	private List<Stock> readAllStocksFromDatabase() {
