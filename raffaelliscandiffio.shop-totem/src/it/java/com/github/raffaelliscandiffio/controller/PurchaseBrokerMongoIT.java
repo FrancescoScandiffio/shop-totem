@@ -2,11 +2,6 @@ package com.github.raffaelliscandiffio.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
-import org.bson.Document;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,7 +18,6 @@ import com.github.raffaelliscandiffio.repository.mongo.ProductMongoRepository;
 import com.github.raffaelliscandiffio.repository.mongo.StockMongoRepository;
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
-import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 @Testcontainers(disabledWithoutDocker = true)
@@ -37,8 +31,6 @@ class PurchaseBrokerMongoIT {
 	public static final MongoDBContainer mongo = new MongoDBContainer("mongo:5.0.6");
 
 	private MongoClient client;
-	private MongoCollection<Document> stockCollection;
-
 	private static final String TOTEM_DB_NAME = "totem";
 	private static final String PRODUCT_COLLECTION_NAME = "product";
 	private static final String STOCK_COLLECTION_NAME = "stock";
@@ -51,7 +43,6 @@ class PurchaseBrokerMongoIT {
 		MongoDatabase database = client.getDatabase(TOTEM_DB_NAME);
 		// make sure we always start with a clean database
 		database.drop();
-		stockCollection = database.getCollection(STOCK_COLLECTION_NAME);
 		broker = new PurchaseBroker(productRepository, stockRepository);
 	}
 
@@ -65,7 +56,7 @@ class PurchaseBrokerMongoIT {
 	void testsaveNewProductInStock() {
 		broker.saveNewProductInStock(1, "pizza", 5.5, 100);
 		assertThat(productRepository.findAll()).containsExactly(new Product(1, "pizza", 5.5));
-		assertThat(readAllStocksFromDatabase()).containsExactly(new Stock(1, 100));
+		assertThat(stockRepository.findById(1).getQuantity()).isEqualTo(100);
 	}
 
 	@DisplayName("'retrieveProducts' should return products in db")
@@ -83,9 +74,8 @@ class PurchaseBrokerMongoIT {
 	void testTakeAvailableReturnsRequested() {
 		stockRepository.save(new Stock(1, 100));
 		int quantity = broker.takeAvailable(1, 20);
-
 		assertThat(quantity).isEqualTo(20);
-		assertThat(readAllStocksFromDatabase()).containsExactly(new Stock(1, 80));
+		assertThat(stockRepository.findById(1).getQuantity()).isEqualTo(80);
 	}
 
 	@DisplayName("'takeAvailable' should return quantity available when requested is not available")
@@ -93,9 +83,8 @@ class PurchaseBrokerMongoIT {
 	void testTakeAvailableReturnsAvailable() {
 		stockRepository.save(new Stock(1, 50));
 		int quantity = broker.takeAvailable(1, 60);
-
 		assertThat(quantity).isEqualTo(50);
-		assertThat(readAllStocksFromDatabase()).containsExactly(new Stock(1, 0));
+		assertThat(stockRepository.findById(1).getQuantity()).isZero();
 	}
 
 	@DisplayName("'doesProductExist' returns true when the id is in db")
@@ -119,9 +108,4 @@ class PurchaseBrokerMongoIT {
 		assertThat(stockRepository.findById(1).getQuantity()).isEqualTo(100);
 	}
 
-	private List<Stock> readAllStocksFromDatabase() {
-		return StreamSupport.stream(stockCollection.find().spliterator(), false)
-				.map(d -> new Stock(Long.valueOf("" + d.get("_id")), Integer.valueOf("" + d.get("quantity"))))
-				.collect(Collectors.toList());
-	}
 }
