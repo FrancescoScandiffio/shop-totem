@@ -110,4 +110,27 @@ class TotemControllerIT {
 		window.label("messageLabel").requireText("Buy quantity must be positive: received " + requestedQuantity);
 	}
 
+	@Test
+	@GUITest
+	@DisplayName("'Add' button product not found error")
+	void testAddErrorProductNotFound() {
+		int requestedQuantity = 20;
+		double price = 2.5;
+		Product product1 = new Product(1, "Pasta", price);
+		Product product2 = new Product(2, "Pizza", price);
+
+		GuiActionRunner.execute(() -> {
+			totemView.showShopping();
+			totemView.showAllProducts(asList(product1, product2));
+		});
+		when(productRepository.findById(1)).thenReturn(null);
+
+		window.list("productList").selectItem(0);
+		window.spinner("quantitySpinner").enterText(String.valueOf(requestedQuantity));
+		window.button(JButtonMatcher.withText("Add")).click();
+
+		window.label("messageLabel").requireText("Product not found");
+		assertThat(window.list("productList").contents()).containsExactly("Pizza - Price: 2.5 €");
+	}
+
 }
