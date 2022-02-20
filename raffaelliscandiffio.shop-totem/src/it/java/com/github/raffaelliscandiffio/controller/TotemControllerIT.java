@@ -1,16 +1,27 @@
 package com.github.raffaelliscandiffio.controller;
 
+import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import org.assertj.swing.annotation.GUITest;
+import org.assertj.swing.core.matcher.JButtonMatcher;
 import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.github.raffaelliscandiffio.model.Order;
+import com.github.raffaelliscandiffio.model.OrderItem;
+import com.github.raffaelliscandiffio.model.Product;
+import com.github.raffaelliscandiffio.model.Stock;
 import com.github.raffaelliscandiffio.repository.ProductRepository;
 import com.github.raffaelliscandiffio.repository.StockRepository;
 import com.github.raffaelliscandiffio.utils.GUITestExtension;
@@ -62,5 +73,16 @@ class TotemControllerIT {
 		window.cleanUp();
 	}
 
+	@Test
+	@GUITest
+	@DisplayName("'welcomeStartShopping' button should open shopping panel and show products")
+	void testStartShoppingButtonInWelcome() {
+		when(productRepository.findAll()).thenReturn(asList(new Product(1, "Pasta", 2.5)));
+
+		window.button("welcomeStartShopping").click();
+
+		assertThat(window.list("productList").contents()).containsExactly("Pasta - Price: 2.5 €");
+		window.panel("shoppingPane").requireVisible();
+	}
 
 }
