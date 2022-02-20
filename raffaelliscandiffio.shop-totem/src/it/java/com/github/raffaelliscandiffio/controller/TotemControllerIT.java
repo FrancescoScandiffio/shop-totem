@@ -97,4 +97,17 @@ class TotemControllerIT {
 		window.label("messageLabel").requireText("Product not found");
 	}
 
+	@Test
+	@GUITest
+	@DisplayName("'Add' button negative quantity error")
+	void testAddErrorNegativeQuantity() {
+		int requestedQuantity = -1;
+		Product product = new Product(1, "Pasta", 2.5);
+		GuiActionRunner.execute(() -> totemView.showShopping());
+
+		GuiActionRunner.execute(() -> totemController.buyProduct(product, requestedQuantity));
+
+		window.label("messageLabel").requireText("Buy quantity must be positive: received " + requestedQuantity);
+	}
+
 }
