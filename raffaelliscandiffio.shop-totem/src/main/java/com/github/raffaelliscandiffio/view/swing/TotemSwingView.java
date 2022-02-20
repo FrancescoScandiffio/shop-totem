@@ -45,6 +45,7 @@ public class TotemSwingView extends JFrame implements TotemView {
 		goodbyePane = new GoodbyePanel();
 		getContentPane().add(welcomePane, "welcome");
 		getContentPane().add(shoppingPane, "shopping");
+		shoppingPane.setName("shoppingPane");
 		getContentPane().add(cartPane, "cart");
 		getContentPane().add(goodbyePane, "bye");
 
