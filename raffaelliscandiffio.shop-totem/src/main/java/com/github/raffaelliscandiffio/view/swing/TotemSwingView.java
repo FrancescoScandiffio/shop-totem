@@ -218,8 +218,8 @@ public class TotemSwingView extends JFrame implements TotemView {
 
 	@Override
 	public void showErrorProductNotFound(String msg, Product product) {
-		setMessageWithColor(getShoppingLabel(), msg, Color.RED);
 		getShoppingPane().getListProductsModel().removeElement(product);
+		setMessageWithColor(getShoppingLabel(), msg, Color.RED);
 	}
 
 	private JLabel getShoppingLabel() {
