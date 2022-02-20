@@ -76,14 +76,15 @@ public class PurchaseBroker {
 	 *         <li>the whole quantity requested if available in stock</li>
 	 *         <li>the whole quantity available if the requested was not entirely in
 	 *         stock</li>
-	 *         <li>zero if the product is out of stock or not found</li>
+	 *         <li>zero if the product is out of stock</li>
+	 *          <li> -1 if the product is not found</li>
 	 *         </ul>
 	 */
 	public int takeAvailable(long id, int quantity) {
 		Stock stock = stockRepository.findById(id);
 		if (stock == null) {
 			LOGGER.log(Level.ERROR, "Stock with id {} not found", id);
-			return 0;
+			return -1;
 		}
 		int stockAvailableQuantity = stock.getQuantity();
 		if (stockAvailableQuantity == 0) {
