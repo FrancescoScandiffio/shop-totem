@@ -85,4 +85,16 @@ class TotemControllerIT {
 		window.panel("shoppingPane").requireVisible();
 	}
 
+	@Test
+	@GUITest
+	@DisplayName("'Add' button product null not found error")
+	void testAddErrorProductNullNotFound() {
+		int requestedQuantity = 20;
+		GuiActionRunner.execute(() -> totemView.showShopping());
+
+		GuiActionRunner.execute(() -> totemController.buyProduct(null, requestedQuantity));
+
+		window.label("messageLabel").requireText("Product not found");
+	}
+
 }
