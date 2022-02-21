@@ -61,11 +61,11 @@ class PurchaseBrokerTest {
 	@DisplayName("Test 'takeAvailable'")
 	class TakeAvailableTest {
 		@Test
-		@DisplayName("should return 0 when Stock is not found")
-		void testTakeAvailableShouldReturnZeroWhenStockIsNotFound() {
+		@DisplayName("should return -1 when Stock is not found")
+		void testTakeAvailableShouldReturnMinusOneWhenStockIsNotFound() {
 			when(stockRepository.findById(PRODUCT_ID)).thenReturn(null);
 
-			assertThat(broker.takeAvailable(PRODUCT_ID, QUANTITY)).isZero();
+			assertThat(broker.takeAvailable(PRODUCT_ID, QUANTITY)).isEqualTo(-1);
 			verifyNoMoreInteractions(stockRepository);
 		}
 

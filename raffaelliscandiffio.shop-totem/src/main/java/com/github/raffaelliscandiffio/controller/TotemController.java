@@ -57,6 +57,10 @@ public class TotemController {
 			return;
 		}
 		int provided = broker.takeAvailable(product.getId(), requested);
+		if (provided == -1) {
+			totemView.showErrorProductNotFound("Item out of stock", product);
+			return;
+		}
 		if (provided == 0) {
 			totemView.showWarning("Item out of stock: " + product.getName());
 			return;

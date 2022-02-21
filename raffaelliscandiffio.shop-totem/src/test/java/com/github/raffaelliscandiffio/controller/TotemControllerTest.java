@@ -228,9 +228,20 @@ class TotemControllerTest {
 				verify(totemView).showShoppingErrorMessage("Product not found");
 				verifyNoMoreInteractions(totemView, broker, order);
 			}
-
+			
+			@Test
+			@DisplayName("Show error when product is not found in stock")
+			void testBuyProductWhenRequestedProductIsNotFoundInStock() {
+				Product product = new Product(1, "pizza", 2.5);
+				totemController.setOrder(order);
+				when(broker.doesProductExist(product.getId())).thenReturn(true);
+				when(broker.takeAvailable(eq(product.getId()), anyInt())).thenReturn(-1);
+				totemController.buyProduct(product, QUANTITY);
+				verify(broker).takeAvailable(product.getId(), QUANTITY);
+				verify(totemView).showErrorProductNotFound("Item out of stock", product);
+				verifyNoMoreInteractions(order, totemView);
+			}
 		}
-
 	}
 
 	@Nested

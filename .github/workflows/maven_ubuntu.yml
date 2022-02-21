@@ -51,7 +51,7 @@ jobs:
     - name: Build with Maven, analyse with SonarCloud
       id: mavenBuild
       run: >
-       mvn verify
+       xvfb-run mvn verify
        org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
        -DskipUTs=true
        -Dsonar.organization=francescoscandiffio-github
