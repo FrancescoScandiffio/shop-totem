@@ -238,4 +238,30 @@ class TotemControllerIT {
 				+ price + " € - Subtotal: " + newQuantity * price + " €");
 	}
 
+	@Test
+	@GUITest
+	@DisplayName("'Add' button when quantity is enough")
+	void testAddWhenQuantityIsEnough() {
+		int requestedQuantity = 20;
+		int availableQuantity = 100;
+		double price = 2.5;
+		Product product = new Product(1, "Pasta", price);
+
+		GuiActionRunner.execute(() -> {
+			totemView.showShopping();
+			totemView.showAllProducts(asList(product));
+		});
+		when(productRepository.findById(1)).thenReturn(product);
+		when(stockRepository.findById(1)).thenReturn(new Stock(1, availableQuantity));
+		when(order.findItemByProduct(product)).thenReturn(null);
+		OrderItem orderItem = new OrderItem(product, requestedQuantity, requestedQuantity * price);
+		when(order.addNewProduct(product, requestedQuantity)).thenReturn(orderItem);
+
+		window.list("productList").selectItem(0);
+		window.spinner("quantitySpinner").enterText(String.valueOf(requestedQuantity));
+		window.button(JButtonMatcher.withText("Add")).click();
+
+		verify(stockRepository).update(new Stock(1, availableQuantity - requestedQuantity));
+		window.label("messageLabel").requireText("Added " + requestedQuantity + " Pasta");
+	}
 }
