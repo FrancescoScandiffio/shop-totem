@@ -61,22 +61,28 @@
 		<sonar.issue.ignore.multicriteria.e2.resourceKey>
 			**/swing/*Test*
 		</sonar.issue.ignore.multicriteria.e2.resourceKey>
-
-		<!-- disable rule on static access -->
 		<sonar.issue.ignore.multicriteria.e3.ruleKey>
-			java:S3252
+			java:S2699
 		</sonar.issue.ignore.multicriteria.e3.ruleKey>
 		<sonar.issue.ignore.multicriteria.e3.resourceKey>
-			**/swing/TotemSwingView*
+			**/controller/TotemControllerIT*
 		</sonar.issue.ignore.multicriteria.e3.resourceKey>
-		
-		<!-- disable rule on cognitive complexity -->
+
+		<!-- disable rule on static access -->
 		<sonar.issue.ignore.multicriteria.e4.ruleKey>
-			java:S3776
+			java:S3252
 		</sonar.issue.ignore.multicriteria.e4.ruleKey>
 		<sonar.issue.ignore.multicriteria.e4.resourceKey>
-			**/swing/CartPanel*
+			**/swing/TotemSwingView*
 		</sonar.issue.ignore.multicriteria.e4.resourceKey>
+		
+		<!-- disable rule on cognitive complexity -->
+		<sonar.issue.ignore.multicriteria.e5.ruleKey>
+			java:S3776
+		</sonar.issue.ignore.multicriteria.e5.ruleKey>
+		<sonar.issue.ignore.multicriteria.e5.resourceKey>
+			**/swing/CartPanel*
+		</sonar.issue.ignore.multicriteria.e5.resourceKey>
 	</properties>
 
 	<dependencyManagement>
