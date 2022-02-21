@@ -132,7 +132,7 @@ class TotemControllerIT {
 		window.label("messageLabel").requireText("Product not found");
 		assertThat(window.list("productList").contents()).containsExactly("Pizza - Price: 2.5 €");
 	}
-	
+
 	@Test
 	@GUITest
 	@DisplayName("'Add' button product out of stock error when stock not found")
@@ -156,7 +156,7 @@ class TotemControllerIT {
 		window.label("messageLabel").requireText("Item out of stock");
 		assertThat(window.list("productList").contents()).containsExactly("Pizza - Price: 2.5 €");
 	}
-	
+
 	@Test
 	@GUITest
 	@DisplayName("'Add' button product out of stock warning")
@@ -177,6 +177,34 @@ class TotemControllerIT {
 		window.button(JButtonMatcher.withText("Add")).click();
 
 		window.label("messageLabel").requireText("Item out of stock: Pasta");
+	}
+
+	@Test
+	@GUITest
+	@DisplayName("'Add' button when product is not already in order")
+	void testAddWhenProductNotInOrder() {
+		int requestedQuantity = 20;
+		int availableQuantity = 100;
+		double price = 2.5;
+		Product product = new Product(1, "Pasta", price);
+
+		GuiActionRunner.execute(() -> {
+			totemView.showShopping();
+			totemView.showAllProducts(asList(product));
+		});
+		when(productRepository.findById(1)).thenReturn(product);
+		when(stockRepository.findById(1)).thenReturn(new Stock(1, availableQuantity));
+		when(order.findItemByProduct(product)).thenReturn(null);
+		OrderItem orderItem = new OrderItem(product, requestedQuantity, requestedQuantity * price);
+		when(order.addNewProduct(product, requestedQuantity)).thenReturn(orderItem);
+
+		window.list("productList").selectItem(0);
+		window.spinner("quantitySpinner").enterText(String.valueOf(requestedQuantity));
+		window.button(JButtonMatcher.withText("Add")).click();
+
+		GuiActionRunner.execute(() -> totemView.showOrder());
+		assertThat(window.list("cartList").contents()).containsExactly("Pasta - Quantity: " + requestedQuantity
+				+ " - Price: " + price + " € - Subtotal: " + requestedQuantity * price + " €");
 	}
 
 }
