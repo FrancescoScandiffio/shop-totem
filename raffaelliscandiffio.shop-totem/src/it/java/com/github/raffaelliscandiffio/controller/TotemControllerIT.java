@@ -207,4 +207,35 @@ class TotemControllerIT {
 				+ " - Price: " + price + " € - Subtotal: " + requestedQuantity * price + " €");
 	}
 
+	@Test
+	@GUITest
+	@DisplayName("'Add' button when product is in order")
+	void testAddWhenProductIsInOrder() {
+		int currentOrderQuantity = 30;
+		int requestedQuantity = 20;
+		int newQuantity = currentOrderQuantity + requestedQuantity;
+		int availableQuantity = 100;
+		double price = 2.5;
+		Product product = new Product(1, "Pasta", price);
+		OrderItem storedItem = new OrderItem(product, currentOrderQuantity, currentOrderQuantity * price);
+		OrderItem modifiedItem = new OrderItem(product, newQuantity, newQuantity * price);
+		GuiActionRunner.execute(() -> {
+			totemView.showShopping();
+			totemView.showAllProducts(asList(product));
+			totemView.itemAdded(storedItem);
+		});
+		when(productRepository.findById(1)).thenReturn(product);
+		when(stockRepository.findById(1)).thenReturn(new Stock(1, availableQuantity));
+		when(order.findItemByProduct(product)).thenReturn(storedItem);
+		when(order.increaseProductQuantity(product, requestedQuantity)).thenReturn(modifiedItem);
+
+		window.list("productList").selectItem(0);
+		window.spinner("quantitySpinner").enterText(String.valueOf(requestedQuantity));
+		window.button(JButtonMatcher.withText("Add")).click();
+
+		GuiActionRunner.execute(() -> totemView.showOrder());
+		assertThat(window.list("cartList").contents()).containsExactly("Pasta - Quantity: " + newQuantity + " - Price: "
+				+ price + " € - Subtotal: " + newQuantity * price + " €");
+	}
+
 }
