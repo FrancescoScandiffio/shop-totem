@@ -23,90 +23,83 @@ import com.github.raffaelliscandiffio.model.Product;
 @Testcontainers(disabledWithoutDocker = true)
 class ProductMySQLRepositoryTestcontainersIT {
 
-	private static final String TOTEM_DB_NAME = "totem";
-
-	private static EntityManagerFactory emf;
+	private static final String DATABASE_NAME = "totem";
+	private static EntityManagerFactory managerFactory;
 	private EntityManager entityManager;
 	private ProductMySQLRepository productRepository;
 
+	private Product product_1;
+	private Product product_2;
+
 	@Container
 	public static final MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0.28")
-			.withDatabaseName(TOTEM_DB_NAME).withUsername("mysql").withPassword("mysql");
+			.withDatabaseName(DATABASE_NAME).withUsername("mysql").withPassword("mysql");
 
 	@BeforeAll
 	public static void createEntityManagerFactory() {
 		System.setProperty("db.port", mysqlContainer.getFirstMappedPort().toString());
-		emf = Persistence.createEntityManagerFactory("mysql-test");
+		managerFactory = Persistence.createEntityManagerFactory("mysql-test");
 	}
 
 	@AfterAll
 	public static void closeEntityManagerFactory() {
-		emf.close();
+		managerFactory.close();
 	}
 
 	@BeforeEach
 	void setup() {
-		entityManager = emf.createEntityManager();
-		// always starting with empty database
+		entityManager = managerFactory.createEntityManager();
 		entityManager.getTransaction().begin();
 		entityManager.createQuery("DELETE FROM Product").executeUpdate();
 		entityManager.getTransaction().commit();
 		productRepository = new ProductMySQLRepository(entityManager);
+
+		product_1 = new Product("pizza", 5.5);
+		product_2 = new Product("pasta", 0.8);
 	}
 
 	@AfterEach
 	void tearDown() {
-		if (entityManager.getTransaction().isActive()) {
-			entityManager.getTransaction().rollback();
-		}
-		if (entityManager.isOpen()) {
+		if (entityManager.isOpen())
 			entityManager.close();
-		}
+
 	}
 
 	@Test
-	@DisplayName("'findById' when the id is found")
+	@DisplayName("Save Product to database with 'save'")
+	void testSaveProduct() {
+		entityManager.getTransaction().begin();
+		productRepository.save(product_1);
+		entityManager.getTransaction().commit();
+		assertThat(readAllProductsFromDatabase()).containsExactly(product_1);
+	}
+
+	@Test
+	@DisplayName("Find Product by id with 'findById' when the product exists")
 	void testFindByIdWhenIdIsFound() {
-		Product product1 = createTestProductWithId("1", "pizza", 5.5);
-		Product product2 = createTestProductWithId("2", "pasta", 2.3);
-		addTestProductToDatabase(product1);
-		addTestProductToDatabase(product2);
-		assertThat(productRepository.findById("2")).isEqualTo(product2);
+		addTestProductToDatabase(product_1);
+		addTestProductToDatabase(product_2);
+		assertThat(productRepository.findById(product_2.getId())).isEqualTo(product_2);
 	}
 
 	@Test
-	@DisplayName("'findById' when the id is not found should return null")
+	@DisplayName("Find Product by id with 'findById' when the product does not exist should return null")
 	void testFindByIdWhenIdIsNotFoundShouldReturnNull() {
 		assertThat(productRepository.findById("1")).isNull();
 	}
 
 	@Test
-	@DisplayName("'findAll' when the database is empty")
+	@DisplayName("Retrieve the products with 'findAll' when the database is not empty")
+	void testFindAllWhenDatabaseIsNotEmpty() {
+		addTestProductToDatabase(product_1);
+		addTestProductToDatabase(product_2);
+		assertThat(productRepository.findAll()).containsExactlyInAnyOrder(product_1, product_2);
+	}
+
+	@Test
+	@DisplayName("Method 'findAll' should return an empty container when the database is empty")
 	void testFindAllWhenDatabaseIsEmpty() {
 		assertThat(productRepository.findAll()).isEmpty();
-	}
-
-	@Test
-	@DisplayName("'findAll' when the database is not empty")
-	void testFindAllWhenDatabaseIsNotEmpty() {
-		Product product1 = createTestProductWithId("1", "pizza", 5.5);
-		Product product2 = createTestProductWithId("2", "pasta", 2.3);
-		addTestProductToDatabase(product1);
-		addTestProductToDatabase(product2);
-		assertThat(productRepository.findAll()).containsExactly(product1, product2);
-	}
-
-	@Test
-	@DisplayName("'save' product to repository")
-	void testSaveProduct() {
-		Product product = createTestProductWithId("1", "pizza", 5.5);
-		productRepository.save(product);
-
-		// ensure that the change has been committed
-		if (entityManager.getTransaction().isActive()) {
-			entityManager.getTransaction().rollback();
-		}
-		assertThat(readAllProductsFromDatabase()).containsExactly(product);
 	}
 
 	private void addTestProductToDatabase(Product product) {
@@ -116,13 +109,7 @@ class ProductMySQLRepositoryTestcontainersIT {
 	}
 
 	private List<Product> readAllProductsFromDatabase() {
-		return entityManager.createQuery("select p from Product p", Product.class).getResultList();
-	}
-
-	private Product createTestProductWithId(String id, String name, double price) {
-		Product product = new Product(name, price);
-		product.setId(id);
-		return product;
+		return entityManager.createQuery("SELECT p FROM Product p", Product.class).getResultList();
 	}
 
 }

@@ -8,8 +8,9 @@
 		table="PRODUCTS">
 
 
-		<id name="id" type="string" column="id" access="field"></id>
-
+	<id name="id" type="string" access="field">
+		<generator class="uuid2"/>
+	</id>
 		<property name="name" column="name" type="string"
 			access="field" />
 		<property name="price" column="price" type="double"

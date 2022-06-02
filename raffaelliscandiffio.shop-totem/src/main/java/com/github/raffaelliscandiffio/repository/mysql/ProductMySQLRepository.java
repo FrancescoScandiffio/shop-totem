@@ -16,8 +16,8 @@ public class ProductMySQLRepository implements ProductRepository {
 	}
 
 	@Override
-	public List<Product> findAll() {
-		return entityManager.createQuery("select p from Product p", Product.class).getResultList();
+	public void save(Product product) {
+		entityManager.persist(product);
 	}
 
 	@Override
@@ -26,9 +26,8 @@ public class ProductMySQLRepository implements ProductRepository {
 	}
 
 	@Override
-	public void save(Product product) {
-		entityManager.getTransaction().begin();
-		entityManager.persist(product);
-		entityManager.getTransaction().commit();
+	public List<Product> findAll() {
+		return entityManager.createQuery("select p from Product p", Product.class).getResultList();
 	}
+
 }
