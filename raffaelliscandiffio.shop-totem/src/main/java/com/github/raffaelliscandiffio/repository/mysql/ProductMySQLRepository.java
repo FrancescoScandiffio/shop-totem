@@ -7,10 +7,10 @@ import javax.persistence.EntityManager;
 import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.repository.ProductRepository;
 
-public class ProductMySQLRepository implements ProductRepository{
-	
-    private EntityManager entityManager;
-	
+public class ProductMySQLRepository implements ProductRepository {
+
+	private EntityManager entityManager;
+
 	public ProductMySQLRepository(EntityManager entityManager) {
 		this.entityManager = entityManager;
 	}
@@ -21,7 +21,7 @@ public class ProductMySQLRepository implements ProductRepository{
 	}
 
 	@Override
-	public Product findById(long id) {
+	public Product findById(String id) {
 		return entityManager.find(Product.class, id);
 	}
 

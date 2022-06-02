@@ -21,7 +21,6 @@ import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
-
 @Testcontainers(disabledWithoutDocker = true)
 class ProductMongoRepositoryTestcontainersIT {
 
@@ -59,42 +58,49 @@ class ProductMongoRepositoryTestcontainersIT {
 	@Test
 	@DisplayName("'findAll' when the database is not empty")
 	void testFindAllWhenDatabaseIsNotEmpty() {
-		addTestProductToDatabase(1, "pizza", 5.5);
-		addTestProductToDatabase(2, "pasta", 2.3);
-		assertThat(productRepository.findAll()).containsExactly(new Product(1, "pizza", 5.5),
-				new Product(2, "pasta", 2.3));
+		addTestProductToDatabase("1", "pizza", 5.5);
+		addTestProductToDatabase("2", "pasta", 2.3);
+		assertThat(productRepository.findAll()).containsExactly(createTestProductWithId("1", "pizza", 5.5),
+				createTestProductWithId("2", "pasta", 2.3));
 	}
 
 	@Test
 	@DisplayName("'findById' when the id is not found should return null")
 	void testFindByIdWhenIdIsNotFoundShouldReturnNull() {
-		assertThat(productRepository.findById(1)).isNull();
+		assertThat(productRepository.findById("1")).isNull();
 	}
 
 	@Test
 	@DisplayName("'findById' when the id is found")
 	void testFindByIdWhenIdIsFound() {
-		addTestProductToDatabase(1, "pizza", 5.5);
-		addTestProductToDatabase(2, "pasta", 2.3);
-		assertThat(productRepository.findById(2)).isEqualTo(new Product(2, "pasta", 2.3));
+		addTestProductToDatabase("1", "pizza", 5.5);
+		addTestProductToDatabase("2", "pasta", 2.3);
+		assertThat(productRepository.findById("2")).isEqualTo(createTestProductWithId("2", "pasta", 2.3));
 	}
 
 	@Test
 	@DisplayName("'save' product to repository")
 	void testSaveProduct() {
-		Product product = new Product(1, "pizza", 5.5);
+		Product product = createTestProductWithId("1", "pizza", 5.5);
 		productRepository.save(product);
 		assertThat(readAllProductsFromDatabase()).containsExactly(product);
 	}
 
-	private void addTestProductToDatabase(long id, String name, double price) {
+	private void addTestProductToDatabase(String id, String name, double price) {
 		productCollection.insertOne(new Document().append("_id", id).append("name", name).append("price", price));
 	}
 
 	private List<Product> readAllProductsFromDatabase() {
-		return StreamSupport.stream(productCollection.find().spliterator(), false)
-				.map(d -> new Product(Long.valueOf("" + d.get("_id")), "" + d.get("name"),
-						Double.valueOf("" + d.get("price"))))
-				.collect(Collectors.toList());
+		return StreamSupport.stream(productCollection.find().spliterator(), false).map(d -> {
+			Product p = new Product(d.getString("name"), d.getDouble("price"));
+			p.setId(d.getString("_id"));
+			return p;
+		}).collect(Collectors.toList());
+	}
+
+	private Product createTestProductWithId(String id, String name, double price) {
+		Product product = new Product(name, price);
+		product.setId(id);
+		return product;
 	}
 }

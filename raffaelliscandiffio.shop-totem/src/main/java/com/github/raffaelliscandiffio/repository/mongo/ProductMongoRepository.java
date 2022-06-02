@@ -28,11 +28,13 @@ public class ProductMongoRepository implements ProductRepository {
 	}
 
 	private Product fromDocumentToProduct(Document d) {
-		return new Product(Long.valueOf("" + d.get("_id")), "" + d.get("name"), Double.valueOf("" + d.get("price")));
+		Product p = new Product(d.getString("name"), d.getDouble("price"));
+		p.setId(d.getString("_id"));
+		return p;
 	}
 
 	@Override
-	public Product findById(long id) throws NoSuchElementException {
+	public Product findById(String id) throws NoSuchElementException {
 		Document d = productCollection.find(Filters.eq("_id", id)).first();
 		if (d != null)
 			return fromDocumentToProduct(d);

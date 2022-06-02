@@ -46,7 +46,7 @@ class OrderTest {
 		@Test
 		@DisplayName("Construct a new OrderItem and add it to the list when the specified product is not found")
 		void testAddNewProductWhenTheSpecifiedProductIsNotFoundShouldConstructANewOrderItemAndInsertItInList() {
-			Product product = new Product(1, "product1", 2.0);
+			Product product = createTestProductWithId("1", "product1", 2.0);
 			OrderItem returned = order.addNewProduct(product, POSITIVE_QUANTITY);
 			softly.assertThat(returned).isNotNull();
 			softly.assertThat(returned.getProduct()).isEqualTo(product);
@@ -71,7 +71,7 @@ class OrderTest {
 			@Test
 			@DisplayName("Throw IllegalArgumentException when the specified quantity is zero")
 			void testAddNewProductWhenSpecifiedQuantityIsZeroShouldThrowIllegalArgumentException() {
-				Product product = new Product(1, "product", 2.0);
+				Product product = createTestProductWithId("1", "product", 2.0);
 				assertThatThrownBy(() -> order.addNewProduct(product, ZERO))
 						.isInstanceOf(IllegalArgumentException.class)
 						.hasMessage("Quantity must be positive. Received: 0");
@@ -81,7 +81,7 @@ class OrderTest {
 			@Test
 			@DisplayName("Throw IllegalArgumentException when the specified quantity is negative")
 			void testAddNewProductWhenSpecifiedQuantityIsNegativeShouldThrowIllegalArgumentException() {
-				Product product = new Product(1, "product", 2.0);
+				Product product = createTestProductWithId("1", "product", 2.0);
 				assertThatThrownBy(() -> order.addNewProduct(product, NEGATIVE_QUANTITY))
 						.isInstanceOf(IllegalArgumentException.class)
 						.hasMessage("Quantity must be positive. Received: " + NEGATIVE_QUANTITY);
@@ -91,7 +91,7 @@ class OrderTest {
 			@Test
 			@DisplayName("Throw IllegalArgumentException when the specified product is found")
 			void testAddNewProductWhenSpecifiedProductIsFoundShouldThrowIllegalArgumentException() {
-				Product product = new Product(1, "product", 2.0);
+				Product product = createTestProductWithId("1", "product", 2.0);
 				OrderItem storedItem = new OrderItem(product, 5, 10.0);
 				items.add(storedItem);
 				assertThatThrownBy(() -> order.addNewProduct(product, POSITIVE_QUANTITY))
@@ -111,7 +111,7 @@ class OrderTest {
 		@Test
 		@DisplayName("Increase the product quantity in order when the specified product is found")
 		void testIncreaseProductQuantityWhenTheSpecifiedProductIsFoundShouldIncreaseProductQuantityAndSubtotal() {
-			Product product = new Product(1, "product1", 2.0);
+			Product product = createTestProductWithId("1", "product1", 2.0);
 			items.add(new OrderItem(product, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY));
 			OrderItem returned = order.increaseProductQuantity(product, POSITIVE_QUANTITY);
 			softly.assertThat(returned.getQuantity()).isEqualTo(POSITIVE_QUANTITY * 2);
@@ -127,7 +127,7 @@ class OrderTest {
 			@Test
 			@DisplayName("Throw NullPointerException when the specified product is null")
 			void testIncreaseProductQuantityWhenProductIsNullShouldThrowNullPointerException() {
-				Product product = new Product(1, "product1", 2.0);
+				Product product = createTestProductWithId("1", "product1", 2.0);
 				OrderItem storedItem = spy(new OrderItem(product, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY));
 				items.add(storedItem);
 				assertThatThrownBy(() -> order.increaseProductQuantity(null, POSITIVE_QUANTITY))
@@ -138,7 +138,7 @@ class OrderTest {
 			@Test
 			@DisplayName("Throw IllegalArgumentException when the specified quantity is zero")
 			void testIncreaseProductQuantityWhenSpecifiedQuantityIsZeroShouldThrowIllegalArgumentException() {
-				Product product = new Product(1, "product", 2.0);
+				Product product = createTestProductWithId("1", "product", 2.0);
 				OrderItem storedItem = spy(new OrderItem(product, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY));
 				items.add(storedItem);
 				assertThatThrownBy(() -> order.increaseProductQuantity(product, ZERO))
@@ -150,7 +150,7 @@ class OrderTest {
 			@Test
 			@DisplayName("Throw IllegalArgumentException when the specified quantity is negative")
 			void testIncreaseProductQuantityWhenSpecifiedQuantityIsNegativeShouldThrowIllegalArgumentException() {
-				Product product = new Product(1, "product", 2.0);
+				Product product = createTestProductWithId("1", "product", 2.0);
 				OrderItem storedItem = spy(new OrderItem(product, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY));
 				items.add(storedItem);
 				assertThatThrownBy(() -> order.increaseProductQuantity(product, NEGATIVE_QUANTITY))
@@ -162,7 +162,7 @@ class OrderTest {
 			@Test
 			@DisplayName("Throw NoSuchElementException when the specified product is not found")
 			void testIncreaseProductQuantityWhenSpecifiedProductIsNotFoundShouldThrowNoSuchElementException() {
-				Product product = new Product(1, "product", 2.0);
+				Product product = createTestProductWithId("1", "product", 2.0);
 				assertThatThrownBy(() -> order.increaseProductQuantity(product, POSITIVE_QUANTITY))
 						.isInstanceOf(NoSuchElementException.class)
 						.hasMessage("Product with id 1 not found in this Order");
@@ -179,7 +179,7 @@ class OrderTest {
 		@Test
 		@DisplayName("Decrease product quantity when the specified product is found")
 		void testDecreaseProductQuantityWhenTheSpecifiedProductIsFoundShouldDecreaseItemQuantityAndTheSubtotal() {
-			Product product = new Product(1, "product1", 2.0);
+			Product product = createTestProductWithId("1", "product1", 2.0);
 			items.add(new OrderItem(product, GREATER_POSITIVE_QUANTITY, 2.0 * GREATER_POSITIVE_QUANTITY));
 			OrderItem returned = order.decreaseProductQuantity(product, POSITIVE_QUANTITY);
 			softly.assertThat(returned.getQuantity()).isEqualTo(GREATER_POSITIVE_QUANTITY - POSITIVE_QUANTITY);
@@ -195,7 +195,7 @@ class OrderTest {
 			@Test
 			@DisplayName("Throw NullPointerException when the specified product is null")
 			void testDecreaseProductQuantityWhenProductIsNullShouldThrowNullPointerException() {
-				Product product = new Product(1, "product", 2.0);
+				Product product = createTestProductWithId("1", "product", 2.0);
 				OrderItem storedItem = spy(new OrderItem(product, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY));
 				items.add(storedItem);
 				assertThatThrownBy(() -> order.decreaseProductQuantity(null, POSITIVE_QUANTITY))
@@ -207,7 +207,7 @@ class OrderTest {
 			@Test
 			@DisplayName("Throw IllegalArgumentException when the specified quantity is zero")
 			void testDecreaseProductQuantityWhenSpecifiedQuantityIsZeroShouldThrowIllegalArgumentException() {
-				Product product = new Product(1, "product", 2.0);
+				Product product = createTestProductWithId("1", "product", 2.0);
 				OrderItem storedItem = spy(new OrderItem(product, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY));
 				items.add(storedItem);
 				assertThatThrownBy(() -> order.decreaseProductQuantity(product, ZERO))
@@ -219,7 +219,7 @@ class OrderTest {
 			@Test
 			@DisplayName("Throw IllegalArgumentException when the specified quantity is negative")
 			void testDecreaseProductQuantityWhenSpecifiedQuantityIsNegativeShouldThrowIllegalArgumentException() {
-				Product product = new Product(1, "product", 2.0);
+				Product product = createTestProductWithId("1", "product", 2.0);
 				OrderItem storedItem = spy(new OrderItem(product, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY));
 				items.add(storedItem);
 				assertThatThrownBy(() -> order.decreaseProductQuantity(product, NEGATIVE_QUANTITY))
@@ -231,7 +231,7 @@ class OrderTest {
 			@Test
 			@DisplayName("Throw NoSuchElementException when the specified product is not found")
 			void testDecreaseProductQuantityWhenSpecifiedProductIsNotFoundShouldThrowNoSuchElementException() {
-				Product product = new Product(1, "product", 2.0);
+				Product product = createTestProductWithId("1", "product", 2.0);
 				assertThatThrownBy(() -> order.decreaseProductQuantity(product, POSITIVE_QUANTITY))
 						.isInstanceOf(NoSuchElementException.class)
 						.hasMessage("Product with id 1 not found in this Order");
@@ -240,7 +240,7 @@ class OrderTest {
 			@Test
 			@DisplayName("Throw IllegalArgumentException when the specified quantity is equal to the item quantity")
 			void testDecreaseProductQuantityWhenSpecifiedQuantityIsEqualToItemQuantityShouldThrowIllegalArgumentException() {
-				Product product = new Product(1, "product", 2.0);
+				Product product = createTestProductWithId("1", "product", 2.0);
 				OrderItem storedItem = spy(new OrderItem(product, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY));
 				items.add(storedItem);
 				assertThatThrownBy(() -> order.decreaseProductQuantity(product, POSITIVE_QUANTITY))
@@ -253,7 +253,7 @@ class OrderTest {
 			@Test
 			@DisplayName("Throw IllegalArgumentException when the specified quantity is greater than the item quantity")
 			void testDecreaseProductQuantityWhenSpecifiedQuantityIsGreaterThanItemQuantityShouldThrowIllegalArgumentException() {
-				Product product = new Product(1, "product", 2.0);
+				Product product = createTestProductWithId("1", "product", 2.0);
 				OrderItem storedItem = spy(new OrderItem(product, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY));
 				items.add(storedItem);
 				assertThatThrownBy(() -> order.decreaseProductQuantity(product, GREATER_POSITIVE_QUANTITY))
@@ -275,8 +275,8 @@ class OrderTest {
 		@Test
 		@DisplayName("Return the item when the specified product is found")
 		void testFindItemByProductWhenTheSpecifiedProductIsFoundShouldReturnTheItem() {
-			Product product1 = new Product(1, "product1", 2.0);
-			Product product2 = new Product(2, "product2", 2.0);
+			Product product1 = createTestProductWithId("1", "product1", 2.0);
+			Product product2 = createTestProductWithId("2", "product2", 2.0);
 			OrderItem storedItem = new OrderItem(product1, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY);
 			OrderItem itemToFind = new OrderItem(product2, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY);
 			items.add(storedItem);
@@ -288,8 +288,8 @@ class OrderTest {
 		@Test
 		@DisplayName("Return null when the specified product is not found")
 		void testFindItemByProductWhenTheSpecifiedProductIsNotFoundShouldReturnNull() {
-			Product product1 = new Product(1, "product1", 2.0);
-			Product product2 = new Product(2, "product2", 2.0);
+			Product product1 = createTestProductWithId("1", "product1", 2.0);
+			Product product2 = createTestProductWithId("2", "product2", 2.0);
 			OrderItem storedItem = new OrderItem(product1, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY);
 			items.add(storedItem);
 			OrderItem itemReturned = order.findItemByProduct(product2);
@@ -317,7 +317,7 @@ class OrderTest {
 		@Test
 		@DisplayName("Remove all items from the order")
 		void testClear() {
-			Product product = new Product(1, "product", 2.0);
+			Product product = createTestProductWithId("1", "product", 2.0);
 			OrderItem storedItem = new OrderItem(product, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY);
 			items.add(storedItem);
 			order.clear();
@@ -333,8 +333,8 @@ class OrderTest {
 		@Test
 		@DisplayName("Remove the item when the specified product is found")
 		void testRemoveProductWhenTheSpecifiedProductIsFoundShouldRemoveTheItem() {
-			Product product1 = new Product(1, "product1", 2.0);
-			Product product2 = new Product(2, "product2", 2.0);
+			Product product1 = createTestProductWithId("1", "product1", 2.0);
+			Product product2 = createTestProductWithId("2", "product2", 2.0);
 			OrderItem storedItem = new OrderItem(product1, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY);
 			OrderItem itemToRemove = new OrderItem(product2, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY);
 			items.add(storedItem);
@@ -350,7 +350,7 @@ class OrderTest {
 			@Test
 			@DisplayName("Throw NullPointerException when the specified product is null")
 			void testRemoveProductWhenTheSpecifiedProductIsNullShouldThrowNullPointerException() {
-				Product product = new Product(1, "product", 2.0);
+				Product product = createTestProductWithId("1", "product", 2.0);
 				OrderItem storedItem = new OrderItem(product, POSITIVE_QUANTITY, 2.0 * POSITIVE_QUANTITY);
 				items.add(storedItem);
 				assertThatThrownBy(() -> order.removeProduct(null)).isInstanceOf(NullPointerException.class)
@@ -362,13 +362,19 @@ class OrderTest {
 			@Test
 			@DisplayName("Throw NoSuchElementException when the specified product is not found")
 			void testRemoveProductWhenTheSpecifiedProductIsNotFoundShouldThrowNoSuchElementException() {
-				Product product = new Product(1, "product", 2.0);
+				Product product = createTestProductWithId("1", "product", 2.0);
 				assertThatThrownBy(() -> order.removeProduct(product)).isInstanceOf(NoSuchElementException.class)
 						.hasMessage("Product with id 1 not found in this Order");
 
 			}
 
 		}
+	}
+
+	private Product createTestProductWithId(String id, String name, double price) {
+		Product product = new Product(name, price);
+		product.setId(id);
+		return product;
 	}
 
 }
