@@ -9,6 +9,7 @@
 	<properties>
 		<skipTests>false</skipTests>
 		<skipUTs>${skipTests}</skipUTs>
+       <skipPIT>true</skipPIT>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
@@ -37,6 +38,7 @@
 			**/model/Stock.java,
 			**/model/OrderItem.java,
 			**/utils/GUITestExtension.java,
+			**/controller/TotemController.java,
 			**/app/**/*
 		</sonar.coverage.exclusions>
 
@@ -225,33 +227,9 @@
 							<version>0.14</version>
 						</dependency>
 					</dependencies>
-					<configuration>
-						<targetClasses>
-							<param>*TotemController*</param>
-							<param>*PurchaseBroker*</param>
-						</targetClasses>
-						<targetTests>
-							<param>*TotemControllerTest*</param>
-							<param>*PurchaseBrokerTest*</param>
-						</targetTests>
-						<mutators>
-							<mutator>CONDITIONALS_BOUNDARY</mutator>
-							<mutator>EMPTY_RETURNS</mutator>
-							<mutator>EXPERIMENTAL_SWITCH</mutator>
-							<mutator>INCREMENTS</mutator>
-							<mutator>INVERT_NEGS</mutator>
-							<mutator>MATH</mutator>
-							<mutator>NULL_RETURNS</mutator>
-							<mutator>PRIMITIVE_RETURNS</mutator>
-							<mutator>REMOVE_CONDITIONALS_EQUAL_ELSE</mutator>
-							<mutator>REMOVE_CONDITIONALS_EQUAL_IF</mutator>
-							<mutator>REMOVE_CONDITIONALS_ORDER_ELSE</mutator>
-							<mutator>REMOVE_CONDITIONALS_ORDER_IF</mutator>
-							<mutator>TRUE_RETURNS</mutator>
-							<mutator>VOID_METHOD_CALLS</mutator>	
-						</mutators>
-						<mutationThreshold>100</mutationThreshold>
-					</configuration>
+         <configuration>
+            <skip>${skipPIT}</skip>
+         </configuration>
 				</plugin>
 
 				<plugin>
@@ -264,6 +242,7 @@
 							<exclude>**/model/Stock.class</exclude>
 							<exclude>**/model/OrderItem.class</exclude>
 							<exclude>**/utils/GUITestExtension.class</exclude>
+							<exclude>**/controller/TotemController.class</exclude>
 							<exclude>**/app/**/*</exclude>
 						</excludes>
 					</configuration>
