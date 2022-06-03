@@ -35,8 +35,10 @@ class ProductMongoRepositoryTestcontainersIT {
 	private static final String TOTEM_DB_NAME = "totem";
 	private static final String PRODUCT_COLLECTION_NAME = "product";
 
-	private Product product_1;
-	private Product product_2;
+	private static final String NAME_1 = "product_1";
+	private static final String NAME_2 = "product_2";
+	private static final double PRICE_1 = 1.0;
+	private static final double PRICE_2 = 2.0;
 
 	@BeforeEach
 	public void setup() {
@@ -45,8 +47,6 @@ class ProductMongoRepositoryTestcontainersIT {
 		MongoDatabase database = client.getDatabase(TOTEM_DB_NAME);
 		database.drop();
 		productCollection = database.getCollection(PRODUCT_COLLECTION_NAME);
-		product_1 = new Product("pizza", 5.0);
-		product_2 = new Product("pasta", 0.8);
 
 	}
 
@@ -58,24 +58,25 @@ class ProductMongoRepositoryTestcontainersIT {
 	@Test
 	@DisplayName("Insert product in database with 'save'")
 	void testSaveProduct() {
-		productRepository.save(product_1);
-		String assignedId = product_1.getId();
-
+		Product product = new Product(NAME_1, PRICE_1);
+		productRepository.save(product);
+		String assignedId = product.getId();
 		SoftAssertions softly = new SoftAssertions();
 		softly.assertThat(assignedId).isNotNull();
 		softly.assertThatCode(() -> new ObjectId(assignedId)).doesNotThrowAnyException();
-		softly.assertThat(readAllProductsFromDatabase()).containsExactly(product_1);
+		softly.assertThat(readAllProductsFromDatabase()).containsExactly(newProductWithId(assignedId, NAME_1, PRICE_1));
 		softly.assertAll();
 	}
 
 	@Test
 	@DisplayName("Retrieve all the products from the database with 'findAll'")
 	void testFindAllWhenDatabaseIsNotEmpty() {
-		product_1.setId(new ObjectId().toString());
-		product_2.setId(new ObjectId().toString());
-		addTestProductToDatabase(product_1);
-		addTestProductToDatabase(product_2);
-		assertThat(productRepository.findAll()).containsExactlyInAnyOrder(product_1, product_2);
+		String id_1 = new ObjectId().toString();
+		String id_2 = new ObjectId().toString();
+		addTestProductToDatabase(id_1, NAME_1, PRICE_1);
+		addTestProductToDatabase(id_2, NAME_2, PRICE_2);
+		assertThat(productRepository.findAll()).containsExactlyInAnyOrder(newProductWithId(id_1, NAME_1, PRICE_1),
+				newProductWithId(id_2, NAME_2, PRICE_2));
 	}
 
 	@Test
@@ -87,11 +88,10 @@ class ProductMongoRepositoryTestcontainersIT {
 	@Test
 	@DisplayName("Retrieve Product by id with 'findById'")
 	void testFindByIdWhenIdIsFound() {
-		product_1.setId(new ObjectId().toString());
-		product_2.setId(new ObjectId().toString());
-		addTestProductToDatabase(product_1);
-		addTestProductToDatabase(product_2);
-		assertThat(productRepository.findById(product_1.getId())).isEqualTo(product_1);
+		String id = new ObjectId().toString();
+		addTestProductToDatabase(id, NAME_1, PRICE_1);
+		addTestProductToDatabase(new ObjectId().toString(), NAME_2, PRICE_2);
+		assertThat(productRepository.findById(id)).isEqualTo(newProductWithId(id, NAME_1, PRICE_1));
 	}
 
 	@Test
@@ -102,16 +102,21 @@ class ProductMongoRepositoryTestcontainersIT {
 	}
 
 	private List<Product> readAllProductsFromDatabase() {
-		return StreamSupport.stream(productCollection.find().spliterator(), false).map(d -> {
-			Product p = new Product(d.getString("name"), d.getDouble("price"));
-			p.setId(d.get("_id").toString());
-			return p;
-		}).collect(Collectors.toList());
+		return StreamSupport.stream(productCollection.find().spliterator(), false)
+				.map(d -> newProductWithId(d.get("_id").toString(), d.getString("name"), d.getDouble("price")))
+				.collect(Collectors.toList());
 	}
 
-	private void addTestProductToDatabase(Product product) {
-		Document productDocument = new Document().append("_id", new ObjectId(product.getId()))
-				.append("name", product.getName()).append("price", product.getPrice());
-		productCollection.insertOne(productDocument);
+	private void addTestProductToDatabase(String id, String name, double price) {
+		productCollection
+				.insertOne(new Document().append("_id", new ObjectId(id)).append("name", name).append("price", price));
+
 	}
+
+	private Product newProductWithId(String id, String name, double price) {
+		Product product = new Product(name, price);
+		product.setId(id);
+		return product;
+	}
+
 }
