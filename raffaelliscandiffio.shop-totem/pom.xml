@@ -37,6 +37,8 @@
 			**/model/Product.java,
 			**/model/Stock.java,
 			**/model/OrderItem.java,
+			**/model/Order.java,
+			**/model/OrderStatus.java,	
 			**/utils/GUITestExtension.java,
 			**/controller/TotemController.java,
 			**/app/**/*
@@ -241,6 +243,7 @@
 							<exclude>**/model/Product.class</exclude>
 							<exclude>**/model/Stock.class</exclude>
 							<exclude>**/model/OrderItem.class</exclude>
+							<exclude>**/model/Order.class</exclude>
 							<exclude>**/utils/GUITestExtension.class</exclude>
 							<exclude>**/controller/TotemController.class</exclude>
 							<exclude>**/app/**/*</exclude>
