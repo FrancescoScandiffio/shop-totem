@@ -8,7 +8,6 @@ public class Order {
 	private String id;
 	private Set<OrderItem> items;
 	private OrderStatus status;
-	private double totalPrice;
 
 	public Order(Set<OrderItem> items, OrderStatus status) {
 		this.items = items;
@@ -37,14 +36,6 @@ public class Order {
 
 	public void setStatus(OrderStatus status) {
 		this.status = status;
-	}
-
-	public double getTotalPrice() {
-		return totalPrice;
-	}
-
-	public void setTotalPrice(double totalPrice) {
-		this.totalPrice = totalPrice;
 	}
 
 	@Override
