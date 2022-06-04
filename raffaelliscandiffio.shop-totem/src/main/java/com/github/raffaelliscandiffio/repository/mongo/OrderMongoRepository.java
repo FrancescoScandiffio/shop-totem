@@ -59,8 +59,12 @@ public class OrderMongoRepository implements OrderRepository {
 		return order;
 	}
 
+	@Override
+	public void delete(Order order) {
+		orderCollection.deleteOne(eqFilter(order.getId()));
+	}
+
 	private Bson eqFilter(String id) {
 		return eq("_id", new ObjectId(id));
 	}
-
 }

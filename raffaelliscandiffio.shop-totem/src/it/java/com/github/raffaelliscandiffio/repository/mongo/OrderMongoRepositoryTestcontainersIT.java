@@ -99,8 +99,6 @@ class OrderMongoRepositoryTestcontainersIT {
 		addTestOrderToDatabase(orderId, new LinkedHashSet<OrderItem>(Arrays.asList(item_2)), OrderStatus.CLOSED);
 		assertThat(orderRepository.findById(orderId)).isEqualTo(
 				createOrderWithId(orderId, new LinkedHashSet<OrderItem>(Arrays.asList(item_2)), OrderStatus.CLOSED));
-		assertThat(orderRepository.findById(orderId)).isNotNull();
-
 	}
 
 	@Test
@@ -108,6 +106,21 @@ class OrderMongoRepositoryTestcontainersIT {
 	void testFindByIdWhenIdIsNotFoundShouldReturnNull() {
 		String missing_id = new ObjectId().toString();
 		assertThat(orderRepository.findById(missing_id)).isNull();
+	}
+
+	@Test
+	@DisplayName("Remove the specified order from the collection with 'delete'")
+	void testDelete() {
+		String orderId = new ObjectId().toString();
+		String removeId = new ObjectId().toString();
+		addTestProductToDatabase(product_1);
+		addTestProductToDatabase(product_2);
+		addTestOrderToDatabase(removeId, new LinkedHashSet<OrderItem>(Arrays.asList(item_1)), OrderStatus.OPEN);
+		addTestOrderToDatabase(orderId, new LinkedHashSet<OrderItem>(Arrays.asList(item_2)), OrderStatus.CLOSED);
+		orderRepository.delete(
+				createOrderWithId(removeId, new LinkedHashSet<OrderItem>(Arrays.asList(item_1)), OrderStatus.OPEN));
+		assertThat(readAllOrderFromDatabase()).containsExactly(
+				createOrderWithId(orderId, new LinkedHashSet<OrderItem>(Arrays.asList(item_2)), OrderStatus.CLOSED));
 	}
 
 	// Private utility methods
