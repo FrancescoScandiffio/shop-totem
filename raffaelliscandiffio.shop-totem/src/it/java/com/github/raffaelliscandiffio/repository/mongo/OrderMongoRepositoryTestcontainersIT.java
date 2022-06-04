@@ -1,7 +1,9 @@
 package com.github.raffaelliscandiffio.repository.mongo;
 
 import static com.mongodb.client.model.Filters.eq;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -36,6 +38,7 @@ class OrderMongoRepositoryTestcontainersIT {
 	private static final String PRODUCT_COLLECTION_NAME = "product";
 	private static final String ORDER_COLLECTION_NAME = "order";
 	private static final String PRODUCT_NAME_1 = "product_1";
+	private static final String PRODUCT_NAME_2 = "product_2";
 	private static final double PRICE = 3.0;
 	private static final int QUANTITY = 4;
 	private MongoClient client;
@@ -43,7 +46,9 @@ class OrderMongoRepositoryTestcontainersIT {
 	private MongoCollection<Document> productCollection;
 	private MongoCollection<Document> orderCollection;
 	private Product product_1;
+	private Product product_2;
 	private OrderItem item_1;
+	private OrderItem item_2;
 
 	@Container
 	public static final MongoDBContainer mongo = new MongoDBContainer("mongo:5.0.6");
@@ -51,15 +56,16 @@ class OrderMongoRepositoryTestcontainersIT {
 	@BeforeEach
 	public void setup() {
 		client = new MongoClient(new ServerAddress(mongo.getContainerIpAddress(), mongo.getFirstMappedPort()));
-		orderRepository = new OrderMongoRepository(client, DATABASE_NAME, ORDER_COLLECTION_NAME);
+		orderRepository = new OrderMongoRepository(client, DATABASE_NAME, ORDER_COLLECTION_NAME,
+				PRODUCT_COLLECTION_NAME);
 		MongoDatabase database = client.getDatabase(DATABASE_NAME);
 		database.drop();
 		productCollection = database.getCollection(PRODUCT_COLLECTION_NAME);
 		orderCollection = database.getCollection(ORDER_COLLECTION_NAME);
 		product_1 = new Product(PRODUCT_NAME_1, PRICE);
+		product_2 = new Product(PRODUCT_NAME_2, PRICE);
 		item_1 = new OrderItem(product_1, QUANTITY);
-		addTestProductToDatabase(product_1);
-
+		item_2 = new OrderItem(product_2, QUANTITY);
 	}
 
 	@AfterEach
@@ -70,6 +76,7 @@ class OrderMongoRepositoryTestcontainersIT {
 	@Test
 	@DisplayName("Insert Order in database with 'save'")
 	void testSaveProduct() {
+		addTestProductToDatabase(product_1);
 		Order order = new Order(new LinkedHashSet<OrderItem>(Arrays.asList(item_1)), OrderStatus.OPEN);
 		orderRepository.save(order);
 		String assignedId = order.getId();
@@ -79,6 +86,28 @@ class OrderMongoRepositoryTestcontainersIT {
 		softly.assertThat(readAllOrderFromDatabase()).containsExactly(
 				createOrderWithId(assignedId, new LinkedHashSet<OrderItem>(Arrays.asList(item_1)), OrderStatus.OPEN));
 		softly.assertAll();
+	}
+
+	@Test
+	@DisplayName("Retrieve Order by id with 'findById'")
+	void testFindByIdWhenIdIsFound() {
+		String orderId = new ObjectId().toString();
+		addTestProductToDatabase(product_1);
+		addTestProductToDatabase(product_2);
+		addTestOrderToDatabase(new ObjectId().toString(), new LinkedHashSet<OrderItem>(Arrays.asList(item_1)),
+				OrderStatus.OPEN);
+		addTestOrderToDatabase(orderId, new LinkedHashSet<OrderItem>(Arrays.asList(item_2)), OrderStatus.CLOSED);
+		assertThat(orderRepository.findById(orderId)).isEqualTo(
+				createOrderWithId(orderId, new LinkedHashSet<OrderItem>(Arrays.asList(item_2)), OrderStatus.CLOSED));
+		assertThat(orderRepository.findById(orderId)).isNotNull();
+
+	}
+
+	@Test
+	@DisplayName("Method 'findById' should return null when the id is not found")
+	void testFindByIdWhenIdIsNotFoundShouldReturnNull() {
+		String missing_id = new ObjectId().toString();
+		assertThat(orderRepository.findById(missing_id)).isNull();
 	}
 
 	// Private utility methods
@@ -112,6 +141,15 @@ class OrderMongoRepositoryTestcontainersIT {
 		Document productDocument = new Document().append("name", product.getName()).append("price", product.getPrice());
 		productCollection.insertOne(productDocument);
 		product.setId(productDocument.get("_id").toString());
+	}
+
+	private void addTestOrderToDatabase(String id, Set<OrderItem> items, OrderStatus status) {
+		List<Document> embeddedItems = new ArrayList<>();
+		items.forEach(item -> embeddedItems.add(
+				new Document().append("product", item.getProduct().getId()).append("quantity", item.getQuantity())));
+		orderCollection.insertOne(new Document().append("_id", new ObjectId(id)).append("items", embeddedItems)
+				.append("status", status.toString()));
+
 	}
 
 }
