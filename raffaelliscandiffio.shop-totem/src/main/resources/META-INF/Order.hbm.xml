@@ -1,0 +1,20 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+"-//Hibernate/Hibernate Mapping DTD//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="com.github.raffaelliscandiffio.model.Order" table="ORDERS">
+		<id name="id" type="string" access="field">
+			<generator class="uuid2"/>
+		</id>
+		<property name="status" type="com.github.raffaelliscandiffio.model.OrderStatus"/>
+		<set name="items" table="order_items" lazy="false" access="field">
+			<key on-delete="cascade" column="order_id"/>
+			<composite-element class="com.github.raffaelliscandiffio.model.OrderItem">
+				<property name="quantity" access="field"/>
+				<many-to-one name="product" class="com.github.raffaelliscandiffio.model.Product" access="field"/>
+			</composite-element>
+		</set>
+	</class>
+</hibernate-mapping>
