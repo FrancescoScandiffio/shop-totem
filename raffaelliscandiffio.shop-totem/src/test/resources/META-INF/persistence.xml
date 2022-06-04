@@ -19,9 +19,9 @@
 			<property name="javax.persistence.jdbc.user" value="mysql" />
 			<property name="javax.persistence.jdbc.password"
 				value="mysql" />
-
+			<property name="hibernate.show_sql" value="true"/>
 			<property name="javax.persistence.jdbc.url"
-				value="jdbc:mysql://localhost:${db.port}/totem" />
+				value="jdbc:mysql://localhost:${db.port}/${db.name}" />
 
 			<property
 				name="javax.persistence.schema-generation.database.action"

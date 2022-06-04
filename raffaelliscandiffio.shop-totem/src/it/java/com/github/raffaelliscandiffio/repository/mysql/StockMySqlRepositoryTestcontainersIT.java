@@ -42,6 +42,7 @@ class StockMySqlRepositoryTestcontainersIT {
 	@BeforeAll
 	public static void createEntityManagerFactory() {
 		System.setProperty("db.port", mysqlContainer.getFirstMappedPort().toString());
+		System.setProperty("db.name", DATABASE_NAME);
 		managerFactory = Persistence.createEntityManagerFactory("mysql-test");
 	}
 
