@@ -7,11 +7,11 @@ import javax.persistence.EntityManager;
 import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.repository.ProductRepository;
 
-public class ProductMySQLRepository implements ProductRepository {
+public class ProductMysqlRepository implements ProductRepository {
 
 	private EntityManager entityManager;
 
-	public ProductMySQLRepository(EntityManager entityManager) {
+	public ProductMysqlRepository(EntityManager entityManager) {
 		this.entityManager = entityManager;
 	}
 
