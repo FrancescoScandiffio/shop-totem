@@ -1,10 +1,14 @@
 package com.github.raffaelliscandiffio.repository.mongo;
 
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Updates.combine;
+import static com.mongodb.client.model.Updates.set;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -30,9 +34,7 @@ public class OrderMongoRepository implements OrderRepository {
 	}
 
 	public void save(Order order) {
-		List<Document> embeddedItems = new ArrayList<>();
-		order.getItems().forEach(item -> embeddedItems.add(
-				new Document().append("product", item.getProduct().getId()).append("quantity", item.getQuantity())));
+		List<Document> embeddedItems = orderItemSetToDocumentList(order.getItems());
 		Document orderDocument = new Document().append("items", embeddedItems).append("status",
 				order.getStatus().toString());
 		orderCollection.insertOne(orderDocument);
@@ -41,7 +43,7 @@ public class OrderMongoRepository implements OrderRepository {
 
 	@Override
 	public Order findById(String id) {
-		Document orderDocument = orderCollection.find(eqFilter(id)).first();
+		Document orderDocument = findDocumentById(id);
 		if (orderDocument == null)
 			return null;
 		List<Document> itemDocuments = orderDocument.getList("items", Document.class);
@@ -64,7 +66,29 @@ public class OrderMongoRepository implements OrderRepository {
 		orderCollection.deleteOne(eqFilter(order.getId()));
 	}
 
+	@Override
+	public void update(Order order) {
+		String orderId = order.getId();
+		if (findDocumentById(orderId) == null)
+			throw new NoSuchElementException("Order with id " + orderId + " not found.");
+		List<Document> embeddedItems = orderItemSetToDocumentList(order.getItems());
+		Bson update = combine(set("items", embeddedItems), set("status", order.getStatus().toString()));
+		orderCollection.updateOne(eqFilter(orderId), update);
+	}
+
+	private Document findDocumentById(String orderId) {
+		return orderCollection.find(eqFilter(orderId)).first();
+	}
+
+	private List<Document> orderItemSetToDocumentList(Set<OrderItem> items) {
+		List<Document> embeddedItems = new ArrayList<>();
+		items.forEach(item -> embeddedItems.add(
+				new Document().append("product", item.getProduct().getId()).append("quantity", item.getQuantity())));
+		return embeddedItems;
+	}
+
 	private Bson eqFilter(String id) {
 		return eq("_id", new ObjectId(id));
 	}
+
 }

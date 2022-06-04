@@ -9,4 +9,6 @@ public interface OrderRepository {
 	Order findById(String id);
 
 	void delete(Order order);
+
+	void update(Order order);
 }
