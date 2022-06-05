@@ -240,10 +240,7 @@
 					<version>0.8.7</version>
 					<configuration>
 						<excludes>
-							<exclude>**/model/Product.class</exclude>
-							<exclude>**/model/Stock.class</exclude>
-							<exclude>**/model/OrderItem.class</exclude>
-							<exclude>**/model/Order.class</exclude>
+							<exclude>**/model/*</exclude>
 							<exclude>**/utils/GUITestExtension.class</exclude>
 							<exclude>**/controller/TotemController.class</exclude>
 							<exclude>**/app/**/*</exclude>
