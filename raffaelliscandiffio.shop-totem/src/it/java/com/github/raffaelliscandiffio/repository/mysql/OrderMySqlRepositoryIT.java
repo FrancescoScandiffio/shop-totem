@@ -27,12 +27,12 @@ import com.github.raffaelliscandiffio.model.OrderStatus;
 import com.github.raffaelliscandiffio.model.Product;
 
 @Testcontainers(disabledWithoutDocker = true)
-class OrderMysqlRepositoryTestcontainersIT {
+class OrderMySqlRepositoryIT {
 
 	private static final String DATABASE_NAME = "totem";
 	private static EntityManagerFactory managerFactory;
 	private EntityManager entityManager;
-	private OrderMysqlRepository orderRepository;
+	private OrderMySqlRepository orderRepository;
 	private Product product_1;
 	private Product product_2;
 	private OrderItem item_1;
@@ -61,7 +61,7 @@ class OrderMysqlRepositoryTestcontainersIT {
 		entityManager.createQuery("DELETE FROM Order").executeUpdate();
 		entityManager.createQuery("DELETE FROM Product").executeUpdate();
 		entityManager.getTransaction().commit();
-		orderRepository = new OrderMysqlRepository(entityManager);
+		orderRepository = new OrderMySqlRepository(entityManager);
 		product_1 = new Product("product_1", 1.0);
 		product_2 = new Product("product_2", 2.0);
 		item_1 = new OrderItem(product_1, 5);

@@ -22,7 +22,7 @@ import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.model.Stock;
 
 @Testcontainers(disabledWithoutDocker = true)
-class StockMySqlRepositoryTestcontainersIT {
+class StockMySqlRepositoryIT {
 
 	private static final int STOCK_QUANTITY = 10;
 	private Product product_1;

@@ -5,11 +5,11 @@ import javax.persistence.EntityManager;
 import com.github.raffaelliscandiffio.model.Order;
 import com.github.raffaelliscandiffio.repository.OrderRepository;
 
-public class OrderMysqlRepository implements OrderRepository {
+public class OrderMySqlRepository implements OrderRepository {
 
 	private EntityManager entityManager;
 
-	public OrderMysqlRepository(EntityManager entityManager) {
+	public OrderMySqlRepository(EntityManager entityManager) {
 		this.entityManager = entityManager;
 	}
 

@@ -21,12 +21,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.github.raffaelliscandiffio.model.Product;
 
 @Testcontainers(disabledWithoutDocker = true)
-class ProductMysqlRepositoryTestcontainersIT {
+class ProductMySqlRepositoryIT {
 
 	private static final String DATABASE_NAME = "totem";
 	private static EntityManagerFactory managerFactory;
 	private EntityManager entityManager;
-	private ProductMysqlRepository productRepository;
+	private ProductMySqlRepository productRepository;
 
 	private Product product_1;
 	private Product product_2;
@@ -53,7 +53,7 @@ class ProductMysqlRepositoryTestcontainersIT {
 		entityManager.getTransaction().begin();
 		entityManager.createQuery("DELETE FROM Product").executeUpdate();
 		entityManager.getTransaction().commit();
-		productRepository = new ProductMysqlRepository(entityManager);
+		productRepository = new ProductMySqlRepository(entityManager);
 
 		product_1 = new Product("pizza", 5.5);
 		product_2 = new Product("pasta", 0.8);
