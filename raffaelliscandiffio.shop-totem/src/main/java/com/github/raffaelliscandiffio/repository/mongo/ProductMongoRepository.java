@@ -10,6 +10,7 @@ import org.bson.types.ObjectId;
 import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.repository.ProductRepository;
 import com.mongodb.MongoClient;
+import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 
@@ -17,7 +18,8 @@ public class ProductMongoRepository implements ProductRepository {
 
 	private MongoCollection<Document> productCollection;
 
-	public ProductMongoRepository(MongoClient client, String databaseName, String collectionName) {
+	public ProductMongoRepository(MongoClient client, ClientSession session, String databaseName,
+			String collectionName) {
 		productCollection = client.getDatabase(databaseName).getCollection(collectionName);
 	}
 

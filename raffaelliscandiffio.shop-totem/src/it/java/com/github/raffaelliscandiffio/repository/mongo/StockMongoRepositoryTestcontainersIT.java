@@ -50,8 +50,8 @@ class StockMongoRepositoryTestcontainersIT {
 	@BeforeEach
 	public void setup() {
 		client = new MongoClient(new ServerAddress(mongo.getContainerIpAddress(), mongo.getFirstMappedPort()));
-		stockRepository = new StockMongoRepository(client, DATABASE_NAME, PRODUCT_COLLECTION_NAME,
-				STOCK_COLLECTION_NAME);
+		stockRepository = new StockMongoRepository(client, client.startSession(), DATABASE_NAME,
+				PRODUCT_COLLECTION_NAME, STOCK_COLLECTION_NAME);
 		MongoDatabase database = client.getDatabase(DATABASE_NAME);
 		database.drop();
 		productCollection = database.getCollection(PRODUCT_COLLECTION_NAME);

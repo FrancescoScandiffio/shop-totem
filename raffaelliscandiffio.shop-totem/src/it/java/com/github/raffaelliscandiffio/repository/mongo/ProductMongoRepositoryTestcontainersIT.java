@@ -43,7 +43,8 @@ class ProductMongoRepositoryTestcontainersIT {
 	@BeforeEach
 	public void setup() {
 		client = new MongoClient(new ServerAddress(mongo.getContainerIpAddress(), mongo.getFirstMappedPort()));
-		productRepository = new ProductMongoRepository(client, TOTEM_DB_NAME, PRODUCT_COLLECTION_NAME);
+		productRepository = new ProductMongoRepository(client, client.startSession(), TOTEM_DB_NAME,
+				PRODUCT_COLLECTION_NAME);
 		MongoDatabase database = client.getDatabase(TOTEM_DB_NAME);
 		database.drop();
 		productCollection = database.getCollection(PRODUCT_COLLECTION_NAME);

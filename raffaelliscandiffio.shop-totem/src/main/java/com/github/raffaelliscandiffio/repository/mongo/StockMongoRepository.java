@@ -10,6 +10,7 @@ import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.model.Stock;
 import com.github.raffaelliscandiffio.repository.StockRepository;
 import com.mongodb.MongoClient;
+import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoCollection;
 
 public class StockMongoRepository implements StockRepository {
@@ -17,8 +18,8 @@ public class StockMongoRepository implements StockRepository {
 	private MongoCollection<Document> productCollection;
 	private MongoCollection<Document> stockCollection;
 
-	public StockMongoRepository(MongoClient client, String databaseName, String productCollectionName,
-			String stockCollectionName) {
+	public StockMongoRepository(MongoClient client, ClientSession session, String databaseName,
+			String productCollectionName, String stockCollectionName) {
 		productCollection = client.getDatabase(databaseName).getCollection(productCollectionName);
 		stockCollection = client.getDatabase(databaseName).getCollection(stockCollectionName);
 	}

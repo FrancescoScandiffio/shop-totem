@@ -20,17 +20,18 @@ import com.github.raffaelliscandiffio.model.OrderStatus;
 import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.repository.OrderRepository;
 import com.mongodb.MongoClient;
+import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoCollection;
 
 public class OrderMongoRepository implements OrderRepository {
 
-	private MongoCollection<Document> orderCollection;
 	private MongoCollection<Document> productCollection;
+	private MongoCollection<Document> orderCollection;
 
-	public OrderMongoRepository(MongoClient client, String databaseName, String orderCollectionName,
-			String productCollectionName) {
-		orderCollection = client.getDatabase(databaseName).getCollection(orderCollectionName);
+	public OrderMongoRepository(MongoClient client, ClientSession session, String databaseName,
+			String productCollectionName, String orderCollectionName) {
 		productCollection = client.getDatabase(databaseName).getCollection(productCollectionName);
+		orderCollection = client.getDatabase(databaseName).getCollection(orderCollectionName);
 	}
 
 	public void save(Order order) {

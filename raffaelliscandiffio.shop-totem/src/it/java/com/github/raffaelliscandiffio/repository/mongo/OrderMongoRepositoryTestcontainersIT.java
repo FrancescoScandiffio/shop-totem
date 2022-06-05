@@ -58,8 +58,8 @@ class OrderMongoRepositoryTestcontainersIT {
 	@BeforeEach
 	public void setup() {
 		client = new MongoClient(new ServerAddress(mongo.getContainerIpAddress(), mongo.getFirstMappedPort()));
-		orderRepository = new OrderMongoRepository(client, DATABASE_NAME, ORDER_COLLECTION_NAME,
-				PRODUCT_COLLECTION_NAME);
+		orderRepository = new OrderMongoRepository(client, client.startSession(), DATABASE_NAME,
+				PRODUCT_COLLECTION_NAME, ORDER_COLLECTION_NAME);
 		MongoDatabase database = client.getDatabase(DATABASE_NAME);
 		database.drop();
 		productCollection = database.getCollection(PRODUCT_COLLECTION_NAME);
