@@ -9,7 +9,6 @@
 	<properties>
 		<skipTests>false</skipTests>
 		<skipUTs>${skipTests}</skipUTs>
-       <skipPIT>true</skipPIT>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
@@ -230,8 +229,29 @@
 						</dependency>
 					</dependencies>
          <configuration>
-            <skip>${skipPIT}</skip>
-         </configuration>
+
+            <targetClasses>
+               <param>*repository.mysql.OrderMySqlRepository*</param>
+               <param>*repository.mysql.StockMySqlRepository*</param>
+               <param>*repository.mysql.ProductMySqlRepository*</param>
+               <param>*transaction.mysql.TransactionManagerMySql*</param>
+             
+               <param>*repository.mongo.OrderMongoRepository*</param>
+               <param>*repository.mongo.StockMongoRepository*</param>
+               <param>*repository.mongo.ProductMongoRepository*</param>
+               <param>*transaction.mongo.TransactionManagerMongo*</param>
+            </targetClasses>
+            <targetTests>
+  				<param>*repository.mysql*</param>
+                <param>*repository.mongo*</param>
+              <param>*transaction.mysql*</param>
+              <param>*transaction.mongo*</param>            
+              </targetTests>
+            <mutators>
+   				STRONGER
+            </mutators>
+            <mutationThreshold>100</mutationThreshold>
+          </configuration>
 				</plugin>
 
 				<plugin>
