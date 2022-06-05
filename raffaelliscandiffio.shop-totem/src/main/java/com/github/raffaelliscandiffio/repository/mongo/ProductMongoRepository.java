@@ -16,6 +16,10 @@ import com.mongodb.client.model.Filters;
 
 public class ProductMongoRepository implements ProductRepository {
 
+	private static final String FIELD_ID = "_id";
+	private static final String FIELD_NAME = "name";
+	private static final String FIELD_PRICE = "price";
+
 	private ClientSession session;
 	private MongoCollection<Document> productCollection;
 
@@ -27,9 +31,10 @@ public class ProductMongoRepository implements ProductRepository {
 
 	@Override
 	public void save(Product product) {
-		Document productDocument = new Document().append("name", product.getName()).append("price", product.getPrice());
+		Document productDocument = new Document().append(FIELD_NAME, product.getName()).append(FIELD_PRICE,
+				product.getPrice());
 		productCollection.insertOne(session, productDocument);
-		product.setId(productDocument.get("_id").toString());
+		product.setId(productDocument.get(FIELD_ID).toString());
 
 	}
 
@@ -41,7 +46,7 @@ public class ProductMongoRepository implements ProductRepository {
 
 	@Override
 	public Product findById(String id) {
-		Document d = productCollection.find(Filters.eq("_id", new ObjectId(id))).first();
+		Document d = productCollection.find(Filters.eq(FIELD_ID, new ObjectId(id))).first();
 		if (d != null)
 			return fromDocumentToProduct(d);
 		else
@@ -49,8 +54,8 @@ public class ProductMongoRepository implements ProductRepository {
 	}
 
 	private Product fromDocumentToProduct(Document d) {
-		Product p = new Product(d.getString("name"), d.getDouble("price"));
-		p.setId(d.get("_id").toString());
+		Product p = new Product(d.getString(FIELD_NAME), d.getDouble(FIELD_PRICE));
+		p.setId(d.get(FIELD_ID).toString());
 		return p;
 	}
 }

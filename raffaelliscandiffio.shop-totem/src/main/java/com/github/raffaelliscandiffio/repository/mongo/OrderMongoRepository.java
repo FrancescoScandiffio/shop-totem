@@ -25,6 +25,14 @@ import com.mongodb.client.MongoCollection;
 
 public class OrderMongoRepository implements OrderRepository {
 
+	private static final String FIELD_ID = "_id";
+	private static final String FIELD_ITEMS = "items";
+	private static final String FIELD_NAME = "name";
+	private static final String FIELD_PRICE = "price";
+	private static final String FIELD_PRODUCT = "product";
+	private static final String FIELD_QUANTITY = "quantity";
+	private static final String FIELD_STATUS = "status";
+
 	private ClientSession session;
 	private MongoCollection<Document> productCollection;
 	private MongoCollection<Document> orderCollection;
@@ -38,10 +46,10 @@ public class OrderMongoRepository implements OrderRepository {
 
 	public void save(Order order) {
 		List<Document> embeddedItems = orderItemSetToDocumentList(order.getItems());
-		Document orderDocument = new Document().append("items", embeddedItems).append("status",
+		Document orderDocument = new Document().append(FIELD_ITEMS, embeddedItems).append(FIELD_STATUS,
 				order.getStatus().toString());
 		orderCollection.insertOne(session, orderDocument);
-		order.setId(orderDocument.get("_id").toString());
+		order.setId(orderDocument.get(FIELD_ID).toString());
 	}
 
 	@Override
@@ -49,18 +57,19 @@ public class OrderMongoRepository implements OrderRepository {
 		Document orderDocument = findDocumentById(id);
 		if (orderDocument == null)
 			return null;
-		List<Document> itemDocuments = orderDocument.getList("items", Document.class);
+		List<Document> itemDocuments = orderDocument.getList(FIELD_ITEMS, Document.class);
 		List<OrderItem> items = new ArrayList<>();
 		Document productDocument;
 		for (Document itemDocument : itemDocuments) {
-			String productId = itemDocument.getString("product");
+			String productId = itemDocument.getString(FIELD_PRODUCT);
 			productDocument = productCollection.find(eqFilter(productId)).first();
-			Product product = new Product(productDocument.getString("name"), productDocument.getDouble("price"));
+			Product product = new Product(productDocument.getString(FIELD_NAME),
+					productDocument.getDouble(FIELD_PRICE));
 			product.setId(productId);
-			items.add(new OrderItem(product, itemDocument.getInteger("quantity")));
+			items.add(new OrderItem(product, itemDocument.getInteger(FIELD_QUANTITY)));
 		}
-		Order order = new Order(new LinkedHashSet<>(items), OrderStatus.valueOf(orderDocument.getString("status")));
-		order.setId(orderDocument.get("_id").toString());
+		Order order = new Order(new LinkedHashSet<>(items), OrderStatus.valueOf(orderDocument.getString(FIELD_STATUS)));
+		order.setId(orderDocument.get(FIELD_ID).toString());
 		return order;
 	}
 
@@ -75,7 +84,7 @@ public class OrderMongoRepository implements OrderRepository {
 		if (findDocumentById(orderId) == null)
 			throw new NoSuchElementException("Order with id " + orderId + " not found.");
 		List<Document> embeddedItems = orderItemSetToDocumentList(order.getItems());
-		Bson update = combine(set("items", embeddedItems), set("status", order.getStatus().toString()));
+		Bson update = combine(set(FIELD_ITEMS, embeddedItems), set(FIELD_STATUS, order.getStatus().toString()));
 		orderCollection.updateOne(session, eqFilter(orderId), update);
 	}
 
@@ -85,13 +94,13 @@ public class OrderMongoRepository implements OrderRepository {
 
 	private List<Document> orderItemSetToDocumentList(Set<OrderItem> items) {
 		List<Document> embeddedItems = new ArrayList<>();
-		items.forEach(item -> embeddedItems.add(
-				new Document().append("product", item.getProduct().getId()).append("quantity", item.getQuantity())));
+		items.forEach(item -> embeddedItems.add(new Document().append(FIELD_PRODUCT, item.getProduct().getId())
+				.append(FIELD_QUANTITY, item.getQuantity())));
 		return embeddedItems;
 	}
 
 	private Bson eqFilter(String id) {
-		return eq("_id", new ObjectId(id));
+		return eq(FIELD_ID, new ObjectId(id));
 	}
 
 }

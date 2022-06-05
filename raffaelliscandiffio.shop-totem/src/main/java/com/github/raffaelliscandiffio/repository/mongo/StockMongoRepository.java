@@ -15,6 +15,12 @@ import com.mongodb.client.MongoCollection;
 
 public class StockMongoRepository implements StockRepository {
 
+	private static final String FIELD_ID = "_id";
+	private static final String FIELD_NAME = "name";
+	private static final String FIELD_PRICE = "price";
+	private static final String FIELD_PRODUCT = "product";
+	private static final String FIELD_QUANTITY = "quantity";
+
 	private MongoCollection<Document> productCollection;
 	private MongoCollection<Document> stockCollection;
 	private ClientSession session;
@@ -28,10 +34,10 @@ public class StockMongoRepository implements StockRepository {
 
 	@Override
 	public void save(Stock stock) {
-		Document stockDocument = new Document().append("product", stock.getProduct().getId()).append("quantity",
+		Document stockDocument = new Document().append(FIELD_PRODUCT, stock.getProduct().getId()).append(FIELD_QUANTITY,
 				stock.getQuantity());
 		stockCollection.insertOne(session, stockDocument);
-		stock.setId(stockDocument.get("_id").toString());
+		stock.setId(stockDocument.get(FIELD_ID).toString());
 	}
 
 	@Override
@@ -39,22 +45,22 @@ public class StockMongoRepository implements StockRepository {
 		Document stockDocument = stockCollection.find(session, eqFilter(id)).first();
 		if (stockDocument == null)
 			return null;
-		String productId = stockDocument.getString("product");
+		String productId = stockDocument.getString(FIELD_PRODUCT);
 		Document productDocument = productCollection.find(session, eqFilter(productId)).first();
-		Product product = new Product(productDocument.getString("name"), productDocument.getDouble("price"));
+		Product product = new Product(productDocument.getString(FIELD_NAME), productDocument.getDouble(FIELD_PRICE));
 		product.setId(productId);
-		Stock stock = new Stock(product, stockDocument.getInteger("quantity"));
+		Stock stock = new Stock(product, stockDocument.getInteger(FIELD_QUANTITY));
 		stock.setId(id);
 		return stock;
 	}
 
 	@Override
 	public void update(Stock stock) {
-		Document updateQuery = new Document("$set", new Document("quantity", stock.getQuantity()));
+		Document updateQuery = new Document("$set", new Document(FIELD_QUANTITY, stock.getQuantity()));
 		stockCollection.updateOne(session, eqFilter(stock.getId()), updateQuery);
 	}
 
 	private Bson eqFilter(String id) {
-		return eq("_id", new ObjectId(id));
+		return eq(FIELD_ID, new ObjectId(id));
 	}
 }
