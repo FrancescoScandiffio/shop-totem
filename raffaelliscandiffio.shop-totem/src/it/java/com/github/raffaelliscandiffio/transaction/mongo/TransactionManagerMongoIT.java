@@ -80,7 +80,7 @@ class TransactionManagerMongoIT {
 			return product;
 		});
 		ClientSession session = transactionManager.getSession();
-		softly.assertThat(result).isEqualTo(result);
+		softly.assertThat(result).isEqualTo(expectedResult);
 		softly.assertThat(session.hasActiveTransaction()).isFalse();
 		softly.assertThat(readAllProductsFromDatabase()).containsExactly(expectedResult);
 		// assert that the client session is close. It doesn't have an 'isClose' getter.
@@ -89,15 +89,15 @@ class TransactionManagerMongoIT {
 	}
 
 	@Test
-	@DisplayName("Method 'runInTransaction' should rollback and throw a new exception when any Exception occurs")
+	@DisplayName("Method 'runInTransaction' should rollback and throw a new exception when an Exception occurs")
 	void testRunInTransactionWhenExceptionOccursShouldRollbackAndThrowNew() {
 		String message = "Exception message";
-		Product product = newProductWithId(PRODUCT_ID, PRODUCT_NAME, PRODUCT_PRICE);
 		SoftAssertions softly = new SoftAssertions();
+		Product product = newProductWithId(PRODUCT_ID, PRODUCT_NAME, PRODUCT_PRICE);
 		softly.assertThatThrownBy(
 				() -> transactionManager.runInTransaction((productRepository, stockRepository, orderRepository) -> {
 					ClientSession session = transactionManager.getSession();
-					productCollection.insertOne(session, productToDocument(product));
+					productCollection.insertOne(session, productToDocument((product)));
 					throw new RuntimeException(message);
 				})).isInstanceOf(TransactionException.class).hasMessage(message);
 		softly.assertThat(readAllProductsFromDatabase()).isEmpty();

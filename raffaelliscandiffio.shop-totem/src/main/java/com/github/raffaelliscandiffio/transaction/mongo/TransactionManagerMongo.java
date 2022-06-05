@@ -40,7 +40,6 @@ public class TransactionManagerMongo implements TransactionManager {
 			session.commitTransaction();
 			return result;
 		} catch (Exception e) {
-			session.abortTransaction();
 			throw new TransactionException(e.getMessage());
 		} finally {
 			session.close();
