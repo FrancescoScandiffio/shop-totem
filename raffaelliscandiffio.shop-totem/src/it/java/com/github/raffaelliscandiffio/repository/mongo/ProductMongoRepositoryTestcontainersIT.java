@@ -20,6 +20,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.github.raffaelliscandiffio.model.Product;
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
+import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
@@ -30,6 +31,7 @@ class ProductMongoRepositoryTestcontainersIT {
 	public static final MongoDBContainer mongo = new MongoDBContainer("mongo:5.0.6");
 
 	private MongoClient client;
+	private ClientSession session;
 	private ProductMongoRepository productRepository;
 	private MongoCollection<Document> productCollection;
 	private static final String TOTEM_DB_NAME = "totem";
@@ -43,8 +45,8 @@ class ProductMongoRepositoryTestcontainersIT {
 	@BeforeEach
 	public void setup() {
 		client = new MongoClient(new ServerAddress(mongo.getContainerIpAddress(), mongo.getFirstMappedPort()));
-		productRepository = new ProductMongoRepository(client, client.startSession(), TOTEM_DB_NAME,
-				PRODUCT_COLLECTION_NAME);
+		session = client.startSession();
+		productRepository = new ProductMongoRepository(client, session, TOTEM_DB_NAME, PRODUCT_COLLECTION_NAME);
 		MongoDatabase database = client.getDatabase(TOTEM_DB_NAME);
 		database.drop();
 		productCollection = database.getCollection(PRODUCT_COLLECTION_NAME);
@@ -60,9 +62,12 @@ class ProductMongoRepositoryTestcontainersIT {
 	@DisplayName("Insert product in database with 'save'")
 	void testSaveProduct() {
 		Product product = new Product(NAME_1, PRICE_1);
+		SoftAssertions softly = new SoftAssertions();
+		session.startTransaction();
 		productRepository.save(product);
 		String assignedId = product.getId();
-		SoftAssertions softly = new SoftAssertions();
+		softly.assertThat(readAllProductsFromDatabase()).isEmpty();
+		session.commitTransaction();
 		softly.assertThat(assignedId).isNotNull();
 		softly.assertThatCode(() -> new ObjectId(assignedId)).doesNotThrowAnyException();
 		softly.assertThat(readAllProductsFromDatabase()).containsExactly(newProductWithId(assignedId, NAME_1, PRICE_1));
@@ -74,10 +79,13 @@ class ProductMongoRepositoryTestcontainersIT {
 	void testFindAllWhenDatabaseIsNotEmpty() {
 		String id_1 = new ObjectId().toString();
 		String id_2 = new ObjectId().toString();
-		addTestProductToDatabase(id_1, NAME_1, PRICE_1);
-		addTestProductToDatabase(id_2, NAME_2, PRICE_2);
+		session.startTransaction();
+		addTestProductToDatabaseWithSession(session, id_1, NAME_1, PRICE_1);
+		addTestProductToDatabaseWithSession(session, id_2, NAME_2, PRICE_2);
 		assertThat(productRepository.findAll()).containsExactlyInAnyOrder(newProductWithId(id_1, NAME_1, PRICE_1),
 				newProductWithId(id_2, NAME_2, PRICE_2));
+		session.commitTransaction();
+
 	}
 
 	@Test
@@ -109,9 +117,15 @@ class ProductMongoRepositoryTestcontainersIT {
 	}
 
 	private void addTestProductToDatabase(String id, String name, double price) {
-		productCollection
-				.insertOne(new Document().append("_id", new ObjectId(id)).append("name", name).append("price", price));
+		productCollection.insertOne(toProductDocument(id, name, price));
+	}
 
+	private void addTestProductToDatabaseWithSession(ClientSession session, String id, String name, double price) {
+		productCollection.insertOne(session, toProductDocument(id, name, price));
+	}
+
+	private Document toProductDocument(String id, String name, double price) {
+		return new Document().append("_id", new ObjectId(id)).append("name", name).append("price", price);
 	}
 
 	private Product newProductWithId(String id, String name, double price) {

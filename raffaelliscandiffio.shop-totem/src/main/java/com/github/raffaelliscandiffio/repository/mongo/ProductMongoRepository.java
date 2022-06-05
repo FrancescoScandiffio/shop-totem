@@ -16,25 +16,27 @@ import com.mongodb.client.model.Filters;
 
 public class ProductMongoRepository implements ProductRepository {
 
+	private ClientSession session;
 	private MongoCollection<Document> productCollection;
 
 	public ProductMongoRepository(MongoClient client, ClientSession session, String databaseName,
 			String collectionName) {
 		productCollection = client.getDatabase(databaseName).getCollection(collectionName);
+		this.session = session;
 	}
 
 	@Override
 	public void save(Product product) {
 		Document productDocument = new Document().append("name", product.getName()).append("price", product.getPrice());
-		productCollection.insertOne(productDocument);
+		productCollection.insertOne(session, productDocument);
 		product.setId(productDocument.get("_id").toString());
 
 	}
 
 	@Override
 	public List<Product> findAll() {
-		return StreamSupport.stream(productCollection.find().spliterator(), false).map(this::fromDocumentToProduct)
-				.collect(Collectors.toList());
+		return StreamSupport.stream(productCollection.find(session).spliterator(), false)
+				.map(this::fromDocumentToProduct).collect(Collectors.toList());
 	}
 
 	@Override

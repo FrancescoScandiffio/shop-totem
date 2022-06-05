@@ -25,11 +25,13 @@ import com.mongodb.client.MongoCollection;
 
 public class OrderMongoRepository implements OrderRepository {
 
+	private ClientSession session;
 	private MongoCollection<Document> productCollection;
 	private MongoCollection<Document> orderCollection;
 
 	public OrderMongoRepository(MongoClient client, ClientSession session, String databaseName,
 			String productCollectionName, String orderCollectionName) {
+		this.session = session;
 		productCollection = client.getDatabase(databaseName).getCollection(productCollectionName);
 		orderCollection = client.getDatabase(databaseName).getCollection(orderCollectionName);
 	}
@@ -38,7 +40,7 @@ public class OrderMongoRepository implements OrderRepository {
 		List<Document> embeddedItems = orderItemSetToDocumentList(order.getItems());
 		Document orderDocument = new Document().append("items", embeddedItems).append("status",
 				order.getStatus().toString());
-		orderCollection.insertOne(orderDocument);
+		orderCollection.insertOne(session, orderDocument);
 		order.setId(orderDocument.get("_id").toString());
 	}
 
@@ -64,7 +66,7 @@ public class OrderMongoRepository implements OrderRepository {
 
 	@Override
 	public void delete(Order order) {
-		orderCollection.deleteOne(eqFilter(order.getId()));
+		orderCollection.deleteOne(session, eqFilter(order.getId()));
 	}
 
 	@Override
@@ -74,11 +76,11 @@ public class OrderMongoRepository implements OrderRepository {
 			throw new NoSuchElementException("Order with id " + orderId + " not found.");
 		List<Document> embeddedItems = orderItemSetToDocumentList(order.getItems());
 		Bson update = combine(set("items", embeddedItems), set("status", order.getStatus().toString()));
-		orderCollection.updateOne(eqFilter(orderId), update);
+		orderCollection.updateOne(session, eqFilter(orderId), update);
 	}
 
 	private Document findDocumentById(String orderId) {
-		return orderCollection.find(eqFilter(orderId)).first();
+		return orderCollection.find(session, eqFilter(orderId)).first();
 	}
 
 	private List<Document> orderItemSetToDocumentList(Set<OrderItem> items) {
