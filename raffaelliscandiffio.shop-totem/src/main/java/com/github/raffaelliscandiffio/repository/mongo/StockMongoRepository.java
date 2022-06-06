@@ -1,6 +1,9 @@
 package com.github.raffaelliscandiffio.repository.mongo;
 
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Updates.set;
+
+import java.util.NoSuchElementException;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -12,6 +15,7 @@ import com.github.raffaelliscandiffio.repository.StockRepository;
 import com.mongodb.MongoClient;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.result.UpdateResult;
 
 public class StockMongoRepository implements StockRepository {
 
@@ -56,8 +60,11 @@ public class StockMongoRepository implements StockRepository {
 
 	@Override
 	public void update(Stock stock) {
-		Document updateQuery = new Document("$set", new Document(FIELD_QUANTITY, stock.getQuantity()));
-		stockCollection.updateOne(session, eqFilter(stock.getId()), updateQuery);
+		Bson update = set(FIELD_QUANTITY, stock.getQuantity());
+		String id = stock.getId();
+		UpdateResult result = stockCollection.updateOne(session, eqFilter(id), update);
+		if (result.getMatchedCount() == 0)
+			throw new NoSuchElementException("Stock with id " + id + " not found.");
 	}
 
 	private Bson eqFilter(String id) {
