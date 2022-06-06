@@ -31,6 +31,8 @@ import com.mongodb.client.MongoDatabase;
 @Testcontainers(disabledWithoutDocker = true)
 class OrderMongoRepositoryTestcontainersIT {
 
+	private static final OrderStatus CLOSED = OrderStatus.CLOSED;
+	private static final OrderStatus OPEN = OrderStatus.OPEN;
 	private static final String DATABASE_NAME = "totem";
 	private static final String ORDER_COLLECTION_NAME = "order";
 
@@ -61,11 +63,11 @@ class OrderMongoRepositoryTestcontainersIT {
 	@Test
 	@DisplayName("Insert Order in database with 'save'")
 	void testSaveOrder() {
-		Order order = new Order(OrderStatus.OPEN);
+		Order order = new Order(OPEN);
 		SoftAssertions softly = new SoftAssertions();
 		orderRepository.save(order);
 		String assignedId = order.getId();
-		Order expectedResult = newOrderWithId(assignedId, OrderStatus.OPEN);
+		Order expectedResult = newOrderWithId(assignedId, OPEN);
 		softly.assertThat(assignedId).isNotNull();
 		softly.assertThatCode(() -> new ObjectId(assignedId)).doesNotThrowAnyException();
 		softly.assertThat(readAllOrderFromDatabase()).containsExactly(expectedResult);
@@ -75,7 +77,7 @@ class OrderMongoRepositoryTestcontainersIT {
 	@Test
 	@DisplayName("Method 'save' should be bound to the repository session")
 	void testSaveOrderShouldBeBoundToTheRepositorySession() {
-		Order order = new Order(OrderStatus.OPEN);
+		Order order = new Order(OPEN);
 		session.startTransaction();
 		orderRepository.save(order);
 		assertThat(readAllOrderFromDatabase()).isEmpty();
@@ -86,9 +88,9 @@ class OrderMongoRepositoryTestcontainersIT {
 	@DisplayName("Retrieve Order by id with 'findById'")
 	void testFindByIdWhenIdIsFound() {
 		String idToFind = getNewStringId();
-		Order order_1 = newOrderWithId(getNewStringId(), OrderStatus.OPEN);
-		Order order_2 = newOrderWithId(idToFind, OrderStatus.OPEN);
-		Order expectedResult = newOrderWithId(idToFind, OrderStatus.OPEN);
+		Order order_1 = newOrderWithId(getNewStringId(), OPEN);
+		Order order_2 = newOrderWithId(idToFind, OPEN);
+		Order expectedResult = newOrderWithId(idToFind, OPEN);
 		saveTestOrderToDatabase(order_1);
 		saveTestOrderToDatabase(order_2);
 		assertThat(orderRepository.findById(idToFind)).isEqualTo(expectedResult);
@@ -105,8 +107,8 @@ class OrderMongoRepositoryTestcontainersIT {
 	@DisplayName("Method 'findById' should be bound to the repository session")
 	void testFindByIdShouldBeBoundToTheRepositorySession() {
 		String idToFind = getNewStringId();
-		Order order_1 = newOrderWithId(idToFind, OrderStatus.OPEN);
-		Order expectedResult = newOrderWithId(idToFind, OrderStatus.OPEN);
+		Order order_1 = newOrderWithId(idToFind, OPEN);
+		Order expectedResult = newOrderWithId(idToFind, OPEN);
 		session.startTransaction();
 		saveTestOrderToDatabaseWithSession(session, order_1);
 		assertThat(orderRepository.findById(idToFind)).isEqualTo(expectedResult);
@@ -117,8 +119,8 @@ class OrderMongoRepositoryTestcontainersIT {
 	@DisplayName("Remove Order from the collection by id with 'delete'")
 	void testDelete() {
 		String idToRemove = getNewStringId();
-		Order toRemove = newOrderWithId(idToRemove, OrderStatus.OPEN);
-		Order order_1 = newOrderWithId(getNewStringId(), OrderStatus.OPEN);
+		Order toRemove = newOrderWithId(idToRemove, OPEN);
+		Order order_1 = newOrderWithId(getNewStringId(), OPEN);
 		saveTestOrderToDatabase(toRemove);
 		saveTestOrderToDatabase(order_1);
 		orderRepository.delete(idToRemove);
@@ -136,8 +138,8 @@ class OrderMongoRepositoryTestcontainersIT {
 	@DisplayName("Method 'delete' should be bound to the repository session")
 	void testDeleteShouldBeBoundToTheRepositorySession() {
 		String idToRemove = getNewStringId();
-		Order toRemove = newOrderWithId(idToRemove, OrderStatus.OPEN);
-		Order order_1 = newOrderWithId(getNewStringId(), OrderStatus.OPEN);
+		Order toRemove = newOrderWithId(idToRemove, OPEN);
+		Order order_1 = newOrderWithId(getNewStringId(), OPEN);
 		session.startTransaction();
 		saveTestOrderToDatabaseWithSession(session, toRemove);
 		saveTestOrderToDatabaseWithSession(session, order_1);
@@ -148,35 +150,35 @@ class OrderMongoRepositoryTestcontainersIT {
 
 	@Test
 	@DisplayName("Update Order with 'update'")
-	void updateOrder() {
+	void testUpdateOrder() {
 		String idToUpdate = getNewStringId();
-		Order toUpdate = newOrderWithId(idToUpdate, OrderStatus.OPEN);
-		Order order_1 = newOrderWithId(getNewStringId(), OrderStatus.OPEN);
+		Order toUpdate = newOrderWithId(idToUpdate, OPEN);
+		Order order_1 = newOrderWithId(getNewStringId(), OPEN);
 		saveTestOrderToDatabase(toUpdate);
 		saveTestOrderToDatabase(order_1);
-		toUpdate.setStatus(OrderStatus.CLOSED);
-		Order expectedResult = newOrderWithId(idToUpdate, OrderStatus.CLOSED);
+		toUpdate.setStatus(CLOSED);
+		Order expectedResult = newOrderWithId(idToUpdate, CLOSED);
 		orderRepository.update(toUpdate);
 		assertThat(readAllOrderFromDatabase()).containsExactlyInAnyOrder(order_1, expectedResult);
 	}
 
 	@Test
 	@DisplayName("Update Order when order does not exist should throw")
-	void updateOrderWhenItDoesNotExistShouldThrow() {
+	void testUpdateOrderWhenItDoesNotExistShouldThrow() {
 		String missingId = getNewStringId();
-		Order missingOrder = newOrderWithId(missingId, OrderStatus.OPEN);
+		Order missingOrder = newOrderWithId(missingId, OPEN);
 		assertThatThrownBy(() -> orderRepository.update(missingOrder)).isInstanceOf(NoSuchElementException.class)
 				.hasMessage("Order with id " + missingId + " not found.");
 	}
 
 	@Test
 	@DisplayName("Method 'update' should be bound to the repository session")
-	void updateOrderShouldBeBoundToTheRepositorySession() {
+	void testUpdateOrderShouldBeBoundToTheRepositorySession() {
 		String idToUpdate = getNewStringId();
-		Order toUpdate = newOrderWithId(idToUpdate, OrderStatus.OPEN);
-		Order notUpdated = newOrderWithId(idToUpdate, OrderStatus.OPEN);
+		Order toUpdate = newOrderWithId(idToUpdate, OPEN);
+		Order notUpdated = newOrderWithId(idToUpdate, OPEN);
 		saveTestOrderToDatabase(toUpdate);
-		toUpdate.setStatus(OrderStatus.CLOSED);
+		toUpdate.setStatus(CLOSED);
 		session.startTransaction();
 		orderRepository.update(toUpdate);
 		assertThat(readAllOrderFromDatabase()).containsExactlyInAnyOrder(notUpdated);
