@@ -46,7 +46,7 @@ public class ProductMongoRepository implements ProductRepository {
 
 	@Override
 	public Product findById(String id) {
-		Document d = productCollection.find(Filters.eq(FIELD_ID, new ObjectId(id))).first();
+		Document d = productCollection.find(session, Filters.eq(FIELD_ID, new ObjectId(id))).first();
 		if (d != null)
 			return fromDocumentToProduct(d);
 		else
