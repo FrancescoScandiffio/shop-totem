@@ -4,47 +4,38 @@ import java.util.Objects;
 
 public class Stock {
 
-	private final long id;
+	private String id;
+	private final Product product;
 	private int quantity;
-	
-	/**
-	 * Constructs a new Stock with an id and quantity available.
-	 * @param id of the stock
-	 * @param quantity of the product currently in stock
-	 */
-	public Stock(long id, int quantity) {
 
-		this.id = id;
+	public Stock(Product product, int quantity) {
+		this.product = product;
 		this.quantity = quantity;
 	}
-	
-	/**
-	 * Sets quantity
-	 * @param quantity available in stock
-	 */
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public int getQuantity() {
+		return quantity;
+	}
+
 	public void setQuantity(int quantity) {
 		this.quantity = quantity;
 	}
 
-	/**
-	 * Returns the quantity currently in stock
-	 * @return quantity
-	 */
-	public int getQuantity() {
-		return quantity;
+	public Product getProduct() {
+		return product;
 	}
-	
-	/**
-	 * Returns the id of the Stock
-	 * @return the id
-	 */
-	public long getId() {
-		return id;
-	}
-	
+
 	@Override
 	public int hashCode() {
-		return Objects.hash(quantity, id);
+		return Objects.hash(id, product, quantity);
 	}
 
 	@Override
@@ -56,6 +47,7 @@ public class Stock {
 		if (getClass() != obj.getClass())
 			return false;
 		Stock other = (Stock) obj;
-		return quantity == other.quantity && id == other.id;
+		return Objects.equals(id, other.id) && Objects.equals(product, other.product) && quantity == other.quantity;
 	}
+
 }

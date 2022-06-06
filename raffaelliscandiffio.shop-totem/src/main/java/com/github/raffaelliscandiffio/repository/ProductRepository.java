@@ -7,8 +7,8 @@ import com.github.raffaelliscandiffio.model.Product;
 public interface ProductRepository {
 	public List<Product> findAll();
 
-	public Product findById(long id);
-	
+	public Product findById(String id);
+
 	public void save(Product product);
 
 }

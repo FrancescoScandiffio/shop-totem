@@ -2,50 +2,33 @@ package com.github.raffaelliscandiffio.model;
 
 import java.util.Objects;
 
-
 public class Product {
 
+	private String id;
 	private final String name;
 	private final double price;
-	private long id;
 
-	/**
-	 * Constructs a new Product with the specified id, name, price.
-	 * @param id of the product
-	 * @param name of the product
-	 * @param price of the product
-	 */
-	public Product(long id, String name, double price) {
-		
-		this.id = id;
+	public Product(String name, double price) {
 		this.name = name;
 		this.price = price;
 	}
 
-	/**
-	 * Returns the price
-	 * @return the price
-	 */
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
 	public double getPrice() {
 		return price;
 	}
 
-	/**
-	 * Returns the name
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
-	
-	/**
-	 * Returns the id
-	 * @return the id
-	 */
-	public long getId() {
-		return id;
-	}
-	
 	@Override
 	public int hashCode() {
 		return Objects.hash(id, name, price);
@@ -60,7 +43,7 @@ public class Product {
 		if (getClass() != obj.getClass())
 			return false;
 		Product other = (Product) obj;
-		return id == other.id && Objects.equals(name, other.name)
+		return Objects.equals(id, other.id) && Objects.equals(name, other.name)
 				&& Double.doubleToLongBits(price) == Double.doubleToLongBits(other.price);
 	}
 

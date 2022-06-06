@@ -7,12 +7,10 @@
 	<class name="com.github.raffaelliscandiffio.model.Stock"
 		table="STOCKS">
 
-		<meta attribute="class-description">
-			This class contains stock details.
-		</meta>
-
-		<id name="id" type="long" column="id" access="field"></id>
-
-		<property name="quantity" column="quantity" type="int" />
+		<id name="id" type="string" access="field">
+			<generator class="uuid2"/>
+		</id>
+		<property name="quantity" column="quantity" type="int" access="field"/>
+		<one-to-one name="product" class="com.github.raffaelliscandiffio.model.Product" access="field"></one-to-one>
 	</class>
 </hibernate-mapping>

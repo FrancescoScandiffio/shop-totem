@@ -7,12 +7,10 @@
 	<class name="com.github.raffaelliscandiffio.model.Product"
 		table="PRODUCTS">
 
-		<meta attribute="class-description">
-			This class contains products details.
-		</meta>
 
-		<id name="id" type="long" column="id" access="field"></id>
-
+	<id name="id" type="string" access="field">
+		<generator class="uuid2"/>
+	</id>
 		<property name="name" column="name" type="string"
 			access="field" />
 		<property name="price" column="price" type="double"
