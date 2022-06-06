@@ -9,12 +9,5 @@
 			<generator class="uuid2"/>
 		</id>
 		<property name="status" type="com.github.raffaelliscandiffio.model.OrderStatus"/>
-		<set name="items" table="order_items" lazy="false" access="field">
-			<key on-delete="cascade" column="order_id"/>
-			<composite-element class="com.github.raffaelliscandiffio.model.OrderItem">
-				<property name="quantity" access="field"/>
-				<many-to-one name="product" class="com.github.raffaelliscandiffio.model.Product" access="field"/>
-			</composite-element>
-		</set>
 	</class>
 </hibernate-mapping>
