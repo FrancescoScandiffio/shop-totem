@@ -29,7 +29,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 @Testcontainers(disabledWithoutDocker = true)
-class StockMongoRepositoryTestcontainersIT {
+class StockMongoRepositoryIT {
 
 	private static final String DATABASE_NAME = "totem";
 	private static final String PRODUCT_COLLECTION_NAME = "product";

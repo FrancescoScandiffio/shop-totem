@@ -25,7 +25,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 @Testcontainers(disabledWithoutDocker = true)
-class ProductMongoRepositoryTestcontainersIT {
+class ProductMongoRepositoryIT {
 
 	@Container
 	public static final MongoDBContainer mongo = new MongoDBContainer("mongo:5.0.6");

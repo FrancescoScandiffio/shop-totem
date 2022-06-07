@@ -29,7 +29,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 @Testcontainers(disabledWithoutDocker = true)
-class OrderMongoRepositoryTestcontainersIT {
+class OrderMongoRepositoryIT {
 
 	private static final OrderStatus CLOSED = OrderStatus.CLOSED;
 	private static final OrderStatus OPEN = OrderStatus.OPEN;
