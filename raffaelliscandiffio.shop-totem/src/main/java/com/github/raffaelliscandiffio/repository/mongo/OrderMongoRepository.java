@@ -24,11 +24,14 @@ public class OrderMongoRepository implements OrderRepository {
 
 	private ClientSession session;
 	private MongoCollection<Document> orderCollection;
+	private MongoCollection<Document> itemCollection;
 
 	public OrderMongoRepository(MongoClient client, ClientSession session, String databaseName,
-			String orderCollectionName) {
+			String orderCollectionName, String itemCollection) {
 		this.session = session;
 		this.orderCollection = client.getDatabase(databaseName).getCollection(orderCollectionName);
+		this.itemCollection = client.getDatabase(databaseName).getCollection(itemCollection);
+
 	}
 
 	@Override
@@ -50,6 +53,10 @@ public class OrderMongoRepository implements OrderRepository {
 
 	@Override
 	public void delete(String id) {
+		Document itemDoc = itemCollection.find(session, eq("order", id)).first();
+		if (itemDoc != null)
+			throw new IllegalStateException("Reference error: cannot delete Order with id " + id
+					+ " because OrderItem with id " + itemDoc.get("_id").toString() + " has a reference to it.");
 		orderCollection.deleteOne(session, eqFilter(id));
 	}
 

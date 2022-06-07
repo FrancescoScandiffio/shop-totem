@@ -35,11 +35,13 @@ class OrderMongoRepositoryTestcontainersIT {
 	private static final OrderStatus OPEN = OrderStatus.OPEN;
 	private static final String DATABASE_NAME = "totem";
 	private static final String ORDER_COLLECTION_NAME = "order";
+	private static final String ORDER_ITEM_COLLECTION_NAME = "item";
 
 	private MongoClient client;
 	private ClientSession session;
 	private OrderMongoRepository orderRepository;
 	private MongoCollection<Document> orderCollection;
+	private MongoCollection<Document> itemCollection;
 
 	@Container
 	public static final MongoDBContainer mongo = new MongoDBContainer("mongo:5.0.6");
@@ -50,8 +52,11 @@ class OrderMongoRepositoryTestcontainersIT {
 		MongoDatabase database = client.getDatabase(DATABASE_NAME);
 		database.drop();
 		orderCollection = database.getCollection(ORDER_COLLECTION_NAME);
+		itemCollection = database.getCollection(ORDER_ITEM_COLLECTION_NAME);
+
 		session = client.startSession();
-		orderRepository = new OrderMongoRepository(client, session, DATABASE_NAME, ORDER_COLLECTION_NAME);
+		orderRepository = new OrderMongoRepository(client, session, DATABASE_NAME, ORDER_COLLECTION_NAME,
+				ORDER_ITEM_COLLECTION_NAME);
 	}
 
 	@AfterEach
@@ -127,7 +132,7 @@ class OrderMongoRepositoryTestcontainersIT {
 		assertThat(readAllOrderFromDatabase()).containsExactly(order_1);
 	}
 
-	@Test // document the behaviour
+	@Test // document the default behaviour
 	@DisplayName("Method 'delete' when the order does not exist should not throw exception")
 	void testDeleteWhenOrderDoesNotExistShouldNotThrow() {
 		String idToRemove = getNewStringId();
@@ -146,6 +151,45 @@ class OrderMongoRepositoryTestcontainersIT {
 		orderRepository.delete(idToRemove);
 		session.commitTransaction();
 		assertThat(readAllOrderFromDatabase()).containsExactly(order_1);
+	}
+
+	@Test
+	@DisplayName("Method 'delete' should throw exception when there is an OrderItem with a reference to this order")
+	void testDeleteWhenAnOrderItemHasAReferenceToTheOrderShouldThrowException() {
+		SoftAssertions softly = new SoftAssertions();
+		String idItemReference = getNewStringId();
+		String idCannotDelete = getNewStringId();
+		Order cannotDelete = newOrderWithId(idCannotDelete, OPEN);
+		saveTestOrderToDatabase(cannotDelete);
+		// No need to store an OrderItem: fields '_id' and 'order_id' are enough
+		itemCollection
+				.insertOne(new Document().append("_id", new ObjectId(idItemReference)).append("order", idCannotDelete));
+		assertThatThrownBy(() -> orderRepository.delete(idCannotDelete)).isInstanceOf(IllegalStateException.class)
+				.hasMessage("Reference error: cannot delete Order with id " + idCannotDelete
+						+ " because OrderItem with id " + idItemReference + " has a reference to it.");
+		softly.assertThat(readAllOrderFromDatabase()).containsExactly(cannotDelete);
+		softly.assertAll();
+	}
+
+	@Test
+	@DisplayName("Method 'delete' reference check should be bound to the repository session")
+	void testDeleteReferenceCheckShouldBeBoundToTheRepositorySession() {
+		SoftAssertions softly = new SoftAssertions();
+		String idItemReference = getNewStringId();
+		String idCannotDelete = getNewStringId();
+		Order cannotDelete = newOrderWithId(idCannotDelete, OPEN);
+		saveTestOrderToDatabase(cannotDelete);
+		session.startTransaction();
+		// No need to store an OrderItem: fields '_id' and 'order_id' are enough
+		itemCollection.insertOne(session,
+				new Document().append("_id", new ObjectId(idItemReference)).append("order", idCannotDelete));
+		softly.assertThatThrownBy(() -> orderRepository.delete(idCannotDelete))
+				.isInstanceOf(IllegalStateException.class).hasMessage("Reference error: cannot delete Order with id "
+						+ idCannotDelete + " because OrderItem with id " + idItemReference + " has a reference to it.");
+		session.commitTransaction();
+		softly.assertThat(readAllOrderFromDatabase()).containsExactly(cannotDelete);
+		softly.assertAll();
+
 	}
 
 	@Test
@@ -181,7 +225,7 @@ class OrderMongoRepositoryTestcontainersIT {
 		toUpdate.setStatus(CLOSED);
 		session.startTransaction();
 		orderRepository.update(toUpdate);
-		assertThat(readAllOrderFromDatabase()).containsExactlyInAnyOrder(notUpdated);
+		assertThat(readAllOrderFromDatabase()).containsExactly(notUpdated);
 		session.commitTransaction();
 	}
 

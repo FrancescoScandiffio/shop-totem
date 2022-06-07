@@ -39,7 +39,8 @@ public class TransactionManagerMongo implements TransactionManager {
 			T result = code.apply(new ProductMongoRepository(client, session, mongoDatabaseName, productCollectionName),
 					new StockMongoRepository(client, session, mongoDatabaseName, productCollectionName,
 							stockCollectionName),
-					new OrderMongoRepository(client, session, mongoDatabaseName, orderCollectionName),
+					new OrderMongoRepository(client, session, mongoDatabaseName, orderCollectionName,
+							orderItemCollectionName),
 					new OrderItemMongoRepository(client, session, mongoDatabaseName, productCollectionName,
 							orderCollectionName, orderItemCollectionName));
 			session.commitTransaction();

@@ -77,8 +77,8 @@ class TransactionManagerMongoIT {
 							.isEqualTo(new ProductMongoRepository(client, session, DB_NAME, PRODUCT_COLLECTION_NAME));
 					softly.assertThat(stockRepository).usingRecursiveComparison().isEqualTo(new StockMongoRepository(
 							client, session, DB_NAME, PRODUCT_COLLECTION_NAME, STOCK_COLLECTION_NAME));
-					softly.assertThat(orderRepository).usingRecursiveComparison()
-							.isEqualTo(new OrderMongoRepository(client, session, DB_NAME, ORDER_COLLECTION_NAME));
+					softly.assertThat(orderRepository).usingRecursiveComparison().isEqualTo(new OrderMongoRepository(
+							client, session, DB_NAME, ORDER_COLLECTION_NAME, ORDER_ITEM_COLLECTION_NAME));
 					softly.assertThat(orderItemRepository).usingRecursiveComparison()
 							.isEqualTo(new OrderItemMongoRepository(client, session, DB_NAME, PRODUCT_COLLECTION_NAME,
 									ORDER_COLLECTION_NAME, ORDER_ITEM_COLLECTION_NAME));
