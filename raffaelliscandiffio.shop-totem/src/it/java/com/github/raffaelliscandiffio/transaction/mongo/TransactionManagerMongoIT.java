@@ -15,6 +15,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.github.raffaelliscandiffio.model.Product;
+import com.github.raffaelliscandiffio.repository.mongo.OrderItemMongoRepository;
 import com.github.raffaelliscandiffio.repository.mongo.OrderMongoRepository;
 import com.github.raffaelliscandiffio.repository.mongo.ProductMongoRepository;
 import com.github.raffaelliscandiffio.repository.mongo.StockMongoRepository;
@@ -32,6 +33,7 @@ class TransactionManagerMongoIT {
 	private static final String PRODUCT_COLLECTION_NAME = "product";
 	private static final String STOCK_COLLECTION_NAME = "stock";
 	private static final String ORDER_COLLECTION_NAME = "order";
+	private static final String ORDER_ITEM_COLLECTION_NAME = "orderItem";
 
 	private static final String PRODUCT_ID = "1";
 	private static final String PRODUCT_NAME = "product";
@@ -51,7 +53,7 @@ class TransactionManagerMongoIT {
 		database.drop();
 		productCollection = database.getCollection(PRODUCT_COLLECTION_NAME);
 		transactionManager = new TransactionManagerMongo(client, DB_NAME, PRODUCT_COLLECTION_NAME,
-				STOCK_COLLECTION_NAME, ORDER_COLLECTION_NAME);
+				STOCK_COLLECTION_NAME, ORDER_COLLECTION_NAME, ORDER_ITEM_COLLECTION_NAME);
 	}
 
 	@AfterEach
@@ -65,20 +67,24 @@ class TransactionManagerMongoIT {
 		SoftAssertions softly = new SoftAssertions();
 		Product product = newProductWithId(PRODUCT_ID, PRODUCT_NAME, PRODUCT_PRICE);
 		Product expectedResult = newProductWithId(PRODUCT_ID, PRODUCT_NAME, PRODUCT_PRICE);
-		Product result = transactionManager.runInTransaction((productRepository, stockRepository, orderRepository) -> {
-			ClientSession session = transactionManager.getSession();
-			softly.assertThat(session).isNotNull();
-			softly.assertThat(session.hasActiveTransaction()).isTrue();
-			// field by field comparison
-			softly.assertThat(productRepository).usingRecursiveComparison()
-					.isEqualTo(new ProductMongoRepository(client, session, DB_NAME, PRODUCT_COLLECTION_NAME));
-			softly.assertThat(stockRepository).usingRecursiveComparison().isEqualTo(
-					new StockMongoRepository(client, session, DB_NAME, PRODUCT_COLLECTION_NAME, STOCK_COLLECTION_NAME));
-			softly.assertThat(orderRepository).usingRecursiveComparison()
-					.isEqualTo(new OrderMongoRepository(client, session, DB_NAME, ORDER_COLLECTION_NAME));
-			productCollection.insertOne(session, productToDocument(product));
-			return product;
-		});
+		Product result = transactionManager
+				.runInTransaction((productRepository, stockRepository, orderRepository, orderItemRepository) -> {
+					ClientSession session = transactionManager.getSession();
+					softly.assertThat(session).isNotNull();
+					softly.assertThat(session.hasActiveTransaction()).isTrue();
+					// field by field comparison
+					softly.assertThat(productRepository).usingRecursiveComparison()
+							.isEqualTo(new ProductMongoRepository(client, session, DB_NAME, PRODUCT_COLLECTION_NAME));
+					softly.assertThat(stockRepository).usingRecursiveComparison().isEqualTo(new StockMongoRepository(
+							client, session, DB_NAME, PRODUCT_COLLECTION_NAME, STOCK_COLLECTION_NAME));
+					softly.assertThat(orderRepository).usingRecursiveComparison()
+							.isEqualTo(new OrderMongoRepository(client, session, DB_NAME, ORDER_COLLECTION_NAME));
+					softly.assertThat(orderItemRepository).usingRecursiveComparison()
+							.isEqualTo(new OrderItemMongoRepository(client, session, DB_NAME, PRODUCT_COLLECTION_NAME,
+									ORDER_COLLECTION_NAME, ORDER_ITEM_COLLECTION_NAME));
+					productCollection.insertOne(session, productToDocument(product));
+					return product;
+				});
 		ClientSession session = transactionManager.getSession();
 		softly.assertThat(result).isEqualTo(expectedResult);
 		softly.assertThat(session.hasActiveTransaction()).isFalse();
@@ -94,8 +100,8 @@ class TransactionManagerMongoIT {
 		String message = "Exception message";
 		SoftAssertions softly = new SoftAssertions();
 		Product product = newProductWithId(PRODUCT_ID, PRODUCT_NAME, PRODUCT_PRICE);
-		softly.assertThatThrownBy(
-				() -> transactionManager.runInTransaction((productRepository, stockRepository, orderRepository) -> {
+		softly.assertThatThrownBy(() -> transactionManager
+				.runInTransaction((productRepository, stockRepository, orderRepository, orderItemRepository) -> {
 					ClientSession session = transactionManager.getSession();
 					productCollection.insertOne(session, productToDocument((product)));
 					throw new RuntimeException(message);

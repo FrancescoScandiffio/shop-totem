@@ -18,6 +18,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.github.raffaelliscandiffio.model.Product;
+import com.github.raffaelliscandiffio.repository.mysql.OrderItemMySqlRepository;
 import com.github.raffaelliscandiffio.repository.mysql.OrderMySqlRepository;
 import com.github.raffaelliscandiffio.repository.mysql.ProductMySqlRepository;
 import com.github.raffaelliscandiffio.repository.mysql.StockMySqlRepository;
@@ -67,17 +68,20 @@ class TransactionManagerMySqlIT {
 	void testRunInTransaction() {
 		SoftAssertions softly = new SoftAssertions();
 		Product product = new Product("product", 1.0);
-		Product result = transactionManager.runInTransaction((productRepository, stockRepository, orderRepository) -> {
-			softly.assertThat(entityManager.getTransaction().isActive()).isTrue();
-			softly.assertThat(productRepository).usingRecursiveComparison()
-					.isEqualTo(new ProductMySqlRepository(entityManager));
-			softly.assertThat(stockRepository).usingRecursiveComparison()
-					.isEqualTo(new StockMySqlRepository(entityManager));
-			softly.assertThat(orderRepository).usingRecursiveComparison()
-					.isEqualTo(new OrderMySqlRepository(entityManager));
-			entityManager.persist(product);
-			return product;
-		});
+		Product result = transactionManager
+				.runInTransaction((productRepository, stockRepository, orderRepository, orderItemRepository) -> {
+					softly.assertThat(entityManager.getTransaction().isActive()).isTrue();
+					softly.assertThat(productRepository).usingRecursiveComparison()
+							.isEqualTo(new ProductMySqlRepository(entityManager));
+					softly.assertThat(stockRepository).usingRecursiveComparison()
+							.isEqualTo(new StockMySqlRepository(entityManager));
+					softly.assertThat(orderRepository).usingRecursiveComparison()
+							.isEqualTo(new OrderMySqlRepository(entityManager));
+					softly.assertThat(orderItemRepository).usingRecursiveComparison()
+							.isEqualTo(new OrderItemMySqlRepository(entityManager));
+					entityManager.persist(product);
+					return product;
+				});
 		softly.assertThat(result).isEqualTo(product);
 		softly.assertThat(entityManager.getTransaction().isActive()).isFalse();
 		softly.assertThat(queryProductList()).containsExactly(product);
@@ -90,8 +94,8 @@ class TransactionManagerMySqlIT {
 		SoftAssertions softly = new SoftAssertions();
 		Product product = new Product("product", 1.0);
 		String exceptionMessage = "Exception message";
-		softly.assertThatThrownBy(
-				() -> transactionManager.runInTransaction((productRepository, stockRepository, orderRepository) -> {
+		softly.assertThatThrownBy(() -> transactionManager
+				.runInTransaction((productRepository, stockRepository, orderRepository, orderItemRepository) -> {
 					entityManager.persist(product);
 					throw new RuntimeException(exceptionMessage);
 				})).isInstanceOf(TransactionException.class).hasMessage(exceptionMessage);

@@ -2,6 +2,7 @@ package com.github.raffaelliscandiffio.transaction.mysql;
 
 import javax.persistence.EntityManager;
 
+import com.github.raffaelliscandiffio.repository.mysql.OrderItemMySqlRepository;
 import com.github.raffaelliscandiffio.repository.mysql.OrderMySqlRepository;
 import com.github.raffaelliscandiffio.repository.mysql.ProductMySqlRepository;
 import com.github.raffaelliscandiffio.repository.mysql.StockMySqlRepository;
@@ -22,7 +23,7 @@ public class TransactionManagerMySql implements TransactionManager {
 		try {
 			entityManager.getTransaction().begin();
 			T result = code.apply(new ProductMySqlRepository(entityManager), new StockMySqlRepository(entityManager),
-					new OrderMySqlRepository(entityManager));
+					new OrderMySqlRepository(entityManager), new OrderItemMySqlRepository(entityManager));
 			entityManager.getTransaction().commit();
 			return result;
 		} catch (Exception e) {
