@@ -38,7 +38,10 @@ public class StockMongoRepository implements StockRepository {
 
 	@Override
 	public void save(Stock stock) {
-		Document stockDocument = new Document().append(FIELD_PRODUCT, stock.getProduct().getId()).append(FIELD_QUANTITY,
+		String productId = stock.getProduct().getId();
+		if (findProductDocumentById(productId) == null)
+			throw new NoSuchElementException("Referenced Product with id " + productId + " not found.");
+		Document stockDocument = new Document().append(FIELD_PRODUCT, productId).append(FIELD_QUANTITY,
 				stock.getQuantity());
 		stockCollection.insertOne(session, stockDocument);
 		stock.setId(stockDocument.get(FIELD_ID).toString());
@@ -50,7 +53,7 @@ public class StockMongoRepository implements StockRepository {
 		if (stockDocument == null)
 			return null;
 		String productId = stockDocument.getString(FIELD_PRODUCT);
-		Document productDocument = productCollection.find(session, eqFilter(productId)).first();
+		Document productDocument = findProductDocumentById(productId);
 		Product product = new Product(productDocument.getString(FIELD_NAME), productDocument.getDouble(FIELD_PRICE));
 		product.setId(productId);
 		Stock stock = new Stock(product, stockDocument.getInteger(FIELD_QUANTITY));
@@ -70,4 +73,9 @@ public class StockMongoRepository implements StockRepository {
 	private Bson eqFilter(String id) {
 		return eq(FIELD_ID, new ObjectId(id));
 	}
+
+	private Document findProductDocumentById(String productId) {
+		return productCollection.find(session, eqFilter(productId)).first();
+	}
+
 }

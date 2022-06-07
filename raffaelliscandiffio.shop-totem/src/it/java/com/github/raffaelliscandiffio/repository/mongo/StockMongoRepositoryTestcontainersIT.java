@@ -35,7 +35,7 @@ class StockMongoRepositoryTestcontainersIT {
 	private static final String PRODUCT_COLLECTION_NAME = "product";
 	private static final String STOCK_COLLECTION_NAME = "stock";
 	private static final String PRODUCT_NAME_1 = "product_1";
-	private static final String PRODUCT_NAME_2 = "pasta";
+	private static final String PRODUCT_NAME_2 = "product_2";
 	private static final double PRICE = 3.0;
 	private static final int QUANTITY_1 = 1;
 	private static final int QUANTITY_2 = 2;
@@ -62,10 +62,8 @@ class StockMongoRepositoryTestcontainersIT {
 		database.drop();
 		productCollection = database.getCollection(PRODUCT_COLLECTION_NAME);
 		stockCollection = database.getCollection(STOCK_COLLECTION_NAME);
-		product_1 = new Product(PRODUCT_NAME_1, PRICE);
-		product_2 = new Product(PRODUCT_NAME_2, PRICE);
-		saveTestProductToDatabase(product_1);
-		saveTestProductToDatabase(product_2);
+		product_1 = saveTestProductToDatabase(new Product(PRODUCT_NAME_1, PRICE));
+		product_2 = saveTestProductToDatabase(new Product(PRODUCT_NAME_2, PRICE));
 	}
 
 	@AfterEach
@@ -85,6 +83,18 @@ class StockMongoRepositoryTestcontainersIT {
 		softly.assertThat(assignedId).isNotNull();
 		softly.assertThatCode(() -> new ObjectId(assignedId)).doesNotThrowAnyException();
 		softly.assertThat(readAllStockFromDatabase()).containsExactly(expectedResult);
+		softly.assertAll();
+	}
+
+	@Test
+	@DisplayName("Method 'save' should throw when the referenced Product does not exist")
+	void testSaveStockWhenTheReferencedProductDoesNotExistShouldThrow() {
+		productCollection.drop();
+		Stock stock = new Stock(product_1, QUANTITY_1);
+		SoftAssertions softly = new SoftAssertions();
+		softly.assertThatThrownBy(() -> stockRepository.save(stock)).isInstanceOf(NoSuchElementException.class)
+				.hasMessage("Referenced Product with id " + product_1.getId() + " not found.");
+		softly.assertThat(readAllStockFromDatabase()).isEmpty();
 		softly.assertAll();
 	}
 
@@ -122,11 +132,11 @@ class StockMongoRepositoryTestcontainersIT {
 	void testFindByIdShouldBeBoundToTheRepositorySession() {
 		productCollection.drop();
 		session.startTransaction();
-		saveTestProductToDatabaseWithSession(product_1);
+		saveTestProductToDatabaseWithSession(session, product_1);
 		String idToFind = getNewStringId();
 		Stock stock_1 = newStockWithId(idToFind, product_1, QUANTITY_1);
 		Stock expectedResult = newStockWithId(idToFind, product_1, QUANTITY_1);
-
+		
 		saveTestStockToDatabaseWithSession(session, stock_1);
 		assertThat(stockRepository.findById(idToFind)).isEqualTo(expectedResult);
 		session.commitTransaction();
@@ -153,6 +163,7 @@ class StockMongoRepositoryTestcontainersIT {
 		Stock missingStock = newStockWithId(missingId, product_1, QUANTITY_1);
 		assertThatThrownBy(() -> stockRepository.update(missingStock)).isInstanceOf(NoSuchElementException.class)
 				.hasMessage("Stock with id " + missingId + " not found.");
+
 	}
 
 	@Test
@@ -217,11 +228,11 @@ class StockMongoRepositoryTestcontainersIT {
 		return productWithoutId;
 	}
 
-	private void saveTestProductToDatabaseWithSession(Product productWithoutId) {
-		Document doc = new Document().append("name", productWithoutId.getName()).append("price",
-				productWithoutId.getPrice());
+	private Product saveTestProductToDatabaseWithSession(ClientSession session, Product productWithoutId) {
+		Document doc = fromProductToDocument(productWithoutId);
 		productCollection.insertOne(session, doc);
 		productWithoutId.setId(doc.get("_id").toString());
+		return productWithoutId;
 	}
 
 }
