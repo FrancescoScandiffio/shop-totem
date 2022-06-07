@@ -8,7 +8,7 @@ public interface OrderRepository {
 
 	Order findById(String id);
 
-	void delete(Order order);
+	void delete(String id);
 
 	void update(Order order);
 }

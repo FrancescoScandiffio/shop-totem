@@ -29,8 +29,8 @@ public class OrderMySqlRepository implements OrderRepository {
 	}
 
 	@Override
-	public void delete(Order order) {
-		entityManager.remove(order);
+	public void delete(String id) {
+		entityManager.createQuery("DELETE FROM Order where id=:order_id").setParameter("order_id", id).executeUpdate();
 	}
 
 }

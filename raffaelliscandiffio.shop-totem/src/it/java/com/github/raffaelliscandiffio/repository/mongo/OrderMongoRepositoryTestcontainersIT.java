@@ -1,15 +1,11 @@
 package com.github.raffaelliscandiffio.repository.mongo;
 
-import static com.mongodb.client.model.Filters.eq;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -25,9 +21,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.github.raffaelliscandiffio.model.Order;
-import com.github.raffaelliscandiffio.model.OrderItem;
 import com.github.raffaelliscandiffio.model.OrderStatus;
-import com.github.raffaelliscandiffio.model.Product;
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.ClientSession;
@@ -37,23 +31,17 @@ import com.mongodb.client.MongoDatabase;
 @Testcontainers(disabledWithoutDocker = true)
 class OrderMongoRepositoryTestcontainersIT {
 
+	private static final OrderStatus CLOSED = OrderStatus.CLOSED;
+	private static final OrderStatus OPEN = OrderStatus.OPEN;
 	private static final String DATABASE_NAME = "totem";
-	private static final String PRODUCT_COLLECTION_NAME = "product";
 	private static final String ORDER_COLLECTION_NAME = "order";
-	private static final String PRODUCT_NAME_1 = "product_1";
-	private static final String PRODUCT_NAME_2 = "product_2";
-	private static final double PRICE = 3.0;
-	private static final int QUANTITY = 4;
+	private static final String ORDER_ITEM_COLLECTION_NAME = "item";
 
 	private MongoClient client;
 	private ClientSession session;
 	private OrderMongoRepository orderRepository;
-	private MongoCollection<Document> productCollection;
 	private MongoCollection<Document> orderCollection;
-	private Product product_1;
-	private Product product_2;
-	private OrderItem item_1;
-	private OrderItem item_2;
+	private MongoCollection<Document> itemCollection;
 
 	@Container
 	public static final MongoDBContainer mongo = new MongoDBContainer("mongo:5.0.6");
@@ -61,118 +49,184 @@ class OrderMongoRepositoryTestcontainersIT {
 	@BeforeEach
 	public void setup() {
 		client = new MongoClient(new ServerAddress(mongo.getContainerIpAddress(), mongo.getFirstMappedPort()));
-		session = client.startSession();
-		orderRepository = new OrderMongoRepository(client, session, DATABASE_NAME, PRODUCT_COLLECTION_NAME,
-				ORDER_COLLECTION_NAME);
 		MongoDatabase database = client.getDatabase(DATABASE_NAME);
 		database.drop();
-		productCollection = database.getCollection(PRODUCT_COLLECTION_NAME);
 		orderCollection = database.getCollection(ORDER_COLLECTION_NAME);
-		product_1 = new Product(PRODUCT_NAME_1, PRICE);
-		product_2 = new Product(PRODUCT_NAME_2, PRICE);
-		item_1 = new OrderItem(product_1, QUANTITY);
-		item_2 = new OrderItem(product_2, QUANTITY);
-		addTestProductToDatabase(product_1);
-		addTestProductToDatabase(product_2);
+		itemCollection = database.getCollection(ORDER_ITEM_COLLECTION_NAME);
+
+		session = client.startSession();
+		orderRepository = new OrderMongoRepository(client, session, DATABASE_NAME, ORDER_COLLECTION_NAME,
+				ORDER_ITEM_COLLECTION_NAME);
 	}
 
 	@AfterEach
 	public void tearDown() {
+		session.close();
 		client.close();
 	}
 
 	@Test
 	@DisplayName("Insert Order in database with 'save'")
 	void testSaveOrder() {
-		Order order = new Order(new LinkedHashSet<OrderItem>(Arrays.asList(item_1)), OrderStatus.OPEN);
+		Order order = new Order(OPEN);
 		SoftAssertions softly = new SoftAssertions();
-		session.startTransaction();
 		orderRepository.save(order);
 		String assignedId = order.getId();
+		Order expectedResult = newOrderWithId(assignedId, OPEN);
 		softly.assertThat(assignedId).isNotNull();
 		softly.assertThatCode(() -> new ObjectId(assignedId)).doesNotThrowAnyException();
-		softly.assertThat(readAllOrderFromDatabase()).isEmpty();
-		session.commitTransaction();
-		softly.assertThat(readAllOrderFromDatabase()).containsExactly(
-				createOrderWithId(assignedId, new LinkedHashSet<OrderItem>(Arrays.asList(item_1)), OrderStatus.OPEN));
+		softly.assertThat(readAllOrderFromDatabase()).containsExactly(expectedResult);
 		softly.assertAll();
+	}
+
+	@Test
+	@DisplayName("Method 'save' should be bound to the repository session")
+	void testSaveOrderShouldBeBoundToTheRepositorySession() {
+		Order order = new Order(OPEN);
+		session.startTransaction();
+		orderRepository.save(order);
+		assertThat(readAllOrderFromDatabase()).isEmpty();
+		session.commitTransaction();
 	}
 
 	@Test
 	@DisplayName("Retrieve Order by id with 'findById'")
 	void testFindByIdWhenIdIsFound() {
-		String orderId = getNewStringId();
-		session.startTransaction();
-		addTestOrderToDatabaseWithSession(session, getNewStringId(),
-				new LinkedHashSet<OrderItem>(Arrays.asList(item_1)), OrderStatus.OPEN);
-		addTestOrderToDatabaseWithSession(session, orderId, new LinkedHashSet<OrderItem>(Arrays.asList(item_2)),
-				OrderStatus.CLOSED);
-		assertThat(orderRepository.findById(orderId)).isEqualTo(
-				createOrderWithId(orderId, new LinkedHashSet<OrderItem>(Arrays.asList(item_2)), OrderStatus.CLOSED));
-		session.commitTransaction();
+		String idToFind = getNewStringId();
+		Order order_1 = newOrderWithId(getNewStringId(), OPEN);
+		Order order_2 = newOrderWithId(idToFind, OPEN);
+		Order expectedResult = newOrderWithId(idToFind, OPEN);
+		saveTestOrderToDatabase(order_1);
+		saveTestOrderToDatabase(order_2);
+		assertThat(orderRepository.findById(idToFind)).isEqualTo(expectedResult);
 	}
 
 	@Test
 	@DisplayName("Method 'findById' should return null when the id is not found")
 	void testFindByIdWhenIdIsNotFoundShouldReturnNull() {
-		String missing_id = getNewStringId();
-		assertThat(orderRepository.findById(missing_id)).isNull();
+		String missingId = getNewStringId();
+		assertThat(orderRepository.findById(missingId)).isNull();
 	}
 
 	@Test
-	@DisplayName("Remove the specified order from the collection with 'delete'")
-	void testDelete() {
-		String orderId = getNewStringId();
-		String removeId = getNewStringId();
-		SoftAssertions softly = new SoftAssertions();
-
-		addTestOrderToDatabase(removeId, new LinkedHashSet<OrderItem>(Arrays.asList(item_1)), OrderStatus.OPEN);
-		addTestOrderToDatabase(orderId, new LinkedHashSet<OrderItem>(Arrays.asList(item_2)), OrderStatus.CLOSED);
+	@DisplayName("Method 'findById' should be bound to the repository session")
+	void testFindByIdShouldBeBoundToTheRepositorySession() {
+		String idToFind = getNewStringId();
+		Order order_1 = newOrderWithId(idToFind, OPEN);
+		Order expectedResult = newOrderWithId(idToFind, OPEN);
 		session.startTransaction();
-		orderRepository.delete(
-				createOrderWithId(removeId, new LinkedHashSet<OrderItem>(Arrays.asList(item_1)), OrderStatus.OPEN));
-		softly.assertThat(readAllOrderFromDatabase()).containsExactly(
-				createOrderWithId(removeId, new LinkedHashSet<OrderItem>(Arrays.asList(item_1)), OrderStatus.OPEN),
-				createOrderWithId(orderId, new LinkedHashSet<OrderItem>(Arrays.asList(item_2)), OrderStatus.CLOSED));
+		saveTestOrderToDatabaseWithSession(session, order_1);
+		assertThat(orderRepository.findById(idToFind)).isEqualTo(expectedResult);
 		session.commitTransaction();
-		softly.assertThat(readAllOrderFromDatabase()).containsExactly(
-				createOrderWithId(orderId, new LinkedHashSet<OrderItem>(Arrays.asList(item_2)), OrderStatus.CLOSED));
+	}
+
+	@Test
+	@DisplayName("Remove Order from the collection by id with 'delete'")
+	void testDelete() {
+		String idToRemove = getNewStringId();
+		Order toRemove = newOrderWithId(idToRemove, OPEN);
+		Order order_1 = newOrderWithId(getNewStringId(), OPEN);
+		saveTestOrderToDatabase(toRemove);
+		saveTestOrderToDatabase(order_1);
+		orderRepository.delete(idToRemove);
+		assertThat(readAllOrderFromDatabase()).containsExactly(order_1);
+	}
+
+	@Test // document the default behaviour
+	@DisplayName("Method 'delete' when the order does not exist should not throw exception")
+	void testDeleteWhenOrderDoesNotExistShouldNotThrow() {
+		String idToRemove = getNewStringId();
+		assertThatCode(() -> orderRepository.delete(idToRemove)).doesNotThrowAnyException();
+	}
+
+	@Test
+	@DisplayName("Method 'delete' should be bound to the repository session")
+	void testDeleteShouldBeBoundToTheRepositorySession() {
+		String idToRemove = getNewStringId();
+		Order toRemove = newOrderWithId(idToRemove, OPEN);
+		Order order_1 = newOrderWithId(getNewStringId(), OPEN);
+		session.startTransaction();
+		saveTestOrderToDatabaseWithSession(session, toRemove);
+		saveTestOrderToDatabaseWithSession(session, order_1);
+		orderRepository.delete(idToRemove);
+		session.commitTransaction();
+		assertThat(readAllOrderFromDatabase()).containsExactly(order_1);
+	}
+
+	@Test
+	@DisplayName("Method 'delete' should throw exception when there is an OrderItem with a reference to this order")
+	void testDeleteWhenAnOrderItemHasAReferenceToTheOrderShouldThrowException() {
+		SoftAssertions softly = new SoftAssertions();
+		String idItemReference = getNewStringId();
+		String idCannotDelete = getNewStringId();
+		Order cannotDelete = newOrderWithId(idCannotDelete, OPEN);
+		saveTestOrderToDatabase(cannotDelete);
+		// No need to store an OrderItem: fields '_id' and 'order_id' are enough
+		itemCollection
+				.insertOne(new Document().append("_id", new ObjectId(idItemReference)).append("order", idCannotDelete));
+		assertThatThrownBy(() -> orderRepository.delete(idCannotDelete)).isInstanceOf(IllegalStateException.class)
+				.hasMessage("Reference error: cannot delete Order with id " + idCannotDelete
+						+ " because OrderItem with id " + idItemReference + " has a reference to it.");
+		softly.assertThat(readAllOrderFromDatabase()).containsExactly(cannotDelete);
 		softly.assertAll();
+	}
+
+	@Test
+	@DisplayName("Method 'delete' reference check should be bound to the repository session")
+	void testDeleteReferenceCheckShouldBeBoundToTheRepositorySession() {
+		SoftAssertions softly = new SoftAssertions();
+		String idItemReference = getNewStringId();
+		String idCannotDelete = getNewStringId();
+		Order cannotDelete = newOrderWithId(idCannotDelete, OPEN);
+		saveTestOrderToDatabase(cannotDelete);
+		session.startTransaction();
+		// No need to store an OrderItem: fields '_id' and 'order_id' are enough
+		itemCollection.insertOne(session,
+				new Document().append("_id", new ObjectId(idItemReference)).append("order", idCannotDelete));
+		softly.assertThatThrownBy(() -> orderRepository.delete(idCannotDelete))
+				.isInstanceOf(IllegalStateException.class).hasMessage("Reference error: cannot delete Order with id "
+						+ idCannotDelete + " because OrderItem with id " + idItemReference + " has a reference to it.");
+		session.commitTransaction();
+		softly.assertThat(readAllOrderFromDatabase()).containsExactly(cannotDelete);
+		softly.assertAll();
+
 	}
 
 	@Test
 	@DisplayName("Update Order with 'update'")
-	void updateOrder() {
-		String modifyId = getNewStringId();
-		String orderId = getNewStringId();
-		SoftAssertions softly = new SoftAssertions();
-		Set<OrderItem> items = new LinkedHashSet<OrderItem>(Arrays.asList(item_1));
-		Order toModify = createOrderWithId(modifyId, items, OrderStatus.OPEN);
-		addTestOrderToDatabase(modifyId, items, OrderStatus.OPEN);
-		addTestOrderToDatabase(orderId, new LinkedHashSet<OrderItem>(Arrays.asList(item_2)), OrderStatus.CLOSED);
-		items.add(item_2);
-		session.startTransaction();
-		orderRepository.update(toModify);
-		softly.assertThat(readAllOrderFromDatabase()).containsExactly(
-				createOrderWithId(modifyId, new LinkedHashSet<OrderItem>(Arrays.asList(item_1)), OrderStatus.OPEN),
-				createOrderWithId(orderId, new LinkedHashSet<OrderItem>(Arrays.asList(item_2)), OrderStatus.CLOSED));
-		session.commitTransaction();
-		softly.assertThat(readAllOrderFromDatabase()).containsExactly(
-				createOrderWithId(modifyId, new LinkedHashSet<OrderItem>(Arrays.asList(item_1, item_2)),
-						OrderStatus.OPEN),
-				createOrderWithId(orderId, new LinkedHashSet<OrderItem>(Arrays.asList(item_2)), OrderStatus.CLOSED));
-		softly.assertAll();
+	void testUpdateOrder() {
+		String idToUpdate = getNewStringId();
+		Order toUpdate = newOrderWithId(idToUpdate, OPEN);
+		Order order_1 = newOrderWithId(getNewStringId(), OPEN);
+		saveTestOrderToDatabase(toUpdate);
+		saveTestOrderToDatabase(order_1);
+		toUpdate.setStatus(CLOSED);
+		Order expectedResult = newOrderWithId(idToUpdate, CLOSED);
+		orderRepository.update(toUpdate);
+		assertThat(readAllOrderFromDatabase()).containsExactlyInAnyOrder(order_1, expectedResult);
 	}
 
 	@Test
 	@DisplayName("Update Order when order does not exist should throw")
-	void updateOrderWhenDoesNotExistShouldThrow() {
-		String orderId = getNewStringId();
-		Order unsavedOrder = createOrderWithId(orderId, new LinkedHashSet<OrderItem>(Arrays.asList(item_2)),
-				OrderStatus.CLOSED);
-		assertThatThrownBy(() -> orderRepository.update(unsavedOrder)).isInstanceOf(NoSuchElementException.class)
-				.hasMessage("Order with id " + orderId + " not found.");
-		assertThat(readAllOrderFromDatabase()).isEmpty();
+	void testUpdateOrderWhenItDoesNotExistShouldThrow() {
+		String missingId = getNewStringId();
+		Order missingOrder = newOrderWithId(missingId, OPEN);
+		assertThatThrownBy(() -> orderRepository.update(missingOrder)).isInstanceOf(NoSuchElementException.class)
+				.hasMessage("Order with id " + missingId + " not found.");
+	}
+
+	@Test
+	@DisplayName("Method 'update' should be bound to the repository session")
+	void testUpdateOrderShouldBeBoundToTheRepositorySession() {
+		String idToUpdate = getNewStringId();
+		Order toUpdate = newOrderWithId(idToUpdate, OPEN);
+		Order notUpdated = newOrderWithId(idToUpdate, OPEN);
+		saveTestOrderToDatabase(toUpdate);
+		toUpdate.setStatus(CLOSED);
+		session.startTransaction();
+		orderRepository.update(toUpdate);
+		assertThat(readAllOrderFromDatabase()).containsExactly(notUpdated);
+		session.commitTransaction();
 	}
 
 	// Private utility methods
@@ -181,53 +235,31 @@ class OrderMongoRepositoryTestcontainersIT {
 		return new ObjectId().toString();
 	}
 
-	private List<Order> readAllOrderFromDatabase() {
-		return StreamSupport.stream(orderCollection.find().spliterator(), false).map(orderDocument -> {
-			List<Document> itemDocuments = orderDocument.getList("items", Document.class);
-			LinkedHashSet<OrderItem> items = new LinkedHashSet<>();
-			itemDocuments.forEach(document -> items.add(fromDocumentToOrderItem(document)));
-			Order order = new Order(items, OrderStatus.valueOf(orderDocument.getString("status")));
-			order.setId(orderDocument.get("_id").toString());
-			return order;
-		}).collect(Collectors.toList());
-	}
-
-	private OrderItem fromDocumentToOrderItem(Document document) {
-		Document productDocument = productCollection.find(eq("_id", new ObjectId(document.getString("product"))))
-				.first();
-		Product product = new Product(productDocument.getString("name"), productDocument.getDouble("price"));
-		product.setId(productDocument.get("_id").toString());
-		return new OrderItem(product, document.getInteger("quantity"));
-	}
-
-	private Order createOrderWithId(String id, Set<OrderItem> items, OrderStatus status) {
-		Order order = new Order(items, status);
+	private Order newOrderWithId(String id, OrderStatus status) {
+		Order order = new Order(status);
 		order.setId(id);
 		return order;
 	}
 
-	private void addTestProductToDatabase(Product product) {
-		Document productDocument = new Document().append("name", product.getName()).append("price", product.getPrice());
-		productCollection.insertOne(productDocument);
-		product.setId(productDocument.get("_id").toString());
+	private Document fromOrderToDocument(Order orderWithId) {
+		return new Document().append("_id", new ObjectId(orderWithId.getId())).append("status",
+				orderWithId.getStatus().toString());
 	}
 
-	private void addTestOrderToDatabase(String id, Set<OrderItem> items, OrderStatus status) {
-		orderCollection.insertOne(new Document().append("_id", new ObjectId(id))
-				.append("items", itemsToDocumentList(items)).append("status", status.toString()));
+	private void saveTestOrderToDatabase(Order orderWithId) {
+		orderCollection.insertOne(fromOrderToDocument(orderWithId));
 	}
 
-	private void addTestOrderToDatabaseWithSession(ClientSession session, String id, Set<OrderItem> items,
-			OrderStatus status) {
-		orderCollection.insertOne(session, new Document().append("_id", new ObjectId(id))
-				.append("items", itemsToDocumentList(items)).append("status", status.toString()));
+	private void saveTestOrderToDatabaseWithSession(ClientSession session, Order orderWithId) {
+		orderCollection.insertOne(session, fromOrderToDocument(orderWithId));
 	}
 
-	private List<Document> itemsToDocumentList(Set<OrderItem> items) {
-		List<Document> embeddedItems = new ArrayList<>();
-		items.forEach(item -> embeddedItems.add(
-				new Document().append("product", item.getProduct().getId()).append("quantity", item.getQuantity())));
-		return embeddedItems;
+	private List<Order> readAllOrderFromDatabase() {
+		return StreamSupport.stream(orderCollection.find().spliterator(), false).map(orderDocument -> {
+			Order order = new Order(OrderStatus.valueOf(orderDocument.getString("status")));
+			order.setId(orderDocument.get("_id").toString());
+			return order;
+		}).collect(Collectors.toList());
 	}
 
 }

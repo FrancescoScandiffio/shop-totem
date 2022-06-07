@@ -2,10 +2,7 @@ package com.github.raffaelliscandiffio.repository.mysql;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -22,9 +19,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.github.raffaelliscandiffio.model.Order;
-import com.github.raffaelliscandiffio.model.OrderItem;
 import com.github.raffaelliscandiffio.model.OrderStatus;
-import com.github.raffaelliscandiffio.model.Product;
 
 @Testcontainers(disabledWithoutDocker = true)
 class OrderMySqlRepositoryIT {
@@ -33,10 +28,6 @@ class OrderMySqlRepositoryIT {
 	private static EntityManagerFactory managerFactory;
 	private EntityManager entityManager;
 	private OrderMySqlRepository orderRepository;
-	private Product product_1;
-	private Product product_2;
-	private OrderItem item_1;
-	private OrderItem item_2;
 
 	@Container
 	public static final MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0.28")
@@ -59,15 +50,9 @@ class OrderMySqlRepositoryIT {
 		entityManager = managerFactory.createEntityManager();
 		entityManager.getTransaction().begin();
 		entityManager.createQuery("DELETE FROM Order").executeUpdate();
-		entityManager.createQuery("DELETE FROM Product").executeUpdate();
 		entityManager.getTransaction().commit();
 		orderRepository = new OrderMySqlRepository(entityManager);
-		product_1 = new Product("product_1", 1.0);
-		product_2 = new Product("product_2", 2.0);
-		item_1 = new OrderItem(product_1, 5);
-		item_2 = new OrderItem(product_2, 10);
-		persistObjectToDatabase(product_1);
-		persistObjectToDatabase(product_2);
+
 	}
 
 	@AfterEach
@@ -79,59 +64,57 @@ class OrderMySqlRepositoryIT {
 	@Test
 	@DisplayName("Save Order to database with 'save'")
 	void testSaveOrder() {
-		Order order_1 = new Order(new LinkedHashSet<OrderItem>(Arrays.asList(item_1)), OrderStatus.OPEN);
+		Order order = new Order(OrderStatus.OPEN);
 		entityManager.getTransaction().begin();
-		orderRepository.save(order_1);
+		orderRepository.save(order);
 		entityManager.getTransaction().commit();
-		assertThat(readAllOrdersFromDatabase()).containsExactly(
-				newOrderWithId(order_1.getId(), new LinkedHashSet<OrderItem>(Arrays.asList(item_1)), OrderStatus.OPEN));
+		Order expectedResult = newOrderWithId(order.getId(), OrderStatus.OPEN);
+		assertThat(readAllOrdersFromDatabase()).containsExactly(expectedResult);
 	}
 
 	@Test
 	@DisplayName("Find Order by id with 'findById' when the order exists")
 	void testFindByIdWhenIdIsFound() {
-		Order order_1 = new Order(new LinkedHashSet<OrderItem>(Arrays.asList(item_1)), OrderStatus.OPEN);
-		Order order_2 = new Order(new LinkedHashSet<OrderItem>(Arrays.asList(item_2)), OrderStatus.OPEN);
-		persistObjectToDatabase(order_1);
-		persistObjectToDatabase(order_2);
-		String assignedId = order_1.getId();
-		assertThat(orderRepository.findById(assignedId)).isEqualTo(
-				newOrderWithId(assignedId, new LinkedHashSet<OrderItem>(Arrays.asList(item_1)), OrderStatus.OPEN));
+		Order order_1 = new Order(OrderStatus.OPEN);
+		Order order_2 = new Order(OrderStatus.OPEN);
+		persistOrderToDatabase(order_1);
+		persistOrderToDatabase(order_2);
+		String idToFind = order_1.getId();
+		Order expectedResult = newOrderWithId(idToFind, OrderStatus.OPEN);
+		assertThat(orderRepository.findById(idToFind)).isEqualTo(expectedResult);
 	}
 
 	@Test
 	@DisplayName("Find Order by id with 'findById' when the order does not exist should return null")
 	void testFindByIdWhenIdIsNotFoundShouldReturnNull() {
-		assertThat(orderRepository.findById("1")).isNull();
+		assertThat(orderRepository.findById("fake_id")).isNull();
 	}
 
 	@Test
 	@DisplayName("Update Order with 'update'")
 	void testUpdateOrder() {
-		Set<OrderItem> items = new LinkedHashSet<OrderItem>(Arrays.asList(item_1));
-		Order order_1 = new Order(items, OrderStatus.OPEN);
-		Order order_2 = new Order(new LinkedHashSet<OrderItem>(Arrays.asList(item_2)), OrderStatus.OPEN);
-		persistObjectToDatabase(order_1);
-		persistObjectToDatabase(order_2);
-		items.add(item_2);
+		Order toModify = new Order(OrderStatus.OPEN);
+		Order order_2 = new Order(OrderStatus.OPEN);
+		persistOrderToDatabase(toModify);
+		persistOrderToDatabase(order_2);
+		toModify.setStatus(OrderStatus.CLOSED);
+		Order expectedResult = newOrderWithId(toModify.getId(), OrderStatus.CLOSED);
 		entityManager.getTransaction().begin();
-		orderRepository.update(order_1);
+		orderRepository.update(toModify);
 		entityManager.getTransaction().commit();
-		assertThat(readAllOrdersFromDatabase()).containsExactlyInAnyOrder(
-				newOrderWithId(order_1.getId(), new LinkedHashSet<OrderItem>(Arrays.asList(item_1, item_2)),
-						OrderStatus.OPEN),
-				newOrderWithId(order_2.getId(), new LinkedHashSet<OrderItem>(Arrays.asList(item_2)), OrderStatus.OPEN));
+		assertThat(readAllOrdersFromDatabase()).containsExactlyInAnyOrder(expectedResult, order_2);
 	}
 
 	@Test
-	@DisplayName("Delete Order with 'delete'")
+	@DisplayName("Delete Order by id with 'delete'")
 	void testDeleteOrder() {
-		Order order_1 = new Order(new LinkedHashSet<OrderItem>(Arrays.asList(item_1)), OrderStatus.OPEN);
-		Order order_2 = new Order(new LinkedHashSet<OrderItem>(Arrays.asList(item_2)), OrderStatus.OPEN);
-		persistObjectToDatabase(order_1);
-		persistObjectToDatabase(order_2);
+		Order toDelete = new Order(OrderStatus.OPEN);
+		Order order_2 = new Order(OrderStatus.OPEN);
+		persistOrderToDatabase(toDelete);
+		persistOrderToDatabase(order_2);
+		String idToDelete = toDelete.getId();
 		entityManager.getTransaction().begin();
-		orderRepository.delete(order_1);
+		orderRepository.delete(idToDelete);
 		entityManager.getTransaction().commit();
 		assertThat(readAllOrdersFromDatabase()).containsExactly(order_2);
 	}
@@ -140,14 +123,14 @@ class OrderMySqlRepositoryIT {
 		return entityManager.createQuery("SELECT o FROM Order o", Order.class).getResultList();
 	}
 
-	private void persistObjectToDatabase(Object object) {
+	private void persistOrderToDatabase(Order order) {
 		entityManager.getTransaction().begin();
-		entityManager.persist(object);
+		entityManager.persist(order);
 		entityManager.getTransaction().commit();
 	}
 
-	private Order newOrderWithId(String id, Set<OrderItem> items, OrderStatus status) {
-		Order order = new Order(items, status);
+	private Order newOrderWithId(String id, OrderStatus status) {
+		Order order = new Order(status);
 		order.setId(id);
 		return order;
 	}

@@ -55,23 +55,63 @@ class ProductMongoRepositoryTestcontainersIT {
 
 	@AfterEach
 	public void tearDown() {
+		session.close();
 		client.close();
 	}
 
 	@Test
-	@DisplayName("Insert product in database with 'save'")
+	@DisplayName("Insert Product in database with 'save'")
 	void testSaveProduct() {
 		Product product = new Product(NAME_1, PRICE_1);
-		SoftAssertions softly = new SoftAssertions();
-		session.startTransaction();
 		productRepository.save(product);
 		String assignedId = product.getId();
-		softly.assertThat(readAllProductsFromDatabase()).isEmpty();
-		session.commitTransaction();
+		Product expectedResult = newProductWithId(assignedId, NAME_1, PRICE_1);
+		SoftAssertions softly = new SoftAssertions();
 		softly.assertThat(assignedId).isNotNull();
 		softly.assertThatCode(() -> new ObjectId(assignedId)).doesNotThrowAnyException();
-		softly.assertThat(readAllProductsFromDatabase()).containsExactly(newProductWithId(assignedId, NAME_1, PRICE_1));
+		softly.assertThat(readAllProductFromDatabase()).containsExactly(expectedResult);
 		softly.assertAll();
+	}
+
+	@Test
+	@DisplayName("Method 'save' should be bound to the repository session")
+	void testSaveProductShouldBeBoundToTheRepositorySession() {
+		Product product = new Product(NAME_1, PRICE_1);
+		session.startTransaction();
+		productRepository.save(product);
+		assertThat(readAllProductFromDatabase()).isEmpty();
+		session.commitTransaction();
+	}
+
+	@Test
+	@DisplayName("Retrieve Product by id with 'findById'")
+	void testFindByIdWhenIdIsFound() {
+		String idToFind = getNewStringId();
+		Product product_1 = newProductWithId(getNewStringId(), NAME_1, PRICE_1);
+		Product product_2 = newProductWithId(idToFind, NAME_1, PRICE_1);
+		Product expectedResult = newProductWithId(idToFind, NAME_1, PRICE_1);
+		saveTestProductToDatabase(product_1);
+		saveTestProductToDatabase(product_2);
+		assertThat(productRepository.findById(idToFind)).isEqualTo(expectedResult);
+	}
+
+	@Test
+	@DisplayName("Method 'findById' should return null when the id is not found")
+	void testFindByIdWhenIdIsNotFoundShouldReturnNull() {
+		String missingId = getNewStringId();
+		assertThat(productRepository.findById(missingId)).isNull();
+	}
+
+	@Test
+	@DisplayName("Method 'findById' should be bound to the repository session")
+	void testFindByIdShouldBeBoundToTheRepositorySession() {
+		String idToFind = getNewStringId();
+		Product product_1 = newProductWithId(idToFind, NAME_1, PRICE_1);
+		Product expectedResult = newProductWithId(idToFind, NAME_1, PRICE_1);
+		session.startTransaction();
+		saveTestProductToDatabaseWithSession(session, product_1);
+		assertThat(productRepository.findById(idToFind)).isEqualTo(expectedResult);
+		session.commitTransaction();
 	}
 
 	@Test
@@ -79,13 +119,13 @@ class ProductMongoRepositoryTestcontainersIT {
 	void testFindAllWhenDatabaseIsNotEmpty() {
 		String id_1 = new ObjectId().toString();
 		String id_2 = new ObjectId().toString();
-		session.startTransaction();
-		addTestProductToDatabaseWithSession(session, id_1, NAME_1, PRICE_1);
-		addTestProductToDatabaseWithSession(session, id_2, NAME_2, PRICE_2);
-		assertThat(productRepository.findAll()).containsExactlyInAnyOrder(newProductWithId(id_1, NAME_1, PRICE_1),
-				newProductWithId(id_2, NAME_2, PRICE_2));
-		session.commitTransaction();
-
+		Product product_1 = newProductWithId(id_1, NAME_1, PRICE_1);
+		Product product_2 = newProductWithId(id_2, NAME_2, PRICE_2);
+		saveTestProductToDatabase(product_1);
+		saveTestProductToDatabase(product_2);
+		Product expected_1 = newProductWithId(id_1, NAME_1, PRICE_1);
+		Product expected_2 = newProductWithId(id_2, NAME_2, PRICE_2);
+		assertThat(productRepository.findAll()).containsExactlyInAnyOrder(expected_1, expected_2);
 	}
 
 	@Test
@@ -95,43 +135,48 @@ class ProductMongoRepositoryTestcontainersIT {
 	}
 
 	@Test
-	@DisplayName("Retrieve Product by id with 'findById'")
-	void testFindByIdWhenIdIsFound() {
-		String id = new ObjectId().toString();
-		addTestProductToDatabase(id, NAME_1, PRICE_1);
-		addTestProductToDatabase(new ObjectId().toString(), NAME_2, PRICE_2);
-		assertThat(productRepository.findById(id)).isEqualTo(newProductWithId(id, NAME_1, PRICE_1));
+	@DisplayName("Method 'findAll' should be bound to the repository session")
+	void testFindAllShouldBeBoundToTheRepositorySession() {
+		String id_1 = new ObjectId().toString();
+		Product product_1 = newProductWithId(id_1, NAME_1, PRICE_1);
+		session.startTransaction();
+		saveTestProductToDatabaseWithSession(session, product_1);
+		Product expected_1 = newProductWithId(id_1, NAME_1, PRICE_1);
+		assertThat(productRepository.findAll()).containsExactly(expected_1);
+		session.commitTransaction();
 	}
 
-	@Test
-	@DisplayName("Method 'findById' should return null when the id is not found")
-	void testFindByIdWhenIdIsNotFoundShouldReturnNull() {
-		String missing_id = new ObjectId().toString();
-		assertThat(productRepository.findById(missing_id)).isNull();
-	}
+	// Private utility methods
 
-	private List<Product> readAllProductsFromDatabase() {
-		return StreamSupport.stream(productCollection.find().spliterator(), false)
-				.map(d -> newProductWithId(d.get("_id").toString(), d.getString("name"), d.getDouble("price")))
-				.collect(Collectors.toList());
-	}
-
-	private void addTestProductToDatabase(String id, String name, double price) {
-		productCollection.insertOne(toProductDocument(id, name, price));
-	}
-
-	private void addTestProductToDatabaseWithSession(ClientSession session, String id, String name, double price) {
-		productCollection.insertOne(session, toProductDocument(id, name, price));
-	}
-
-	private Document toProductDocument(String id, String name, double price) {
-		return new Document().append("_id", new ObjectId(id)).append("name", name).append("price", price);
+	private String getNewStringId() {
+		return new ObjectId().toString();
 	}
 
 	private Product newProductWithId(String id, String name, double price) {
 		Product product = new Product(name, price);
 		product.setId(id);
 		return product;
+	}
+
+	private Document fromProductToDocument(Product productWithId) {
+		return new Document().append("_id", new ObjectId(productWithId.getId())).append("name", productWithId.getName())
+				.append("price", productWithId.getPrice());
+	}
+
+	private void saveTestProductToDatabase(Product productWithId) {
+		productCollection.insertOne(fromProductToDocument(productWithId));
+	}
+
+	private void saveTestProductToDatabaseWithSession(ClientSession session, Product productWithId) {
+		productCollection.insertOne(session, fromProductToDocument(productWithId));
+	}
+
+	private List<Product> readAllProductFromDatabase() {
+		return StreamSupport.stream(productCollection.find().spliterator(), false).map(productDocument -> {
+			Product product = new Product(productDocument.getString("name"), productDocument.getDouble("price"));
+			product.setId(productDocument.get("_id").toString());
+			return product;
+		}).collect(Collectors.toList());
 	}
 
 }

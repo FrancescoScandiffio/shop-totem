@@ -1,16 +1,13 @@
 package com.github.raffaelliscandiffio.model;
 
 import java.util.Objects;
-import java.util.Set;
 
 public class Order {
 
 	private String id;
-	private Set<OrderItem> items;
 	private OrderStatus status;
 
-	public Order(Set<OrderItem> items, OrderStatus status) {
-		this.items = items;
+	public Order(OrderStatus status) {
 		this.status = status;
 	}
 
@@ -20,14 +17,6 @@ public class Order {
 
 	public void setId(String id) {
 		this.id = id;
-	}
-
-	public Set<OrderItem> getItems() {
-		return items;
-	}
-
-	public void setItems(Set<OrderItem> items) {
-		this.items = items;
 	}
 
 	public OrderStatus getStatus() {
@@ -40,7 +29,7 @@ public class Order {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, items, status);
+		return Objects.hash(id, status);
 	}
 
 	@Override
@@ -52,7 +41,7 @@ public class Order {
 		if (getClass() != obj.getClass())
 			return false;
 		Order other = (Order) obj;
-		return Objects.equals(id, other.id) && Objects.equals(items, other.items) && status == other.status;
+		return Objects.equals(id, other.id) && status == other.status;
 	}
 
 }

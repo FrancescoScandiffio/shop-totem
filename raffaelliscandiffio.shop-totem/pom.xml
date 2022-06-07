@@ -29,7 +29,7 @@
 		<testcontainers.version>1.16.3</testcontainers.version>
 		<mysql.version>8.0.28</mysql.version>
 		<hibernate.version>5.4.24.Final</hibernate.version>
-		
+
 		<picocli.version>4.6.2</picocli.version>
 
 		<sonar.coverage.exclusions>
@@ -37,7 +37,7 @@
 			**/model/Stock.java,
 			**/model/OrderItem.java,
 			**/model/Order.java,
-			**/model/OrderStatus.java,	
+			**/model/OrderStatus.java,
 			**/utils/GUITestExtension.java,
 			**/controller/TotemController.java,
 			**/app/**/*
@@ -78,7 +78,7 @@
 		<sonar.issue.ignore.multicriteria.e4.resourceKey>
 			**/swing/TotemSwingView*
 		</sonar.issue.ignore.multicriteria.e4.resourceKey>
-		
+
 		<!-- disable rule on cognitive complexity -->
 		<sonar.issue.ignore.multicriteria.e5.ruleKey>
 			java:S3776
@@ -228,30 +228,33 @@
 							<version>0.14</version>
 						</dependency>
 					</dependencies>
-         <configuration>
+					<configuration>
 
-            <targetClasses>
-               <param>*repository.mysql.OrderMySqlRepository*</param>
-               <param>*repository.mysql.StockMySqlRepository*</param>
-               <param>*repository.mysql.ProductMySqlRepository*</param>
-               <param>*transaction.mysql.TransactionManagerMySql*</param>
-             
-               <param>*repository.mongo.OrderMongoRepository*</param>
-               <param>*repository.mongo.StockMongoRepository*</param>
-               <param>*repository.mongo.ProductMongoRepository*</param>
-               <param>*transaction.mongo.TransactionManagerMongo*</param>
-            </targetClasses>
-            <targetTests>
-  				<param>*repository.mysql*</param>
-                <param>*repository.mongo*</param>
-              <param>*transaction.mysql*</param>
-              <param>*transaction.mongo*</param>            
-              </targetTests>
-            <mutators>
-   				STRONGER
-            </mutators>
-            <mutationThreshold>100</mutationThreshold>
-          </configuration>
+						<targetClasses>
+							<param>*repository.mysql.OrderMySqlRepository*</param>
+							<param>*repository.mysql.OrderItemMySqlRepository*</param>
+							<param>*repository.mysql.StockMySqlRepository*</param>
+							<param>*repository.mysql.ProductMySqlRepository*</param>
+
+							<param>*repository.mongo.OrderMongoRepository*</param>
+							<param>*repository.mongo.OrderItemMongoRepository*</param>						
+							<param>*repository.mongo.StockMongoRepository*</param>
+							<param>*repository.mongo.ProductMongoRepository*</param>
+
+							<param>*transaction.mysql.TransactionManagerMySql*</param>
+							<param>*transaction.mongo.TransactionManagerMongo*</param>
+						</targetClasses>
+						<targetTests>
+							<param>*repository.mysql*</param>
+							<param>*repository.mongo*</param>
+							<param>*transaction.mysql*</param>
+							<param>*transaction.mongo*</param>
+						</targetTests>
+						<mutators>
+							STRONGER
+						</mutators>
+						<mutationThreshold>100</mutationThreshold>
+					</configuration>
 				</plugin>
 
 				<plugin>

@@ -2,8 +2,10 @@ package com.github.raffaelliscandiffio.repository.mongo;
 
 import static com.mongodb.client.model.Filters.eq;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -33,9 +35,10 @@ class StockMongoRepositoryTestcontainersIT {
 	private static final String PRODUCT_COLLECTION_NAME = "product";
 	private static final String STOCK_COLLECTION_NAME = "stock";
 	private static final String PRODUCT_NAME_1 = "product_1";
-	private static final String PRODUCT_NAME_2 = "pasta";
+	private static final String PRODUCT_NAME_2 = "product_2";
 	private static final double PRICE = 3.0;
-	private static final int QUANTITY = 4;
+	private static final int QUANTITY_1 = 1;
+	private static final int QUANTITY_2 = 2;
 
 	@Container
 	public static final MongoDBContainer mongo = new MongoDBContainer("mongo:5.0.6");
@@ -59,125 +62,177 @@ class StockMongoRepositoryTestcontainersIT {
 		database.drop();
 		productCollection = database.getCollection(PRODUCT_COLLECTION_NAME);
 		stockCollection = database.getCollection(STOCK_COLLECTION_NAME);
-		product_1 = new Product(PRODUCT_NAME_1, PRICE);
-		product_2 = new Product(PRODUCT_NAME_2, PRICE);
-		addTestProductToDatabase(product_1);
-		addTestProductToDatabase(product_2);
+		product_1 = saveTestProductToDatabase(new Product(PRODUCT_NAME_1, PRICE));
+		product_2 = saveTestProductToDatabase(new Product(PRODUCT_NAME_2, PRICE));
 	}
 
 	@AfterEach
 	public void tearDown() {
+		session.close();
 		client.close();
 	}
 
 	@Test
 	@DisplayName("Insert Stock in database with 'save'")
-	void testSaveProduct() {
-		Stock stock = new Stock(product_1, QUANTITY);
-		session.startTransaction();
+	void testSaveStock() {
+		Stock stock = new Stock(product_1, QUANTITY_1);
 		stockRepository.save(stock);
 		String assignedId = stock.getId();
+		Stock expectedResult = newStockWithId(assignedId, product_1, QUANTITY_1);
 		SoftAssertions softly = new SoftAssertions();
 		softly.assertThat(assignedId).isNotNull();
 		softly.assertThatCode(() -> new ObjectId(assignedId)).doesNotThrowAnyException();
-		// assert that 'save' is tied to a transaction because it's state can't be read
-		// from outside before the commit
-		softly.assertThat(readAllStocksFromDatabase()).isEmpty();
-		session.commitTransaction();
-		softly.assertThat(readAllStocksFromDatabase())
-				.containsExactly(createTestStockWithId(assignedId, product_1, QUANTITY));
+		softly.assertThat(readAllStockFromDatabase()).containsExactly(expectedResult);
 		softly.assertAll();
+	}
+
+	@Test
+	@DisplayName("Method 'save' should throw when the referenced Product does not exist")
+	void testSaveStockWhenTheReferencedProductDoesNotExistShouldThrow() {
+		productCollection.drop();
+		Stock stock = new Stock(product_1, QUANTITY_1);
+		SoftAssertions softly = new SoftAssertions();
+		softly.assertThatThrownBy(() -> stockRepository.save(stock)).isInstanceOf(NoSuchElementException.class)
+				.hasMessage("Referenced Product with id " + product_1.getId() + " not found.");
+		softly.assertThat(readAllStockFromDatabase()).isEmpty();
+		softly.assertAll();
+	}
+
+	@Test
+	@DisplayName("Method 'save' should be bound to the repository session")
+	void testSaveStockShouldBeBoundToTheRepositorySession() {
+		Stock stock = new Stock(product_1, QUANTITY_1);
+		session.startTransaction();
+		stockRepository.save(stock);
+		assertThat(readAllStockFromDatabase()).isEmpty();
+		session.commitTransaction();
 	}
 
 	@Test
 	@DisplayName("Retrieve Stock by id with 'findById'")
 	void testFindByIdWhenIdIsFound() {
-		String stockId = new ObjectId().toString();
-		Product sessionProduct = new Product("product_3", 3.0);
-		addTestStockToDatabase(new ObjectId().toString(), product_2, 10);
-		session.startTransaction();
-		addTestProductToDatabaseWithSession(session, sessionProduct);
-		addTestStockToDatabaseWithSession(session, stockId, sessionProduct, QUANTITY);
-		assertThat(stockRepository.findById(stockId))
-				.isEqualTo(createTestStockWithId(stockId, sessionProduct, QUANTITY));
-		session.commitTransaction();
+		String idToFind = getNewStringId();
+		Stock stock_1 = newStockWithId(getNewStringId(), product_1, QUANTITY_1);
+		Stock stock_2 = newStockWithId(idToFind, product_2, QUANTITY_2);
+		Stock expectedResult = newStockWithId(idToFind, product_2, QUANTITY_2);
+		saveTestStockToDatabase(stock_1);
+		saveTestStockToDatabase(stock_2);
+		assertThat(stockRepository.findById(idToFind)).isEqualTo(expectedResult);
 	}
 
 	@Test
 	@DisplayName("Method 'findById' should return null when the id is not found")
 	void testFindByIdWhenIdIsNotFoundShouldReturnNull() {
-		String missing_id = new ObjectId().toString();
-		assertThat(stockRepository.findById(missing_id)).isNull();
+		String missingId = getNewStringId();
+		assertThat(stockRepository.findById(missingId)).isNull();
 	}
 
 	@Test
-	@DisplayName("Update Stock in database with 'update'")
-	void testUpdateProduct() {
-		SoftAssertions softly = new SoftAssertions();
-		String stockId = new ObjectId().toString();
-		String stockId_2 = new ObjectId().toString();
-		addTestStockToDatabase(stockId, product_1, QUANTITY);
-		addTestStockToDatabase(stockId_2, product_2, QUANTITY);
-		int modifiedQuantity = QUANTITY + 5;
+	@DisplayName("Method 'findById' should be bound to the repository session")
+	void testFindByIdShouldBeBoundToTheRepositorySession() {
+		productCollection.drop();
 		session.startTransaction();
-		stockRepository.update(createTestStockWithId(stockId, product_1, modifiedQuantity));
-		softly.assertThat(readAllStocksFromDatabase()).containsExactlyInAnyOrder(
-				createTestStockWithId(stockId, product_1, QUANTITY),
-				createTestStockWithId(stockId_2, product_2, QUANTITY));
+		saveTestProductToDatabaseWithSession(session, product_1);
+		String idToFind = getNewStringId();
+		Stock stock_1 = newStockWithId(idToFind, product_1, QUANTITY_1);
+		Stock expectedResult = newStockWithId(idToFind, product_1, QUANTITY_1);
+		
+		saveTestStockToDatabaseWithSession(session, stock_1);
+		assertThat(stockRepository.findById(idToFind)).isEqualTo(expectedResult);
 		session.commitTransaction();
-		softly.assertThat(readAllStocksFromDatabase()).containsExactlyInAnyOrder(
-				createTestStockWithId(stockId, product_1, modifiedQuantity),
-				createTestStockWithId(stockId_2, product_2, QUANTITY));
-		softly.assertAll();
 	}
 
-	private List<Stock> readAllStocksFromDatabase() {
-		return StreamSupport.stream(stockCollection.find().spliterator(), false).map(stockDocument -> {
-			String productId = stockDocument.getString("product");
-			Document productDocument = productCollection.find(eq("_id", new ObjectId(productId))).first();
-			Product product = new Product(productDocument.getString("name"), productDocument.getDouble("price"));
-			product.setId(productDocument.get("_id").toString());
-			Stock stock = createTestStockWithId(stockDocument.get("_id").toString(), product,
-					stockDocument.getInteger("quantity"));
-			return stock;
-		}).collect(Collectors.toList());
+	@Test
+	@DisplayName("Update Stock with 'update'")
+	void testUpdateStock() {
+		String idToUpdate = getNewStringId();
+		Stock stock_1 = newStockWithId(getNewStringId(), product_1, QUANTITY_1);
+		Stock toUpdate = newStockWithId(idToUpdate, product_2, QUANTITY_2);
+		saveTestStockToDatabase(stock_1);
+		saveTestStockToDatabase(toUpdate);
+		toUpdate.setQuantity(QUANTITY_1);
+		Stock expectedResult = newStockWithId(idToUpdate, product_2, QUANTITY_1);
+		stockRepository.update(toUpdate);
+		assertThat(readAllStockFromDatabase()).containsExactlyInAnyOrder(stock_1, expectedResult);
 	}
 
-	private Stock createTestStockWithId(String id, Product product, int quantity) {
+	@Test
+	@DisplayName("Update Stock when stock does not exist should throw")
+	void testUpdateStockWhenItDoesNotExistShouldThrow() {
+		String missingId = getNewStringId();
+		Stock missingStock = newStockWithId(missingId, product_1, QUANTITY_1);
+		assertThatThrownBy(() -> stockRepository.update(missingStock)).isInstanceOf(NoSuchElementException.class)
+				.hasMessage("Stock with id " + missingId + " not found.");
+
+	}
+
+	@Test
+	@DisplayName("Method 'update' should be bound to the repository session")
+	void testUpdateStockShouldBeBoundToTheRepositorySession() {
+		String idToUpdate = getNewStringId();
+		Stock toUpdate = newStockWithId(idToUpdate, product_1, QUANTITY_1);
+		Stock notUpdated = newStockWithId(idToUpdate, product_1, QUANTITY_1);
+		saveTestStockToDatabase(toUpdate);
+		toUpdate.setQuantity(QUANTITY_2);
+		session.startTransaction();
+		stockRepository.update(toUpdate);
+		assertThat(readAllStockFromDatabase()).containsExactly(notUpdated);
+		session.commitTransaction();
+	}
+
+	// Private utility methods
+
+	private String getNewStringId() {
+		return new ObjectId().toString();
+	}
+
+	private Stock newStockWithId(String id, Product product, int quantity) {
 		Stock stock = new Stock(product, quantity);
 		stock.setId(id);
 		return stock;
 	}
 
-	private void addTestProductToDatabase(Product product) {
-		Document productDocument = toProductDocument(product);
-		productCollection.insertOne(productDocument);
-		product.setId(productDocument.get("_id").toString());
+	private Document fromStockToDocument(Stock stockWithId) {
+		return new Document().append("_id", new ObjectId(stockWithId.getId()))
+				.append("product", stockWithId.getProduct().getId()).append("quantity", stockWithId.getQuantity());
 	}
 
-	private void addTestProductToDatabaseWithSession(ClientSession session, Product product) {
-		Document productDocument = toProductDocument(product);
-		productCollection.insertOne(session, productDocument);
-		product.setId(productDocument.get("_id").toString());
+	private void saveTestStockToDatabase(Stock stockWithId) {
+		stockCollection.insertOne(fromStockToDocument(stockWithId));
 	}
 
-	private Document toProductDocument(Product product) {
-		return new Document().append("name", product.getName()).append("price", product.getPrice());
+	private void saveTestStockToDatabaseWithSession(ClientSession session, Stock stockWithId) {
+		stockCollection.insertOne(session, fromStockToDocument(stockWithId));
 	}
 
-	private void addTestStockToDatabase(String objectIdString, Product product, int quantity) {
-		stockCollection.insertOne(toStockDocument(objectIdString, product, quantity));
+	private List<Stock> readAllStockFromDatabase() {
+		return StreamSupport.stream(stockCollection.find().spliterator(), false).map(stockDocument -> {
+			String productId = stockDocument.getString("product");
+			Document productDocument = productCollection.find(eq("_id", new ObjectId(productId))).first();
+			Product product = new Product(productDocument.getString("name"), productDocument.getDouble("price"));
+			product.setId(productDocument.get("_id").toString());
+			Stock stock = newStockWithId(stockDocument.get("_id").toString(), product,
+					stockDocument.getInteger("quantity"));
+			return stock;
+		}).collect(Collectors.toList());
 	}
 
-	private void addTestStockToDatabaseWithSession(ClientSession session, String objectIdString, Product product,
-			int quantity) {
-		stockCollection.insertOne(session, toStockDocument(objectIdString, product, quantity));
-
+	private Document fromProductToDocument(Product productWithoutId) {
+		return new Document().append("name", productWithoutId.getName()).append("price", productWithoutId.getPrice());
 	}
 
-	private Document toStockDocument(String objectIdString, Product product, int quantity) {
-		return new Document().append("_id", new ObjectId(objectIdString)).append("product", product.getId())
-				.append("quantity", quantity);
+	private Product saveTestProductToDatabase(Product productWithoutId) {
+		Document doc = fromProductToDocument(productWithoutId);
+		productCollection.insertOne(doc);
+		productWithoutId.setId(doc.get("_id").toString());
+		return productWithoutId;
+	}
+
+	private Product saveTestProductToDatabaseWithSession(ClientSession session, Product productWithoutId) {
+		Document doc = fromProductToDocument(productWithoutId);
+		productCollection.insertOne(session, doc);
+		productWithoutId.setId(doc.get("_id").toString());
+		return productWithoutId;
 	}
 
 }
