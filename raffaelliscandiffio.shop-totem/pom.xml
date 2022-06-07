@@ -189,6 +189,11 @@
 			<artifactId>hibernate-core</artifactId>
 			<version>${hibernate.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-c3p0</artifactId>
+			<version>${hibernate.version}</version>
+		</dependency>
 		<!-- https://mvnrepository.com/artifact/info.picocli/picocli -->
 		<dependency>
 			<groupId>info.picocli</groupId>
@@ -237,7 +242,7 @@
 							<param>*repository.mysql.ProductMySqlRepository*</param>
 
 							<param>*repository.mongo.OrderMongoRepository*</param>
-							<param>*repository.mongo.OrderItemMongoRepository*</param>						
+							<param>*repository.mongo.OrderItemMongoRepository*</param>
 							<param>*repository.mongo.StockMongoRepository*</param>
 							<param>*repository.mongo.ProductMongoRepository*</param>
 
@@ -338,6 +343,48 @@
 						<goals>
 							<goal>integration-test</goal>
 							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>io.fabric8</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>0.27.2</version>
+				<configuration>
+					<images>
+						<image>
+							<name>mysql:8.0.28</name>
+							<run>
+								<wait>
+									<log>mysqld: ready for connections</log>
+									<time>20000</time>
+								</wait>
+								<env>
+									<MYSQL_ALLOW_EMPTY_PASSWORD>1</MYSQL_ALLOW_EMPTY_PASSWORD>
+									<MYSQL_DATABASE>totem</MYSQL_DATABASE>
+								</env>
+								<ports>
+									<port>3306:3306</port>
+								</ports>
+							</run>
+						</image>
+					</images>
+				</configuration>
+				<executions>
+					<execution>
+						<id>docker:start</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>start</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>docker:stop</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>stop</goal>
 						</goals>
 					</execution>
 				</executions>
