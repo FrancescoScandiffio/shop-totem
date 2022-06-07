@@ -10,10 +10,12 @@
 		<mapping-file>/META-INF/Product.hbm.xml</mapping-file>
 		<mapping-file>/META-INF/Stock.hbm.xml</mapping-file>
 		<mapping-file>/META-INF/Order.hbm.xml</mapping-file>
+		<mapping-file>/META-INF/OrderItem.hbm.xml</mapping-file>
 		
 		<class>com.github.raffaelliscandiffio.model.Product</class>
 		<class>com.github.raffaelliscandiffio.model.Stock</class>
 		<class>com.github.raffaelliscandiffio.model.Order</class>
+		<class>com.github.raffaelliscandiffio.model.OrderItem</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		
 		<properties>
