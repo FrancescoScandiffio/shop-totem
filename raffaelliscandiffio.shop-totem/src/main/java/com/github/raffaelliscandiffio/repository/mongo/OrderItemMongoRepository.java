@@ -8,7 +8,10 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
+import com.github.raffaelliscandiffio.model.Order;
 import com.github.raffaelliscandiffio.model.OrderItem;
+import com.github.raffaelliscandiffio.model.OrderStatus;
+import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.repository.OrderItemRepository;
 import com.mongodb.MongoClient;
 import com.mongodb.client.ClientSession;
@@ -20,6 +23,9 @@ public class OrderItemMongoRepository implements OrderItemRepository {
 	private static final String FIELD_PRODUCT = "product";
 	private static final String FIELD_ORDER = "order";
 	private static final String FIELD_QUANTITY = "quantity";
+	private static final String FIELD_NAME = "name";
+	private static final String FIELD_PRICE = "price";
+	private static final String FIELD_STATUS = "status";
 
 	private ClientSession session;
 	private MongoCollection<Document> productCollection;
@@ -54,8 +60,20 @@ public class OrderItemMongoRepository implements OrderItemRepository {
 
 	@Override
 	public OrderItem findById(String id) {
-		// TODO Auto-generated method stub
-		return null;
+		Document itemDocument = orderItemCollection.find(session, eqFilter(id)).first();
+		if (itemDocument == null)
+			return null;
+		String productId = itemDocument.getString(FIELD_PRODUCT);
+		String orderId = itemDocument.getString(FIELD_ORDER);
+		Document productDocument = productCollection.find(session, eqFilter(productId)).first();
+		Document orderDocument = orderCollection.find(session, eqFilter(orderId)).first();
+		Product product = new Product(productDocument.getString(FIELD_NAME), productDocument.getDouble(FIELD_PRICE));
+		product.setId(productId);
+		Order order = new Order(OrderStatus.valueOf(orderDocument.getString(FIELD_STATUS)));
+		order.setId(orderId);
+		OrderItem orderItem = new OrderItem(product, order, itemDocument.getInteger(FIELD_QUANTITY));
+		orderItem.setId(id);
+		return orderItem;
 	}
 
 	@Override

@@ -41,6 +41,12 @@ class OrderItemMongoRepositoryIT {
 	private static final String ORDER_COLLECTION_NAME = "order";
 	private static final String ORDERITEM_COLLECTION_NAME = "orderItem";
 	private static final int QUANTITY_1 = 1;
+	private static final int QUANTITY_2 = 2;
+	private static final String NAME_1 = "product_1";
+	private static final String NAME_2 = "product_2";
+	private static final double PRICE_1 = 1.0;
+	private static final double PRICE_2 = 2.0;
+	private static final OrderStatus ORDER_OPEN = OrderStatus.OPEN;
 
 	private MongoClient client;
 	private ClientSession session;
@@ -50,7 +56,9 @@ class OrderItemMongoRepositoryIT {
 	private MongoCollection<Document> orderItemCollection;
 
 	private Product product_1;
+	private Product product_2;
 	private Order order_1;
+	private Order order_2;
 
 	@BeforeEach
 	public void setup() {
@@ -63,9 +71,10 @@ class OrderItemMongoRepositoryIT {
 		session = client.startSession();
 		orderItemRepository = new OrderItemMongoRepository(client, session, DATABASE_NAME, PRODUCT_COLLECTION_NAME,
 				ORDER_COLLECTION_NAME, ORDERITEM_COLLECTION_NAME);
-		product_1 = saveTestProductToDatabase(new Product("product_1", 1.0));
+		product_1 = saveTestProductToDatabase(new Product(NAME_1, PRICE_1));
+		product_2 = saveTestProductToDatabase(new Product(NAME_2, PRICE_2));
 		order_1 = saveTestOrderToDatabase(new Order(OrderStatus.OPEN));
-
+		order_2 = saveTestOrderToDatabase(new Order(OrderStatus.CLOSED));
 	}
 
 	@AfterEach
@@ -128,6 +137,38 @@ class OrderItemMongoRepositoryIT {
 		session.commitTransaction();
 	}
 
+	@Test
+	@DisplayName("Retrieve OrderItem by id with 'findById'")
+	void testFindByIdWhenIdIsFound() {
+		String idToFind = getNewStringId();
+		OrderItem orderItem = newOrderItemWithId(getNewStringId(), product_1, order_1, QUANTITY_1);
+		OrderItem itemToFind = newOrderItemWithId(idToFind, product_2, order_2, QUANTITY_2);
+		OrderItem expectedResult = newOrderItemWithId(idToFind, product_2, order_2, QUANTITY_2);
+		saveTestOrderItemToDatabase(orderItem);
+		saveTestOrderItemToDatabase(itemToFind);
+		assertThat(orderItemRepository.findById(idToFind)).isEqualTo(expectedResult);
+	}
+
+	@Test
+	@DisplayName("Method 'findById' should return null when the id is not found")
+	void testFindByIdWhenIdIsNotFoundShouldReturnNull() {
+		String missingId = getNewStringId();
+		assertThat(orderItemRepository.findById(missingId)).isNull();
+	}
+
+	@Test
+	@DisplayName("Method 'findById' should be bound to the repository session")
+	void testFindByIdShouldBeBoundToTheRepositorySession() {
+		session.startTransaction();
+		Product sessionProduct = saveTestProductToDatabaseWithSession(session, new Product(NAME_1, PRICE_1));
+		Order sessionOrder = saveTestOrderToDatabaseWithSession(session, new Order(ORDER_OPEN));
+		String idToFind = getNewStringId();
+		OrderItem itemToFind = newOrderItemWithId(idToFind, sessionProduct, sessionOrder, QUANTITY_1);
+		saveTestOrderItemToDatabaseWithSession(session, itemToFind);
+		assertThat(orderItemRepository.findById(idToFind)).isEqualTo(itemToFind);
+		session.commitTransaction();
+	}
+
 	// Private utility methods
 
 	private String getNewStringId() {
@@ -162,6 +203,20 @@ class OrderItemMongoRepositoryIT {
 		}).collect(Collectors.toList());
 	}
 
+	private void saveTestOrderItemToDatabase(OrderItem orderItemWithId) {
+		orderItemCollection.insertOne(fromOrderItemToDocument(orderItemWithId));
+	}
+
+	private void saveTestOrderItemToDatabaseWithSession(ClientSession session, OrderItem orderItemWithId) {
+		orderItemCollection.insertOne(session, fromOrderItemToDocument(orderItemWithId));
+	}
+
+	private Document fromOrderItemToDocument(OrderItem orderItemWithId) {
+		return new Document().append("_id", getObjectId(orderItemWithId.getId()))
+				.append("product", orderItemWithId.getProduct().getId())
+				.append("order", orderItemWithId.getOrder().getId()).append("quantity", orderItemWithId.getQuantity());
+	}
+
 	// --- Product ---
 
 	private Document fromProductToDocument(Product productWithoutId) {
@@ -171,6 +226,13 @@ class OrderItemMongoRepositoryIT {
 	private Product saveTestProductToDatabase(Product productWithoutId) {
 		Document doc = fromProductToDocument(productWithoutId);
 		productCollection.insertOne(doc);
+		productWithoutId.setId(doc.get("_id").toString());
+		return productWithoutId;
+	}
+
+	private Product saveTestProductToDatabaseWithSession(ClientSession session, Product productWithoutId) {
+		Document doc = fromProductToDocument(productWithoutId);
+		productCollection.insertOne(session, doc);
 		productWithoutId.setId(doc.get("_id").toString());
 		return productWithoutId;
 	}
