@@ -16,19 +16,17 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.model.Stock;
-import com.mongodb.MongoClient;
-import com.mongodb.ServerAddress;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
-@Testcontainers(disabledWithoutDocker = true)
+
+
 class StockMongoRepositoryIT {
 
 	private static final String DATABASE_NAME = "totem";
@@ -40,26 +38,29 @@ class StockMongoRepositoryIT {
 	private static final int QUANTITY_1 = 1;
 	private static final int QUANTITY_2 = 2;
 
-	@Container
-	public static final MongoDBContainer mongo = new MongoDBContainer("mongo:5.0.6");
 
 	private MongoClient client;
 	private ClientSession session;
 	private StockMongoRepository stockRepository;
 	private MongoCollection<Document> productCollection;
 	private MongoCollection<Document> stockCollection;
+	private MongoDatabase database;
 
 	private Product product_1;
 	private Product product_2;
 
 	@BeforeEach
 	public void setup() {
-		client = new MongoClient(new ServerAddress(mongo.getContainerIpAddress(), mongo.getFirstMappedPort()));
+		String uri = "mongodb://localhost:27017,localhost:27018,localhost:27019/?replicaSet=rs0&readPreference=primary&ssl=false";
+		client = MongoClients.create(uri);
 		session = client.startSession();
 		stockRepository = new StockMongoRepository(client, session, DATABASE_NAME, PRODUCT_COLLECTION_NAME,
 				STOCK_COLLECTION_NAME);
-		MongoDatabase database = client.getDatabase(DATABASE_NAME);
+		database = client.getDatabase(DATABASE_NAME);
 		database.drop();
+		database.createCollection(PRODUCT_COLLECTION_NAME);
+		database.createCollection(STOCK_COLLECTION_NAME);
+		
 		productCollection = database.getCollection(PRODUCT_COLLECTION_NAME);
 		stockCollection = database.getCollection(STOCK_COLLECTION_NAME);
 		product_1 = saveTestProductToDatabase(new Product(PRODUCT_NAME_1, PRICE));
@@ -130,7 +131,8 @@ class StockMongoRepositoryIT {
 	@Test
 	@DisplayName("Method 'findById' should be bound to the repository session")
 	void testFindByIdShouldBeBoundToTheRepositorySession() {
-		productCollection.drop();
+		dropAndCreateCollection(stockCollection);
+
 		session.startTransaction();
 		saveTestProductToDatabaseWithSession(session, product_1);
 		String idToFind = getNewStringId();
@@ -234,5 +236,12 @@ class StockMongoRepositoryIT {
 		productWithoutId.setId(doc.get("_id").toString());
 		return productWithoutId;
 	}
+	
+	private void dropAndCreateCollection(MongoCollection<Document> collection) {
+		String name = collection.getNamespace().getCollectionName();
+		collection.drop();
+		database.createCollection(name);
+	}
 
 }
+

@@ -370,6 +370,20 @@
 								</ports>
 							</run>
 						</image>
+						<image>
+							<name>candis/mongo-replica-set</name>
+							<run>
+								<wait>
+									<log>connecting to</log>
+									<time>50000</time>
+								</wait>
+								<ports>
+									<port>27017:27017</port>
+									<port>27018:27018</port>
+									<port>27019:27019</port>
+								</ports>
+							</run>
+						</image>
 					</images>
 				</configuration>
 				<executions>

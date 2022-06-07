@@ -7,7 +7,7 @@ import com.github.raffaelliscandiffio.repository.mongo.StockMongoRepository;
 import com.github.raffaelliscandiffio.transaction.TransactionCode;
 import com.github.raffaelliscandiffio.transaction.TransactionException;
 import com.github.raffaelliscandiffio.transaction.TransactionManager;
-import com.mongodb.MongoClient;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.ClientSession;
 
 public class TransactionManagerMongo implements TransactionManager {
