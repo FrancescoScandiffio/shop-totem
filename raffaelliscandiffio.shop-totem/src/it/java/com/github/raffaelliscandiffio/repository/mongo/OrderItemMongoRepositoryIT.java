@@ -102,9 +102,12 @@ class OrderItemMongoRepositoryIT {
 	void testSaveOrderItemWhenTheProductReferenceDoesNotExistShouldThrow() {
 		productCollection.drop();
 		OrderItem orderItem = new OrderItem(product_1, order_1, QUANTITY_1);
-		assertThatThrownBy(() -> orderItemRepository.save(orderItem)).isInstanceOf(NoSuchElementException.class)
+		SoftAssertions softly = new SoftAssertions();
+		softly.assertThatThrownBy(() -> orderItemRepository.save(orderItem)).isInstanceOf(NoSuchElementException.class)
 				.hasMessage(
 						"Reference error, cannot save OrderItem: Product with " + product_1.getId() + " not found.");
+		softly.assertThat(readAllOrderItemFromDatabase()).isEmpty();
+		softly.assertAll();
 	}
 
 	@Test
@@ -112,8 +115,11 @@ class OrderItemMongoRepositoryIT {
 	void testSaveOrderItemWhenTheOrderReferenceDoesNotExistShouldThrow() {
 		orderCollection.drop();
 		OrderItem orderItem = new OrderItem(product_1, order_1, QUANTITY_1);
-		assertThatThrownBy(() -> orderItemRepository.save(orderItem)).isInstanceOf(NoSuchElementException.class)
+		SoftAssertions softly = new SoftAssertions();
+		softly.assertThatThrownBy(() -> orderItemRepository.save(orderItem)).isInstanceOf(NoSuchElementException.class)
 				.hasMessage("Reference error, cannot save OrderItem: Order with " + order_1.getId() + " not found.");
+		softly.assertThat(readAllOrderItemFromDatabase()).isEmpty();
+		softly.assertAll();
 	}
 
 	@Test
