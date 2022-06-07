@@ -1,6 +1,7 @@
 package com.github.raffaelliscandiffio.repository.mongo;
 
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Updates.set;
 
 import java.util.NoSuchElementException;
 
@@ -16,6 +17,7 @@ import com.github.raffaelliscandiffio.repository.OrderItemRepository;
 import com.mongodb.MongoClient;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.result.UpdateResult;
 
 public class OrderItemMongoRepository implements OrderItemRepository {
 
@@ -84,7 +86,11 @@ public class OrderItemMongoRepository implements OrderItemRepository {
 
 	@Override
 	public void update(OrderItem orderItem) {
-		// TODO Auto-generated method stub
+		Bson update = set(FIELD_QUANTITY, orderItem.getQuantity());
+		String id = orderItem.getId();
+		UpdateResult result = orderItemCollection.updateOne(session, eqFilter(id), update);
+		if (result.getMatchedCount() == 0)
+			throw new NoSuchElementException("OrderItem with id " + id + " not found.");
 
 	}
 

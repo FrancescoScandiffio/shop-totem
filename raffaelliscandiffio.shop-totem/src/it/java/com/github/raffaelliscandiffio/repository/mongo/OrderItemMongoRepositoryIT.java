@@ -98,8 +98,8 @@ class OrderItemMongoRepositoryIT {
 	}
 
 	@Test
-	@DisplayName("Method 'save' should throw when the referenced product does not exist")
-	void testSaveOrderItemWhenReferencedProductDoesNotExistShouldThrow() {
+	@DisplayName("Method 'save' should throw when the product reference does not exist")
+	void testSaveOrderItemWhenTheProductReferenceDoesNotExistShouldThrow() {
 		productCollection.drop();
 		OrderItem orderItem = new OrderItem(product_1, order_1, QUANTITY_1);
 		assertThatThrownBy(() -> orderItemRepository.save(orderItem)).isInstanceOf(NoSuchElementException.class)
@@ -108,8 +108,8 @@ class OrderItemMongoRepositoryIT {
 	}
 
 	@Test
-	@DisplayName("Method 'save' should throw when the referenced order does not exist")
-	void testSaveOrderItemWhenReferencedOrderDoesNotExistShouldThrow() {
+	@DisplayName("Method 'save' should throw when the order reference does not exist")
+	void testSaveOrderItemWhenTheOrderReferenceDoesNotExistShouldThrow() {
 		orderCollection.drop();
 		OrderItem orderItem = new OrderItem(product_1, order_1, QUANTITY_1);
 		assertThatThrownBy(() -> orderItemRepository.save(orderItem)).isInstanceOf(NoSuchElementException.class)
@@ -193,6 +193,44 @@ class OrderItemMongoRepositoryIT {
 		orderItemRepository.delete(idToRemove);
 		session.commitTransaction();
 		assertThat(readAllOrderItemFromDatabase()).containsExactly(orderItem);
+	}
+
+	@Test
+	@DisplayName("Update OrderItem with 'update'")
+	void testUpdateOrderItem() {
+		String idToUpdate = getNewStringId();
+		OrderItem itemToUpdate = newOrderItemWithId(idToUpdate, product_1, order_1, QUANTITY_1);
+		OrderItem orderItem = newOrderItemWithId(getNewStringId(), product_2, order_2, QUANTITY_2);
+		saveTestOrderItemToDatabase(orderItem);
+		saveTestOrderItemToDatabase(itemToUpdate);
+		itemToUpdate.setQuantity(QUANTITY_2);
+		OrderItem expectedResult = newOrderItemWithId(idToUpdate, product_1, order_1, QUANTITY_2);
+		orderItemRepository.update(itemToUpdate);
+		assertThat(readAllOrderItemFromDatabase()).containsExactlyInAnyOrder(orderItem, expectedResult);
+	}
+
+	@Test
+	@DisplayName("Update OrderItem when orderItem does not exist should throw")
+	void testUpdateOrderItemWhenItDoesNotExistShouldThrow() {
+		String missingId = getNewStringId();
+		OrderItem missingOrderItem = newOrderItemWithId(missingId, product_1, order_1, QUANTITY_1);
+		assertThatThrownBy(() -> orderItemRepository.update(missingOrderItem))
+				.isInstanceOf(NoSuchElementException.class)
+				.hasMessage("OrderItem with id " + missingId + " not found.");
+	}
+
+	@Test
+	@DisplayName("Method 'update' should be bound to the repository session")
+	void testUpdateOrderItemShouldBeBoundToTheRepositorySession() {
+		String idToUpdate = getNewStringId();
+		OrderItem toUpdate = newOrderItemWithId(idToUpdate, product_1, order_1, QUANTITY_1);
+		OrderItem notUpdated = newOrderItemWithId(idToUpdate, product_1, order_1, QUANTITY_1);
+		saveTestOrderItemToDatabase(toUpdate);
+		toUpdate.setQuantity(QUANTITY_2);
+		session.startTransaction();
+		orderItemRepository.update(toUpdate);
+		assertThat(readAllOrderItemFromDatabase()).containsExactly(notUpdated);
+		session.commitTransaction();
 	}
 
 	// Private utility methods
