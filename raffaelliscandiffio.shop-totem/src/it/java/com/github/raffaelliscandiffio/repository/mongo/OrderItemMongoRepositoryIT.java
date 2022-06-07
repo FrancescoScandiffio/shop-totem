@@ -169,6 +169,32 @@ class OrderItemMongoRepositoryIT {
 		session.commitTransaction();
 	}
 
+	@Test
+	@DisplayName("Remove OrderItem from the collection by id with 'delete'")
+	void testDelete() {
+		String idToRemove = getNewStringId();
+		OrderItem orderItem = newOrderItemWithId(getNewStringId(), product_1, order_1, QUANTITY_1);
+		OrderItem itemToRemove = newOrderItemWithId(idToRemove, product_2, order_2, QUANTITY_2);
+		saveTestOrderItemToDatabase(orderItem);
+		saveTestOrderItemToDatabase(itemToRemove);
+		orderItemRepository.delete(idToRemove);
+		assertThat(readAllOrderItemFromDatabase()).containsExactly(orderItem);
+	}
+
+	@Test
+	@DisplayName("Method 'delete' should be bound to the repository session")
+	void testDeleteShouldBeBoundToTheRepositorySession() {
+		String idToRemove = getNewStringId();
+		OrderItem orderItem = newOrderItemWithId(getNewStringId(), product_1, order_1, QUANTITY_1);
+		OrderItem itemToRemove = newOrderItemWithId(idToRemove, product_2, order_2, QUANTITY_2);
+		session.startTransaction();
+		saveTestOrderItemToDatabaseWithSession(session, orderItem);
+		saveTestOrderItemToDatabaseWithSession(session, itemToRemove);
+		orderItemRepository.delete(idToRemove);
+		session.commitTransaction();
+		assertThat(readAllOrderItemFromDatabase()).containsExactly(orderItem);
+	}
+
 	// Private utility methods
 
 	private String getNewStringId() {

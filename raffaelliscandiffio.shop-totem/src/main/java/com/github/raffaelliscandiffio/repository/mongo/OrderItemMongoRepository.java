@@ -78,7 +78,7 @@ public class OrderItemMongoRepository implements OrderItemRepository {
 
 	@Override
 	public void delete(String id) {
-		// TODO Auto-generated method stub
+		orderItemCollection.deleteOne(session, eqFilter(id));
 
 	}
 
