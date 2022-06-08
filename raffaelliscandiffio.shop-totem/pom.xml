@@ -176,9 +176,9 @@
 
 	<build>
 		<pluginManagement>
+			<!-- Specify plug-in versions -->
 			<plugins>
 				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>2.22.2</version>
 				</plugin>
@@ -192,43 +192,8 @@
 					<artifactId>maven-site-plugin</artifactId>
 					<version>3.9.1</version>
 				</plugin>
-
-				<plugin>
-					<groupId>org.pitest</groupId>
-					<artifactId>pitest-maven</artifactId>
-					<version>1.7.3</version>
-					<dependencies>
-						<dependency>
-							<groupId>org.pitest</groupId>
-							<artifactId>pitest-junit5-plugin</artifactId>
-							<version>0.14</version>
-						</dependency>
-					</dependencies>
-					<configuration>
-
-						<excludedClasses>
-							<param>${groupId}.model.*</param>
-							<param>${groupId}.view.swing.*</param>
-
-							<!-- Exclude because there are no UT -->
-							<param>${groupId}.repository.*</param>
-							<param>${groupId}.transaction.*</param>
-
-						</excludedClasses>
-						<targetTests>
-							<!-- Run mutation testing only on unit tests -->
-							<param>${groupId}.*Test</param>
-						</targetTests>
-						<excludedTestClasses>
-							<param>${groupId}.*ViewTest</param>
-						</excludedTestClasses>
-						<mutators>
-							STRONGER
-						</mutators>
-						<mutationThreshold>100</mutationThreshold>
-					</configuration>
-				</plugin>
-
+				
+				<!--  Configuring code coverage  -->
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
@@ -252,29 +217,19 @@
 						</execution>
 					</executions>
 				</plugin>
-				<plugin>
-					<groupId>org.sonarsource.scanner.maven</groupId>
-					<artifactId>sonar-maven-plugin</artifactId>
-					<version>3.9.1.2184</version>
-				</plugin>
-				<plugin>
-					<groupId>org.eluder.coveralls</groupId>
-					<artifactId>coveralls-maven-plugin</artifactId>
-					<version>4.3.0</version>
-					<dependencies>
-						<!-- This is required when using JDK 9 or higher since javax.xml.bind 
-							has been removed from the JDK -->
-						<dependency>
-							<groupId>javax.xml.bind</groupId>
-							<artifactId>jaxb-api</artifactId>
-							<version>2.3.1</version>
-						</dependency>
-					</dependencies>
-				</plugin>
+
 			</plugins>
 		</pluginManagement>
 
+
 		<plugins>
+
+			<plugin>
+				<groupId>org.sonarsource.scanner.maven</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>3.9.1.2184</version>
+			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
@@ -282,6 +237,8 @@
 					<skipTests>${skipUTs}</skipTests>
 				</configuration>
 			</plugin>
+
+			<!-- Manually add source folders -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
@@ -301,20 +258,82 @@
 					</execution>
 				</executions>
 			</plugin>
+
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<version>3.0.0-M5</version>
 				<executions>
 					<execution>
+						<id>Integrations</id>
 						<goals>
 							<goal>integration-test</goal>
 							<goal>verify</goal>
 						</goals>
+						<configuration>
+							<includes>
+								<include>**/*IT.java</include>
+							</includes>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
 
+			<!-- Coveralls -->
+			<plugin>
+				<groupId>org.eluder.coveralls</groupId>
+				<artifactId>coveralls-maven-plugin</artifactId>
+				<version>4.3.0</version>
+				<dependencies>
+					<!-- This is required when using JDK 9 or higher since javax.xml.bind 
+						has been removed from the JDK -->
+					<dependency>
+						<groupId>javax.xml.bind</groupId>
+						<artifactId>jaxb-api</artifactId>
+						<version>2.3.1</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+
+			<!-- Mutation testing -->
+			<plugin>
+				<groupId>org.pitest</groupId>
+				<artifactId>pitest-maven</artifactId>
+				<version>1.7.3</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.pitest</groupId>
+						<artifactId>pitest-junit5-plugin</artifactId>
+						<version>0.14</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+
+					<excludedClasses>
+						<param>${groupId}.model.*</param>
+						<param>${groupId}.view.swing.*</param>
+
+						<!-- Exclude because there are no UT -->
+						<param>${groupId}.repository.*</param>
+						<param>${groupId}.transaction.*</param>
+
+					</excludedClasses>
+					<targetTests>
+						<!-- Run mutation testing only on unit tests -->
+						<param>${groupId}.*Test</param>
+					</targetTests>
+					<excludedTestClasses>
+						<param>${groupId}.*ViewTest</param>
+					</excludedTestClasses>
+					<mutators>
+						STRONGER
+					</mutators>
+					<mutationThreshold>100</mutationThreshold>
+				</configuration>
+			</plugin>
+
+			<!-- Start docker containers with databases for Integration Tests -->
 			<plugin>
 				<groupId>io.fabric8</groupId>
 				<artifactId>docker-maven-plugin</artifactId>
