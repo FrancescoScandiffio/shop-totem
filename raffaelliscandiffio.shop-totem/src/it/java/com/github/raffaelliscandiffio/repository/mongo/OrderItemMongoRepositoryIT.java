@@ -17,25 +17,21 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.github.raffaelliscandiffio.model.Order;
 import com.github.raffaelliscandiffio.model.OrderItem;
 import com.github.raffaelliscandiffio.model.OrderStatus;
 import com.github.raffaelliscandiffio.model.Product;
-import com.mongodb.MongoClient;
-import com.mongodb.ServerAddress;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
-@Testcontainers(disabledWithoutDocker = true)
+
+
 class OrderItemMongoRepositoryIT {
 
-	@Container
-	public static final MongoDBContainer mongo = new MongoDBContainer("mongo:5.0.6");
 	private static final String DATABASE_NAME = "totem";
 	private static final String PRODUCT_COLLECTION_NAME = "product";
 	private static final String ORDER_COLLECTION_NAME = "order";
@@ -54,6 +50,7 @@ class OrderItemMongoRepositoryIT {
 	private MongoCollection<Document> productCollection;
 	private MongoCollection<Document> orderCollection;
 	private MongoCollection<Document> orderItemCollection;
+	private MongoDatabase database;
 
 	private Product product_1;
 	private Product product_2;
@@ -62,12 +59,19 @@ class OrderItemMongoRepositoryIT {
 
 	@BeforeEach
 	public void setup() {
-		client = new MongoClient(new ServerAddress(mongo.getContainerIpAddress(), mongo.getFirstMappedPort()));
-		MongoDatabase database = client.getDatabase(DATABASE_NAME);
+        String uri = "mongodb://localhost:27017,localhost:27018,localhost:27019/?replicaSet=rs0&readPreference=primary&ssl=false";
+		client = MongoClients.create(uri);
+		
+		database = client.getDatabase(DATABASE_NAME);
 		database.drop();
+		database.createCollection(PRODUCT_COLLECTION_NAME);
+		database.createCollection(ORDER_COLLECTION_NAME);
+		database.createCollection(ORDERITEM_COLLECTION_NAME);
+
 		productCollection = database.getCollection(PRODUCT_COLLECTION_NAME);
 		orderCollection = database.getCollection(ORDER_COLLECTION_NAME);
 		orderItemCollection = database.getCollection(ORDERITEM_COLLECTION_NAME);
+		
 		session = client.startSession();
 		orderItemRepository = new OrderItemMongoRepository(client, session, DATABASE_NAME, PRODUCT_COLLECTION_NAME,
 				ORDER_COLLECTION_NAME, ORDERITEM_COLLECTION_NAME);
@@ -125,7 +129,7 @@ class OrderItemMongoRepositoryIT {
 	@Test
 	@DisplayName("In method 'save', the existence check of order should be bound to the repository session")
 	void testSaveOrderItemCheckOnOrderShouldBeBoundToTheRepositorySession() {
-		orderCollection.drop();
+		dropAndCreateCollection(orderItemCollection);
 		OrderItem orderItem = newOrderItemWithId(getNewStringId(), product_1, order_1, QUANTITY_1);
 		session.startTransaction();
 		saveTestOrderToDatabaseWithSession(session, order_1);
@@ -247,6 +251,12 @@ class OrderItemMongoRepositoryIT {
 
 	private ObjectId getObjectId(String id) {
 		return new ObjectId(id);
+	}
+	
+	private void dropAndCreateCollection(MongoCollection<Document> collection) {
+		String name = collection.getNamespace().getCollectionName();
+		collection.drop();
+		database.createCollection(name);
 	}
 
 	// --- OrderItem ---

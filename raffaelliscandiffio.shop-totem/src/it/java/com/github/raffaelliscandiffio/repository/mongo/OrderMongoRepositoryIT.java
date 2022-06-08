@@ -16,20 +16,18 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.github.raffaelliscandiffio.model.Order;
 import com.github.raffaelliscandiffio.model.OrderStatus;
-import com.mongodb.MongoClient;
-import com.mongodb.ServerAddress;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
-@Testcontainers(disabledWithoutDocker = true)
-class OrderMongoRepositoryTestcontainersIT {
+
+
+class OrderMongoRepositoryIT {
 
 	private static final OrderStatus CLOSED = OrderStatus.CLOSED;
 	private static final OrderStatus OPEN = OrderStatus.OPEN;
@@ -43,14 +41,16 @@ class OrderMongoRepositoryTestcontainersIT {
 	private MongoCollection<Document> orderCollection;
 	private MongoCollection<Document> itemCollection;
 
-	@Container
-	public static final MongoDBContainer mongo = new MongoDBContainer("mongo:5.0.6");
 
 	@BeforeEach
 	public void setup() {
-		client = new MongoClient(new ServerAddress(mongo.getContainerIpAddress(), mongo.getFirstMappedPort()));
+		String uri = "mongodb://localhost:27017,localhost:27018,localhost:27019/?replicaSet=rs0&readPreference=primary&ssl=false";
+		client = MongoClients.create(uri);
 		MongoDatabase database = client.getDatabase(DATABASE_NAME);
 		database.drop();
+		database.createCollection(ORDER_COLLECTION_NAME);
+		database.createCollection(ORDER_ITEM_COLLECTION_NAME);
+		
 		orderCollection = database.getCollection(ORDER_COLLECTION_NAME);
 		itemCollection = database.getCollection(ORDER_ITEM_COLLECTION_NAME);
 
@@ -263,3 +263,4 @@ class OrderMongoRepositoryTestcontainersIT {
 	}
 
 }
+

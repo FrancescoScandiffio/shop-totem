@@ -14,14 +14,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.model.Stock;
 
-@Testcontainers(disabledWithoutDocker = true)
+
 class StockMySqlRepositoryIT {
 
 	private static final int STOCK_QUANTITY = 10;
@@ -35,13 +32,10 @@ class StockMySqlRepositoryIT {
 	private StockMySqlRepository stockRepository;
 	private static final String DATABASE_NAME = "totem";
 
-	@Container
-	public static final MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0.28")
-			.withDatabaseName(DATABASE_NAME).withUsername("mysql").withPassword("mysql");
 
 	@BeforeAll
 	public static void createEntityManagerFactory() {
-		System.setProperty("db.port", mysqlContainer.getFirstMappedPort().toString());
+		System.setProperty("db.port", "3306");		
 		System.setProperty("db.name", DATABASE_NAME);
 		managerFactory = Persistence.createEntityManagerFactory("mysql-test");
 	}

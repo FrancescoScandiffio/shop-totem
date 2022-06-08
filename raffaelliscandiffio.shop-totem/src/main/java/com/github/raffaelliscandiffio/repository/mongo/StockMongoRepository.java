@@ -12,7 +12,7 @@ import org.bson.types.ObjectId;
 import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.model.Stock;
 import com.github.raffaelliscandiffio.repository.StockRepository;
-import com.mongodb.MongoClient;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.result.UpdateResult;

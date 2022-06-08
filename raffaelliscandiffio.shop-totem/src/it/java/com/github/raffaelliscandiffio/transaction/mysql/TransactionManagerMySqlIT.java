@@ -13,9 +13,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.repository.mysql.OrderItemMySqlRepository;
@@ -24,7 +21,7 @@ import com.github.raffaelliscandiffio.repository.mysql.ProductMySqlRepository;
 import com.github.raffaelliscandiffio.repository.mysql.StockMySqlRepository;
 import com.github.raffaelliscandiffio.transaction.TransactionException;
 
-@Testcontainers(disabledWithoutDocker = true)
+
 class TransactionManagerMySqlIT {
 
 	private static final String DB_NAME = "totem";
@@ -32,13 +29,10 @@ class TransactionManagerMySqlIT {
 	private EntityManager entityManager;
 	private TransactionManagerMySql transactionManager;
 
-	@Container
-	public static final MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0.28")
-			.withDatabaseName(DB_NAME).withUsername("mysql").withPassword("mysql");
 
 	@BeforeAll
-	static void setupClass() {
-		System.setProperty("db.port", mysqlContainer.getFirstMappedPort().toString());
+	public static void setupClass() {
+		System.setProperty("db.port", "3306");
 		System.setProperty("db.name", DB_NAME);
 		entityManagerFactory = Persistence.createEntityManagerFactory("mysql-test");
 

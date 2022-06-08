@@ -10,9 +10,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.repository.mongo.OrderItemMongoRepository;
@@ -20,13 +17,13 @@ import com.github.raffaelliscandiffio.repository.mongo.OrderMongoRepository;
 import com.github.raffaelliscandiffio.repository.mongo.ProductMongoRepository;
 import com.github.raffaelliscandiffio.repository.mongo.StockMongoRepository;
 import com.github.raffaelliscandiffio.transaction.TransactionException;
-import com.mongodb.MongoClient;
-import com.mongodb.ServerAddress;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.ClientSession;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
-@Testcontainers(disabledWithoutDocker = true)
+
 class TransactionManagerMongoIT {
 
 	private static final String DB_NAME = "totem";
@@ -39,8 +36,6 @@ class TransactionManagerMongoIT {
 	private static final String PRODUCT_NAME = "product";
 	private static final double PRODUCT_PRICE = 1.0;
 
-	@Container
-	public static final MongoDBContainer mongo = new MongoDBContainer("mongo:5.0.6");
 
 	private MongoClient client;
 	private MongoCollection<Document> productCollection;
@@ -48,9 +43,13 @@ class TransactionManagerMongoIT {
 
 	@BeforeEach
 	public void setup() {
-		client = new MongoClient(new ServerAddress(mongo.getContainerIpAddress(), mongo.getFirstMappedPort()));
+		String uri = "mongodb://localhost:27017,localhost:27018,localhost:27019/?replicaSet=rs0&readPreference=primary&ssl=false";
+		client = MongoClients.create(uri);
+		
 		MongoDatabase database = client.getDatabase(DB_NAME);
 		database.drop();
+		database.createCollection(PRODUCT_COLLECTION_NAME);
+
 		productCollection = database.getCollection(PRODUCT_COLLECTION_NAME);
 		transactionManager = new TransactionManagerMongo(client, DB_NAME, PRODUCT_COLLECTION_NAME,
 				STOCK_COLLECTION_NAME, ORDER_COLLECTION_NAME, ORDER_ITEM_COLLECTION_NAME);

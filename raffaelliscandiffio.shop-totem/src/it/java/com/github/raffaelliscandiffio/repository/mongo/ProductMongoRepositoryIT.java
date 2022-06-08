@@ -13,22 +13,18 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.github.raffaelliscandiffio.model.Product;
-import com.mongodb.MongoClient;
-import com.mongodb.ServerAddress;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.ClientSession;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
-@Testcontainers(disabledWithoutDocker = true)
-class ProductMongoRepositoryTestcontainersIT {
 
-	@Container
-	public static final MongoDBContainer mongo = new MongoDBContainer("mongo:5.0.6");
+
+class ProductMongoRepositoryIT {
+
 
 	private MongoClient client;
 	private ClientSession session;
@@ -44,11 +40,14 @@ class ProductMongoRepositoryTestcontainersIT {
 
 	@BeforeEach
 	public void setup() {
-		client = new MongoClient(new ServerAddress(mongo.getContainerIpAddress(), mongo.getFirstMappedPort()));
+		String uri = "mongodb://localhost:27017,localhost:27018,localhost:27019/?replicaSet=rs0&readPreference=primary&ssl=false";
+		client = MongoClients.create(uri);
 		session = client.startSession();
 		productRepository = new ProductMongoRepository(client, session, TOTEM_DB_NAME, PRODUCT_COLLECTION_NAME);
 		MongoDatabase database = client.getDatabase(TOTEM_DB_NAME);
 		database.drop();
+		database.createCollection(PRODUCT_COLLECTION_NAME);
+		
 		productCollection = database.getCollection(PRODUCT_COLLECTION_NAME);
 
 	}
@@ -180,3 +179,4 @@ class ProductMongoRepositoryTestcontainersIT {
 	}
 
 }
+
