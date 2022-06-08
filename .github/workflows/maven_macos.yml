@@ -1,4 +1,4 @@
-name: Java CI with Maven on windows and macos
+name: Java CI with Maven on MacOS
 
 on:
   pull_request:
@@ -9,13 +9,9 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-11
     env:
      workdir: raffaelliscandiffio.shop-totem
-    strategy:
-      matrix:
-        os: [macos-11, windows-2022]
-      fail-fast: false
 
     steps:
     - uses: actions/checkout@v2
@@ -23,6 +19,9 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
+    
+    - name: Install Docker
+      uses: docker-practice/actions-setup-docker@master
         
     - name: Cache Maven packages
       uses: actions/cache@v2
