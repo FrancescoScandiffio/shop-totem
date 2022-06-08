@@ -341,7 +341,7 @@
 				<configuration>
 					<images>
 						<image>
-							<name>mysql:8.0.29</name>
+							<name>mysql:latest</name>
 							<run>
 								<wait>
 									<log>mysqld: ready for connections</log>
