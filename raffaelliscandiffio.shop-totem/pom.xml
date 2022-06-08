@@ -206,26 +206,22 @@
 					</dependencies>
 					<configuration>
 
-						<targetClasses>
-							<param>*repository.mysql.OrderMySqlRepository*</param>
-							<param>*repository.mysql.OrderItemMySqlRepository*</param>
-							<param>*repository.mysql.StockMySqlRepository*</param>
-							<param>*repository.mysql.ProductMySqlRepository*</param>
+						<excludedClasses>
+							<param>${groupId}.model.*</param>
+							<param>${groupId}.view.swing.*</param>
 
-							<param>*repository.mongo.OrderMongoRepository*</param>
-							<param>*repository.mongo.OrderItemMongoRepository*</param>
-							<param>*repository.mongo.StockMongoRepository*</param>
-							<param>*repository.mongo.ProductMongoRepository*</param>
+							<!-- Exclude because there are no UT -->
+							<param>${groupId}.repository.*</param>
+							<param>${groupId}.transaction.*</param>
 
-							<param>*transaction.mysql.TransactionManagerMySql*</param>
-							<param>*transaction.mongo.TransactionManagerMongo*</param>
-						</targetClasses>
+						</excludedClasses>
 						<targetTests>
-							<param>*repository.mysql*</param>
-							<param>*repository.mongo*</param>
-							<param>*transaction.mysql*</param>
-							<param>*transaction.mongo*</param>
+							<!-- Run mutation testing only on unit tests -->
+							<param>${groupId}.*Test</param>
 						</targetTests>
+						<excludedTestClasses>
+							<param>${groupId}.*ViewTest</param>
+						</excludedTestClasses>
 						<mutators>
 							STRONGER
 						</mutators>
