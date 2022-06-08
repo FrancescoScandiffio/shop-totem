@@ -311,20 +311,20 @@
 				<configuration>
 
 					<excludedClasses>
-						<param>${groupId}.model.*</param>
-						<param>${groupId}.view.swing.*</param>
+						<param>${project.groupId}.model.*</param>
+						<param>${project.groupId}.view.swing.*</param>
 
 						<!-- Exclude because there are no UT -->
-						<param>${groupId}.repository.*</param>
-						<param>${groupId}.transaction.*</param>
+						<param>${project.groupId}.repository.*</param>
+						<param>${project.groupId}.transaction.*</param>
 
 					</excludedClasses>
 					<targetTests>
 						<!-- Run mutation testing only on unit tests -->
-						<param>${groupId}.*Test</param>
+						<param>${project.groupId}.*Test</param>
 					</targetTests>
 					<excludedTestClasses>
-						<param>${groupId}.*ViewTest</param>
+						<param>${project.groupId}.*ViewTest</param>
 					</excludedTestClasses>
 					<mutators>
 						STRONGER
