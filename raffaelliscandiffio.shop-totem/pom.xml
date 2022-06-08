@@ -345,7 +345,7 @@
 							<run>
 								<wait>
 									<log>mysqld: ready for connections</log>
-									<time>20000</time>
+									<time>60000</time>
 								</wait>
 								<env>
 									<MYSQL_ALLOW_EMPTY_PASSWORD>1</MYSQL_ALLOW_EMPTY_PASSWORD>
@@ -361,7 +361,7 @@
 							<run>
 								<wait>
 									<log>connecting to</log>
-									<time>50000</time>
+									<time>60000</time>
 								</wait>
 								<ports>
 									<port>27017:27017</port>
