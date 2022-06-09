@@ -971,9 +971,8 @@ class TotemSwingViewTest {
 				window.label("cartMessageLabel").requireText(" ");
 			}
 
-			// TODO rimosssoooooooo -1
 			@ParameterizedTest
-			@ValueSource(strings = { "0", "01", " ", "a", "1.1" })
+			@ValueSource(strings = { "-1", "0", "01", " ", "a", "1.1" })
 			@DisplayName("Show error message when the content of the spinner is not a positive integer or starts with zero")
 			void testShowErrorMessageWhenTheContentOfTheSpinnerIsNotPositiveIntegerOrStartsWithZero(String input) {
 				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
