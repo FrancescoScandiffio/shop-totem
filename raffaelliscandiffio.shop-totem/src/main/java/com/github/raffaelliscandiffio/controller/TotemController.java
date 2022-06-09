@@ -1,48 +1,120 @@
 package com.github.raffaelliscandiffio.controller;
 
+import java.util.List;
+
+import com.github.raffaelliscandiffio.model.Order;
 import com.github.raffaelliscandiffio.model.OrderItem;
+import com.github.raffaelliscandiffio.model.OrderStatus;
 import com.github.raffaelliscandiffio.model.Product;
+import com.github.raffaelliscandiffio.service.ShoppingService;
+import com.github.raffaelliscandiffio.view.TotemView;
+import com.github.raffaelliscandiffio.transaction.TransactionException;
+
 
 public class TotemController {
+	
+	private ShoppingService shoppingService;
+	private TotemView totemView;
+	
+	public TotemController(ShoppingService shoppingService, TotemView totemView) {
+		this.shoppingService = shoppingService;
+		this.totemView = totemView; 
+	}
+	
 
 	public void startShopping() {
-		// TODO Auto-generated method stub
-
+		Order order = new Order(OrderStatus.OPEN);
+		try {
+			order = shoppingService.saveOrder(order);
+			List<Product> allProducts = shoppingService.getAllProducts();
+			
+			totemView.setOrderId(order.getId());
+			totemView.showShopping();
+			totemView.showAllProducts(allProducts);
+			
+		} catch(TransactionException e){
+			totemView.showShopping();
+			totemView.showShoppingErrorMessage(e.getMessage());
+		}
 	}
+	
 
-	public void cancelShopping() {
-		// TODO Auto-generated method stub
+	public void openShopping() {
+		try {
+			List<Product> allProducts = shoppingService.getAllProducts();
+			totemView.showShopping();
+			totemView.showAllProducts(allProducts);
+		} catch(TransactionException e) {
+			totemView.showShopping();
+			totemView.showShoppingErrorMessage(e.getMessage());
+		}
+	}
+	
 
+	public void cancelShopping(String orderId) {
+		
+		shoppingService.deleteOrder(orderId);
+		totemView.resetView();
+		totemView.setOrderId(null);
+		totemView.showWelcome();
 	}
 
 	public void openOrder() {
-		// TODO Auto-generated method stub
-
+		totemView.showOrder();
 	}
 
-	public void buyProduct(Product product, int i) {
-		// TODO Auto-generated method stub
-
+	public void buyProduct(String orderId, String productId, int quantity) {
+		
+		try {
+			OrderItem orderItem = shoppingService.buyProduct(orderId, productId, quantity);
+			totemView.itemAdded(orderItem);
+			totemView.showShoppingMessage("Added " + quantity + " " + orderItem.getProduct().getName());
+		}catch(TransactionException e) {
+			totemView.showShoppingErrorMessage(e.getMessage());
+		}	
 	}
 
-	public void openShopping() {
-		// TODO Auto-generated method stub
+
+	public void removeItem(OrderItem orderItem) {
+		try {
+			shoppingService.deleteItem(orderItem);
+			totemView.itemRemoved(orderItem);
+			totemView.showCartMessage("Removed all " + orderItem.getProduct().getName());
+		} catch(TransactionException e) {
+			totemView.showCartErrorMessage(e.getMessage());
+		}
+	}
+	
+
+	public void checkout(String orderId, List<OrderItem> orderItems) {
+		try {
+			shoppingService.closeOrder(orderId, orderItems);
+			totemView.resetView();
+			totemView.showGoodbye();
+		} catch(TransactionException e) {
+			totemView.showCartErrorMessage(e.getMessage());
+		}
 
 	}
+	
 
-	public void removeItem(OrderItem item2) {
-		// TODO Auto-generated method stub
+	public void returnItem(OrderItem itemToReturn, int quantity) {
+		try {
+			OrderItem modifiedItem = shoppingService.returnItem(itemToReturn, quantity);
+			totemView.itemModified(itemToReturn, modifiedItem);
+			totemView.showCartMessage("Removed " + quantity + " " + modifiedItem.getProduct().getName());
+		}catch(TransactionException e) {
+			totemView.resetView();
+			try {
+				List<Product> allProducts = shoppingService.getAllProducts();
+				List<OrderItem> allOrderItems = shoppingService.getOrderItems(totemView.getOrderId());
+				totemView.showAllProducts(allProducts);
+				totemView.showAllOrderItems(allOrderItems);
+				totemView.showCartErrorMessage(e.getMessage());
+			}catch(TransactionException ee) {
+				totemView.showCartErrorMessage(ee.getMessage());
+			}
+		}
 
 	}
-
-	public void confirmOrder() {
-		// TODO Auto-generated method stub
-
-	}
-
-	public void returnProduct(OrderItem itemToReturn, int i) {
-		// TODO Auto-generated method stub
-
-	}
-
 }
