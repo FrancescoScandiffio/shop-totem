@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.Collectors;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
@@ -13,6 +15,7 @@ import javax.swing.JLabel;
 import com.github.raffaelliscandiffio.controller.TotemController;
 import com.github.raffaelliscandiffio.model.OrderItem;
 import com.github.raffaelliscandiffio.model.Product;
+import com.github.raffaelliscandiffio.utils.ExcludeGeneratedFromCoverage;
 import com.github.raffaelliscandiffio.view.TotemView;
 
 public class TotemSwingView extends JFrame implements TotemView {
@@ -23,6 +26,7 @@ public class TotemSwingView extends JFrame implements TotemView {
 	private ShoppingPanel shoppingPane;
 	private CartPanel cartPane;
 	private GoodbyePanel goodbyePane;
+	private String orderId;
 
 	private transient TotemController totemController;
 	private CardLayout layout;
@@ -91,7 +95,7 @@ public class TotemSwingView extends JFrame implements TotemView {
 
 	private void returnProductAction() {
 		int spinnerValue = ((Integer) cartPane.getSpinner().getValue()).intValue();
-		this.totemController.returnProduct(cartPane.getListOrderItems().getSelectedValue(), spinnerValue);
+		this.totemController.returnItem(cartPane.getListOrderItems().getSelectedValue(), spinnerValue);
 	}
 
 	private void removeItemAction() {
@@ -99,7 +103,9 @@ public class TotemSwingView extends JFrame implements TotemView {
 	}
 
 	private void confirmOrderAction() {
-		this.totemController.confirmOrder();
+		List<OrderItem> orderItemList = IntStream.range(0, getCartPane().getListOrderItemsModel().size())
+				.mapToObj(getCartPane().getListOrderItemsModel()::get).collect(Collectors.toList());
+		this.totemController.checkout(this.getOrderId(), orderItemList);
 	}
 
 	private void startShoppingAction() {
@@ -111,15 +117,16 @@ public class TotemSwingView extends JFrame implements TotemView {
 	}
 
 	private void closeShoppingAction() {
-		this.totemController.cancelShopping();
+		this.totemController.cancelShopping(this.getOrderId());
 	}
+	
 
 	private void openCartAction() {
 		this.totemController.openOrder();
 	}
 
 	private void buyProductAction() {
-		this.totemController.buyProduct(getShoppingPane().getListProducts().getSelectedValue(),
+		this.totemController.buyProduct(this.getOrderId(), getShoppingPane().getListProducts().getSelectedValue().getId(),
 				(Integer) getShoppingPane().getQuantitySpinner().getValue());
 	}
 
@@ -141,6 +148,7 @@ public class TotemSwingView extends JFrame implements TotemView {
 
 	@Override
 	public void showAllProducts(List<Product> products) {
+		getShoppingPane().getListProductsModel().removeAllElements();
 		products.stream().forEach(getShoppingPane().getListProductsModel()::addElement);
 	}
 
@@ -171,18 +179,12 @@ public class TotemSwingView extends JFrame implements TotemView {
 	@Override
 	public void itemModified(OrderItem storedItem, OrderItem modifiedItem) {
 		final DefaultListModel<OrderItem> listOrderItemsModel = getCartPane().getListOrderItemsModel();
-		listOrderItemsModel.setElementAt(modifiedItem,
-				listOrderItemsModel.indexOf(storedItem));
+		listOrderItemsModel.setElementAt(modifiedItem, listOrderItemsModel.indexOf(storedItem));
 	}
 
 	@Override
 	public void itemAdded(OrderItem newItem) {
 		getCartPane().getListOrderItemsModel().addElement(newItem);
-	}
-
-	@Override
-	public void allItemsRemoved() {
-		getCartPane().getListOrderItemsModel().clear();
 	}
 
 	@Override
@@ -202,11 +204,6 @@ public class TotemSwingView extends JFrame implements TotemView {
 	}
 
 	@Override
-	public void showWarning(String msg) {
-		setMessageWithColor(getShoppingLabel(), msg, Color.ORANGE);
-	}
-
-	@Override
 	public void showShoppingErrorMessage(String msg) {
 		setMessageWithColor(getShoppingLabel(), msg, Color.RED);
 	}
@@ -216,27 +213,16 @@ public class TotemSwingView extends JFrame implements TotemView {
 		setMessageWithColor(getCartLabel(), msg, Color.RED);
 	}
 
-	@Override
-	public void showErrorProductNotFound(String msg, Product product) {
-		getShoppingPane().getListProductsModel().removeElement(product);
-		setMessageWithColor(getShoppingLabel(), msg, Color.RED);
-	}
 
 	private JLabel getShoppingLabel() {
 		return getShoppingPane().getLblMessage();
 	}
 
+	
 	@Override
-	public void showErrorItemNotFound(String msg, OrderItem item) {
-		setMessageWithColor(getCartLabel(), msg, Color.RED);
-		getCartPane().getListOrderItemsModel().removeElement(item);
-
-	}
-
-	@Override
-	public void showErrorEmptyOrder(String msg) {
-		setMessageWithColor(getCartLabel(), msg, Color.RED);
-		getCartPane().getListOrderItemsModel().clear();
+	@ExcludeGeneratedFromCoverage
+	public String getOrderId() {
+		return this.orderId;
 	}
 
 	private JLabel getCartLabel() {
@@ -250,6 +236,27 @@ public class TotemSwingView extends JFrame implements TotemView {
 
 	CardLayout getCardLayout() {
 		return layout;
+	}
+
+	@Override
+	@ExcludeGeneratedFromCoverage
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
+	}
+
+	@Override
+	public void resetView() {
+		getShoppingPane().getListProductsModel().removeAllElements();
+		getCartPane().getListOrderItemsModel().removeAllElements();
+		this.showShoppingMessage(" ");
+		this.showCartMessage(" ");
+	}
+
+	@Override
+	public void showAllOrderItems(List<OrderItem> allOrderItems) {
+		
+		getCartPane().getListOrderItemsModel().removeAllElements();
+		allOrderItems.stream().forEach(getCartPane().getListOrderItemsModel()::addElement);
 	}
 
 }

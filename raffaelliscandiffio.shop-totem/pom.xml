@@ -202,7 +202,6 @@
 						<excludes>
 							<exclude>**/model/*</exclude>
 							<exclude>**/utils/GUITestExtension.class</exclude>
-							<exclude>**/controller/TotemController.class</exclude>
 							<exclude>**/app/**/*</exclude>
 						</excludes>
 					</configuration>
