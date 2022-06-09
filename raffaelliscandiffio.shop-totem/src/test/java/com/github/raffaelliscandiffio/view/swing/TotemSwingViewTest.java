@@ -8,6 +8,7 @@ import java.util.Arrays;
 import javax.swing.DefaultListModel;
 import javax.swing.SpinnerNumberModel;
 
+import org.assertj.core.api.SoftAssertions;
 import org.assertj.swing.annotation.GUITest;
 import org.assertj.swing.core.matcher.JButtonMatcher;
 import org.assertj.swing.core.matcher.JLabelMatcher;
@@ -43,6 +44,8 @@ class TotemSwingViewTest {
 	private FrameFixture window;
 
 	private TotemSwingView totemSwingView;
+	
+	private SoftAssertions softly;
 
 	@Mock
 	private TotemController totemController;
@@ -54,6 +57,8 @@ class TotemSwingViewTest {
 
 	@BeforeEach
 	void setup() {
+		softly = new SoftAssertions();
+		
 		GuiActionRunner.execute(() -> {
 			totemSwingView = new TotemSwingView();
 			totemSwingView.setTotemController(totemController);
@@ -72,6 +77,7 @@ class TotemSwingViewTest {
 	@Nested
 	@DisplayName("Test the change of panels")
 	class PanelShowTest {
+		
 
 		@Test
 		@DisplayName("Method 'showShopping' should show the shopping panel")
@@ -79,8 +85,9 @@ class TotemSwingViewTest {
 			GuiActionRunner
 					.execute(() -> totemSwingView.getCardLayout().show(totemSwingView.getContentPane(), "welcome"));
 			GuiActionRunner.execute(() -> totemSwingView.showShopping());
-			assertThat(totemSwingView.getShoppingPane().isShowing()).isTrue();
-			assertThat(totemSwingView.getWelcomePane().isShowing()).isFalse();
+			softly.assertThat(totemSwingView.getShoppingPane().isShowing()).isTrue();
+			softly.assertThat(totemSwingView.getWelcomePane().isShowing()).isFalse();
+			softly.assertAll();
 		}
 
 		@Test
@@ -89,8 +96,9 @@ class TotemSwingViewTest {
 			GuiActionRunner
 					.execute(() -> totemSwingView.getCardLayout().show(totemSwingView.getContentPane(), "shopping"));
 			GuiActionRunner.execute(() -> totemSwingView.showWelcome());
-			assertThat(totemSwingView.getWelcomePane().isShowing()).isTrue();
-			assertThat(totemSwingView.getShoppingPane().isShowing()).isFalse();
+			softly.assertThat(totemSwingView.getWelcomePane().isShowing()).isTrue();
+			softly.assertThat(totemSwingView.getShoppingPane().isShowing()).isFalse();
+			softly.assertAll();
 		}
 
 		@Test
@@ -99,8 +107,9 @@ class TotemSwingViewTest {
 			GuiActionRunner
 					.execute(() -> totemSwingView.getCardLayout().show(totemSwingView.getContentPane(), "shopping"));
 			GuiActionRunner.execute(() -> totemSwingView.showOrder());
-			assertThat(totemSwingView.getCartPane().isShowing()).isTrue();
-			assertThat(totemSwingView.getShoppingPane().isShowing()).isFalse();
+			softly.assertThat(totemSwingView.getCartPane().isShowing()).isTrue();
+			softly.assertThat(totemSwingView.getShoppingPane().isShowing()).isFalse();
+			softly.assertAll();
 		}
 
 		@Test
@@ -108,11 +117,12 @@ class TotemSwingViewTest {
 		void testShowGoodbyeShouldChangePanelToGoodbyePanel() {
 			GuiActionRunner.execute(() -> totemSwingView.getCardLayout().show(totemSwingView.getContentPane(), "cart"));
 			GuiActionRunner.execute(() -> totemSwingView.showGoodbye());
-			assertThat(totemSwingView.getCartPane().isShowing()).isFalse();
-			assertThat(totemSwingView.getGoodbyePane().isShowing()).isTrue();
+			softly.assertThat(totemSwingView.getCartPane().isShowing()).isFalse();
+			softly.assertThat(totemSwingView.getGoodbyePane().isShowing()).isTrue();
+			softly.assertAll();
 		}
 	}
-
+	
 	@Nested
 	@DisplayName("Test Welcome panel")
 	class WelcomePanelTest {
@@ -120,10 +130,11 @@ class TotemSwingViewTest {
 		@Test
 		@DisplayName("Welcome panel should be the only visible panel at start")
 		void testWelcomePanelShouldBeInitialPanel() {
-			assertThat(totemSwingView.getWelcomePane().isShowing()).isTrue();
-			assertThat(totemSwingView.getShoppingPane().isShowing()).isFalse();
-			assertThat(totemSwingView.getCartPane().isShowing()).isFalse();
-			assertThat(totemSwingView.getGoodbyePane().isShowing()).isFalse();
+			softly.assertThat(totemSwingView.getWelcomePane().isShowing()).isTrue();
+			softly.assertThat(totemSwingView.getShoppingPane().isShowing()).isFalse();
+			softly.assertThat(totemSwingView.getCartPane().isShowing()).isFalse();
+			softly.assertThat(totemSwingView.getGoodbyePane().isShowing()).isFalse();
+			softly.assertAll();
 		}
 
 		@Test
@@ -173,8 +184,8 @@ class TotemSwingViewTest {
 
 		@Test
 		@GUITest
-		@DisplayName("Method 'ShowAllProducts' should add the received products to shopping panel")
-		void testShowAllProductsShouldAddProductsFromTheListToShoppingPanel() {
+		@DisplayName("Method 'ShowAllProducts' should load the received products to shopping panel")
+		void testShowAllProductsShouldLoadProductsFromTheListToShoppingPanel() {
 			Product product1 = new Product("Product1", 2);
 			Product product2 = new Product("Product2", 3);
 			GuiActionRunner.execute(() -> totemSwingView.showAllProducts(Arrays.asList(product1, product2)));
@@ -184,10 +195,28 @@ class TotemSwingViewTest {
 		}
 
 		@Test
-		@DisplayName("Button 'Cancel Shopping' should delegate to TotemController 'cancelShopping'")
-		void testCancelShoppingButtonShouldDelegateToTotemControllerCancelShopping() {
+		@GUITest
+		@DisplayName("Method 'ShowAllProducts' should load the received products to shopping panel deleting old products")
+		void testShowAllProductsShouldLoadProductsFromTheListToShoppingPanelDeletingOld() {
+			Product productOld = new Product("ProductOld", 4);
+			Product product1 = new Product("Product1", 2);
+			Product product2 = new Product("Product2", 3);
+			GuiActionRunner
+					.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(productOld));
+
+			GuiActionRunner.execute(() -> totemSwingView.showAllProducts(Arrays.asList(product1, product2)));
+
+			String[] listContents = window.list("productList").contents();
+			assertThat(listContents).containsExactly("Product1 - Price: 2.0 €", "Product2 - Price: 3.0 €");
+		}
+
+		@Test
+		@DisplayName("Button 'Cancel Shopping' should delegate to TotemController 'cancelShopping' with orderId")
+		void testCancelShoppingButtonShouldDelegateToTotemControllerCancelShoppingWithOrderId() {
+			String orderId = "3";
+			totemSwingView.setOrderId(orderId);
 			window.button(JButtonMatcher.withName("shopBtnCancelShopping")).click();
-			verify(totemController).cancelShopping();
+			verify(totemController).cancelShopping(orderId);
 		}
 
 		@Test
@@ -271,12 +300,16 @@ class TotemSwingViewTest {
 		@Test
 		@DisplayName("Button 'Add' should delegate to TotemController 'buyProduct'")
 		void testAddButtonShouldDelegateToTotemControllerBuyProduct() {
+			String orderId = "3";
 			Product product = new Product("Product1", 2);
+			totemSwingView.setOrderId(orderId);
 			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
+			
 			window.list("productList").selectItem(0);
 			window.spinner("quantitySpinner").enterTextAndCommit("3");
 			window.button(JButtonMatcher.withText("Add")).click();
-			verify(totemController).buyProduct(product, 3);
+			
+			verify(totemController).buyProduct(orderId, product.getId(), 3);
 		}
 
 		@Test
@@ -292,27 +325,6 @@ class TotemSwingViewTest {
 		@DisplayName("Method 'showShoppingMessage' should show the message in the shopping label")
 		void testShowShoppingMessageShouldShowTheMessageInTheShoppingLabel() {
 			GuiActionRunner.execute(() -> totemSwingView.showShoppingMessage("Message"));
-			window.label("messageLabel").requireText("Message");
-		}
-
-		@Test
-		@GUITest
-		@DisplayName("Method 'showErrorProductNotFound' should set error message label and delete product from list")
-		void testShowErrorProductNotFoundShouldSetMessageLabelAndDeleteProductFromList() {
-			Product product1 = new Product("Product1", 2);
-			Product product2 = new Product("Product2", 3);
-			GuiActionRunner.execute(() -> totemSwingView.showAllProducts(Arrays.asList(product1, product2)));
-			GuiActionRunner.execute(() -> totemSwingView.showErrorProductNotFound("Error message", product2));
-			String[] listContents = window.list("productList").contents();
-			assertThat(listContents).containsExactly("Product1 - Price: 2.0 €");
-			window.label("messageLabel").requireText("Error message");
-		}
-
-		@Test
-		@GUITest
-		@DisplayName("Method 'showWarning' should show the warning message in the shopping label")
-		void testShowWarningShouldShowTheWarningMessageInTheShoppingLabel() {
-			GuiActionRunner.execute(() -> totemSwingView.showWarning("Message"));
 			window.label("messageLabel").requireText("Message");
 		}
 
@@ -383,22 +395,22 @@ class TotemSwingViewTest {
 					.getModel());
 			assertThat(spinnerModel.getValue()).isEqualTo(1);
 			assertThat((Integer) spinnerModel.getMinimum()).isEqualTo(1);
-
 		}
 
 		@Nested
 		@DisplayName("Test swing interface methods")
 		class TestSwingInterfaceImplementation {
-
+			
 			@Test
 			@GUITest
 			@DisplayName("Method 'itemAdded' should add the received OrderItem element to the cart list")
 			void testItemAddedShouldAddTheOrderItemToTheCartList() {
-				OrderItem newItem = new OrderItem(new Product("Product2", 2.0), new Order(OrderStatus.OPEN), 4);
-				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
-						.addElement(new OrderItem(new Product("Product1", 3.0), new Order(OrderStatus.OPEN), 5)));
+				OrderItem orderItem1 = new OrderItem(new Product("Product1", 3.0), new Order(OrderStatus.OPEN), 5);
+				OrderItem orderItem2 = new OrderItem(new Product("Product2", 2.0), new Order(OrderStatus.OPEN), 4);
+				
+				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel().addElement(orderItem1));
 
-				GuiActionRunner.execute(() -> totemSwingView.itemAdded(newItem));
+				GuiActionRunner.execute(() -> totemSwingView.itemAdded(orderItem2));
 				String[] listContents = window.list("cartList").contents();
 				assertThat(listContents).containsExactly("Product1 - Quantity: 5 - Price: 3.0 € - Subtotal: 15.0 €",
 						"Product2 - Quantity: 4 - Price: 2.0 € - Subtotal: 8.0 €");
@@ -411,6 +423,7 @@ class TotemSwingViewTest {
 				Product product = new Product("Product2", 3.0);
 				OrderItem oldItem = new OrderItem(product, new Order(OrderStatus.OPEN), 4);
 				OrderItem updatedItem = new OrderItem(product, new Order(OrderStatus.OPEN), 5);
+				
 				GuiActionRunner.execute(() -> {
 					DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
 					itemsModel.addElement(new OrderItem(new Product("Product1", 2.0), new Order(OrderStatus.OPEN), 5));
@@ -420,56 +433,8 @@ class TotemSwingViewTest {
 				String[] listContents = window.list("cartList").contents();
 				assertThat(listContents).containsExactly("Product1 - Quantity: 5 - Price: 2.0 € - Subtotal: 10.0 €",
 						"Product2 - Quantity: 5 - Price: 3.0 € - Subtotal: 15.0 €");
-
 			}
-
-			@Test
-			@GUITest
-			@DisplayName("Method 'allItemsRemoved' should remove all items from the cart list")
-			void testAllItemsRemovedShouldClearTheCartList() {
-				GuiActionRunner.execute(() -> {
-					DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
-					itemsModel.addElement(new OrderItem(new Product("Product1", 2.0), new Order(OrderStatus.OPEN), 5));
-					itemsModel.addElement(new OrderItem(new Product("Product2", 2.0), new Order(OrderStatus.OPEN), 4));
-				});
-				GuiActionRunner.execute(() -> totemSwingView.allItemsRemoved());
-				String[] listContents = window.list("cartList").contents();
-				assertThat(listContents).isEmpty();
-			}
-
-			@Test
-			@GUITest
-			@DisplayName("Method 'showErrorItemNotFound' should set error message label and delete the item from the cart list")
-			void testShowErrorItemNotFoundShouldSetMessageLabelAndDeleteItemFromCartList() {
-				OrderItem item1 = new OrderItem(new Product("Product1", 3.0), new Order(OrderStatus.OPEN), 5);
-				OrderItem item2 = new OrderItem(new Product("Product2", 1.0), new Order(OrderStatus.OPEN), 4);
-				GuiActionRunner.execute(() -> {
-					DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
-					itemsModel.addElement(item1);
-					itemsModel.addElement(item2);
-				});
-				GuiActionRunner.execute(() -> totemSwingView.showErrorItemNotFound("error message", item1));
-				window.label("cartMessageLabel").requireText("error message");
-				assertThat(window.list("cartList").contents())
-						.containsExactly("Product2 - Quantity: 4 - Price: 1.0 € - Subtotal: 4.0 €");
-			}
-
-			@Test
-			@GUITest
-			@DisplayName("Method 'showErrorEmptyOrder' should set error message label and clear the cart list")
-			void testShowErrorEmptyOrderShouldSetMessageLabelAndClearTheCartList() {
-				OrderItem item1 = new OrderItem(new Product("Product1", 3.0), new Order(OrderStatus.OPEN), 5);
-				OrderItem item2 = new OrderItem(new Product("Product2", 1.0), new Order(OrderStatus.OPEN), 4);
-				GuiActionRunner.execute(() -> {
-					DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
-					itemsModel.addElement(item1);
-					itemsModel.addElement(item2);
-				});
-				GuiActionRunner.execute(() -> totemSwingView.showErrorEmptyOrder("error message"));
-				window.label("cartMessageLabel").requireText("error message");
-				assertThat(window.list("cartList").contents()).isEmpty();
-			}
-
+			
 			@Test
 			@GUITest
 			@DisplayName("Method 'showCartMessage' should show the message in the cart label")
@@ -477,7 +442,7 @@ class TotemSwingViewTest {
 				GuiActionRunner.execute(() -> totemSwingView.showCartMessage("Message"));
 				window.label("cartMessageLabel").requireText("Message");
 			}
-
+			
 			@Test
 			@GUITest
 			@DisplayName("Method 'showCartErrorMessage' should show the error message in the cart label")
@@ -485,21 +450,89 @@ class TotemSwingViewTest {
 				GuiActionRunner.execute(() -> totemSwingView.showCartErrorMessage("Error message"));
 				window.label("cartMessageLabel").requireText("Error message");
 			}
-
+			
 			@Test
 			@GUITest
 			@DisplayName("Method 'itemRemoved' should remove the specified OrderItem from the cart")
 			void testItemRemovedShouldRemoveTheOrderItemFromTheCart() {
 				OrderItem toRemove = new OrderItem(new Product("Product2", 2.0), new Order(OrderStatus.OPEN), 4);
+				OrderItem existingOrderItem = new OrderItem(new Product("Product1", 3.0), new Order(OrderStatus.OPEN), 5);
+				
 				GuiActionRunner.execute(() -> {
 					DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
-					itemsModel.addElement(new OrderItem(new Product("Product1", 3.0), new Order(OrderStatus.OPEN), 5));
+					itemsModel.addElement(existingOrderItem);
 					itemsModel.addElement(toRemove);
 				});
 				GuiActionRunner.execute(() -> totemSwingView.itemRemoved(toRemove));
 				String[] listContents = window.list("cartList").contents();
 				assertThat(listContents).containsExactly("Product1 - Quantity: 5 - Price: 3.0 € - Subtotal: 15.0 €");
 			}
+			
+			@Test
+			@GUITest
+			@DisplayName("Method 'resetView' should set orderId to null, empty products and cart, reset labels")
+			void testStartShoppingButtonShouldDelegateToTotemControllerStartShopping() {
+				
+				Product product = new Product("Product", 3.0);
+				OrderItem storedItem = new OrderItem(product, new Order(OrderStatus.OPEN), 5);
+				
+				GuiActionRunner.execute(() -> {
+					totemSwingView.getShoppingPane().getListProductsModel().addElement(product);
+					totemSwingView.getCartPane().getListOrderItemsModel().addElement(storedItem);
+					
+					totemSwingView.getCardLayout().show(totemSwingView.getContentPane(), "shopping");
+					window.label("messageLabel").target().setText("foo");
+					
+					totemSwingView.getCardLayout().show(totemSwingView.getContentPane(), "cart");
+					window.label("cartMessageLabel").target().setText("foo");
+				});
+				
+				GuiActionRunner.execute(() -> totemSwingView.resetView());
+
+				GuiActionRunner.execute(() -> totemSwingView.getCardLayout().show(totemSwingView.getContentPane(), "shopping"));
+				String[] listContentsShopping = window.list("productList").contents();
+				softly.assertThat(listContentsShopping).isEmpty();
+				window.label("messageLabel").requireText(" ");
+				
+				GuiActionRunner.execute(() -> totemSwingView.getCardLayout().show(totemSwingView.getContentPane(), "cart"));
+				String[] listContentsCart = window.list("cartList").contents();
+				softly.assertThat(listContentsCart).isEmpty();
+				window.label("cartMessageLabel").requireText(" ");
+				
+				softly.assertAll();
+			}
+			
+			@Test
+			@GUITest
+			@DisplayName("Method 'showAllOrderItems' should load the received order items to cart panel")
+			void testshowAllOrderItemsShouldLoadOrderItemsFromTheListToCartPanel() {
+				Product product = new Product("Product", 3.0);
+				OrderItem orderItem1 = new OrderItem(product, new Order(OrderStatus.OPEN), 5);
+				OrderItem orderItem2 = new OrderItem(product, new Order(OrderStatus.OPEN), 3);
+				GuiActionRunner.execute(() -> totemSwingView.showAllOrderItems(Arrays.asList(orderItem1, orderItem2)));
+
+				String[] listContents = window.list("cartList").contents();
+				assertThat(listContents).containsExactly("Product - Quantity: 5 - Price: 3.0 € - Subtotal: 15.0 €", "Product - Quantity: 3 - Price: 3.0 € - Subtotal: 9.0 €");
+			}
+
+			@Test
+			@GUITest
+			@DisplayName("Method 'showAllOrderItems' should load the received order items to cart panel deleting old order items")
+			void testShowAllOrderItemsShouldAddOrderItemsFromTheListToCartPanelAndDeleteOld() {
+				Product product = new Product("Product", 3.0);
+				OrderItem orderItem1 = new OrderItem(product, new Order(OrderStatus.OPEN), 5);
+				OrderItem orderItem2 = new OrderItem(product, new Order(OrderStatus.OPEN), 3);
+				OrderItem orderItemOld = new OrderItem(product, new Order(OrderStatus.OPEN), 2);
+				GuiActionRunner
+						.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel().addElement(orderItemOld));
+
+				GuiActionRunner.execute(() -> totemSwingView.showAllOrderItems(Arrays.asList(orderItem1, orderItem2)));
+
+				String[] listContents = window.list("cartList").contents();
+				assertThat(listContents).containsExactly("Product - Quantity: 5 - Price: 3.0 € - Subtotal: 15.0 €", "Product - Quantity: 3 - Price: 3.0 € - Subtotal: 9.0 €");
+			}
+			
+			
 		}
 
 		@Nested
@@ -519,10 +552,12 @@ class TotemSwingViewTest {
 		class TestCancelShopping {
 
 			@Test
-			@DisplayName("Button 'Cancel Shopping' should delegate to TotemController 'cancelShopping'")
-			void testCancelShoppingButtonShouldDelegateToTotemControllerCancelShopping() {
+			@DisplayName("Button 'Cancel Shopping' should delegate to TotemController 'cancelShopping' with orderId")
+			void testCancelShoppingButtonShouldDelegateToTotemControllerCancelShoppingWithOrderId() {
+				String orderId = "3";
+				totemSwingView.setOrderId(orderId);
 				window.button(JButtonMatcher.withName("cartBtnCancelShopping")).click();
-				verify(totemController).cancelShopping();
+				verify(totemController).cancelShopping(orderId);
 			}
 		}
 
@@ -598,14 +633,24 @@ class TotemSwingViewTest {
 				GuiActionRunner.execute(() -> itemsModel.removeElementAt(0));
 				checkoutButton.requireEnabled();
 			}
-
+			
 			@Test
-			@DisplayName("Button 'Checkout' should delegate to TotemController 'confirmOrder'")
+			@DisplayName("Button 'Checkout' should delegate to TotemController 'confirmOrder' with OrderId and OrderItems")
 			void testCheckoutButtonShouldDelegateToTotemControllerConfirmOrder() {
+				String orderId = "2";
 				JButtonFixture checkoutButton = window.button(JButtonMatcher.withText("Checkout"));
+				DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
+				OrderItem orderItem1 = new OrderItem(new Product("Product1", 3.0), new Order(OrderStatus.OPEN), 5);
+				OrderItem orderItem2 = new OrderItem(new Product("Product2", 3.0), new Order(OrderStatus.OPEN), 5);
+				totemSwingView.setOrderId(orderId);
+				GuiActionRunner.execute(() -> {
+					itemsModel.addElement(orderItem1);
+					itemsModel.addElement(orderItem2);
+				});
+				
 				GuiActionRunner.execute(() -> checkoutButton.target().setEnabled(true));
 				checkoutButton.click();
-				verify(totemController).confirmOrder();
+				verify(totemController).checkout(orderId, Arrays.asList(orderItem1, orderItem2));
 			}
 		}
 
@@ -816,7 +861,7 @@ class TotemSwingViewTest {
 				window.list("cartList").selectItem(0);
 				window.spinner("cartReturnSpinner").enterTextAndCommit("3");
 				window.button(JButtonMatcher.withText("Return quantity")).click();
-				verify(totemController).returnProduct(itemToReturn, 3);
+				verify(totemController).returnItem(itemToReturn, 3);
 			}
 
 			@ParameterizedTest
@@ -926,8 +971,9 @@ class TotemSwingViewTest {
 				window.label("cartMessageLabel").requireText(" ");
 			}
 
+			// TODO rimosssoooooooo -1
 			@ParameterizedTest
-			@ValueSource(strings = { "-1", "0", "01", " ", "a", "1.1" })
+			@ValueSource(strings = { "0", "01", " ", "a", "1.1" })
 			@DisplayName("Show error message when the content of the spinner is not a positive integer or starts with zero")
 			void testShowErrorMessageWhenTheContentOfTheSpinnerIsNotPositiveIntegerOrStartsWithZero(String input) {
 				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()
@@ -1020,9 +1066,7 @@ class TotemSwingViewTest {
 				GuiActionRunner.execute(() -> listOrderItemsModel.setElementAt(modifiedItem, 0));
 				window.label("cartMessageLabel").requireText(" ");
 			}
-
 		}
-
 	}
 
 	@Nested
@@ -1051,9 +1095,4 @@ class TotemSwingViewTest {
 
 	}
 
-	private Product createTestProductWithId(String id, String name, double price) {
-		Product product = new Product(name, price);
-		product.setId(id);
-		return product;
-	}
 }

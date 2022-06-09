@@ -10,6 +10,8 @@ public interface TotemView {
 	void showShopping();
 
 	void showAllProducts(List<Product> allProducts);
+	
+	void showAllOrderItems(List<OrderItem> allOrderItems);
 
 	void showWelcome();
 
@@ -23,22 +25,18 @@ public interface TotemView {
 
 	void showShoppingErrorMessage(String msg);
 
-	void showWarning(String msg);
-
 	void itemModified(OrderItem old, OrderItem modified);
 
 	void itemRemoved(OrderItem item);
 
-	void showErrorItemNotFound(String msg, OrderItem item);
-
-	void showErrorProductNotFound(String msg, Product product);
-
-	void allItemsRemoved();
-
 	void showGoodbye();
 
-	void showErrorEmptyOrder(String msg);
-
 	void showOrder();
+	
+	void setOrderId(String orderId);
+	
+	String getOrderId();
+
+	void resetView();
 
 }
