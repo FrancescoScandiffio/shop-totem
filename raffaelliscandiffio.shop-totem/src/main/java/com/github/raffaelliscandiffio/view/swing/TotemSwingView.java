@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 
 import com.github.raffaelliscandiffio.controller.TotemController;
 import com.github.raffaelliscandiffio.model.OrderItem;
@@ -61,7 +62,8 @@ public class TotemSwingView extends JFrame implements TotemView {
 		shoppingPane.getAddProductButton().addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				buyProductAction();
+				Thread t = new Thread(TotemSwingView.this::buyProductAction);
+				t.start();
 			}
 		});
 
@@ -122,14 +124,14 @@ public class TotemSwingView extends JFrame implements TotemView {
 	private void closeShoppingAction() {
 		this.totemController.cancelShopping(this.getOrderId());
 	}
-	
 
 	private void openCartAction() {
 		this.totemController.openOrder();
 	}
 
 	private void buyProductAction() {
-		this.totemController.buyProduct(this.getOrderId(), getShoppingPane().getListProducts().getSelectedValue().getId(),
+		this.totemController.buyProduct(this.getOrderId(),
+				getShoppingPane().getListProducts().getSelectedValue().getId(),
 				(Integer) getShoppingPane().getQuantitySpinner().getValue());
 	}
 
@@ -151,8 +153,10 @@ public class TotemSwingView extends JFrame implements TotemView {
 
 	@Override
 	public void showAllProducts(List<Product> products) {
-		getShoppingPane().getListProductsModel().removeAllElements();
-		products.stream().forEach(getShoppingPane().getListProductsModel()::addElement);
+		SwingUtilities.invokeLater(() -> {
+			getShoppingPane().getListProductsModel().removeAllElements();
+			products.stream().forEach(getShoppingPane().getListProductsModel()::addElement);
+		});
 	}
 
 	@Override
@@ -181,47 +185,46 @@ public class TotemSwingView extends JFrame implements TotemView {
 
 	@Override
 	public void itemModified(OrderItem storedItem, OrderItem modifiedItem) {
-		final DefaultListModel<OrderItem> listOrderItemsModel = getCartPane().getListOrderItemsModel();
-		listOrderItemsModel.setElementAt(modifiedItem, listOrderItemsModel.indexOf(storedItem));
+		SwingUtilities.invokeLater(() -> {
+			final DefaultListModel<OrderItem> listOrderItemsModel = getCartPane().getListOrderItemsModel();
+			listOrderItemsModel.setElementAt(modifiedItem, listOrderItemsModel.indexOf(storedItem));
+		});
 	}
 
 	@Override
 	public void itemAdded(OrderItem newItem) {
-		getCartPane().getListOrderItemsModel().addElement(newItem);
+		SwingUtilities.invokeLater(() -> getCartPane().getListOrderItemsModel().addElement(newItem));
 	}
 
 	@Override
 	public void itemRemoved(OrderItem item) {
-		getCartPane().getListOrderItemsModel().removeElement(item);
-
+		SwingUtilities.invokeLater(() -> getCartPane().getListOrderItemsModel().removeElement(item));
 	}
 
 	@Override
 	public void showShoppingMessage(String msg) {
-		setMessageWithColor(getShoppingLabel(), msg, Color.BLACK);
+		SwingUtilities.invokeLater(() -> setMessageWithColor(getShoppingLabel(), msg, Color.BLACK));
 	}
 
 	@Override
 	public void showCartMessage(String msg) {
-		setMessageWithColor(getCartLabel(), msg, Color.BLACK);
+		SwingUtilities.invokeLater(() -> setMessageWithColor(getCartLabel(), msg, Color.BLACK));
 	}
 
 	@Override
 	public void showShoppingErrorMessage(String msg) {
-		setMessageWithColor(getShoppingLabel(), msg, Color.RED);
+		SwingUtilities.invokeLater(() -> setMessageWithColor(getShoppingLabel(), msg, Color.RED));
 	}
 
 	@Override
 	public void showCartErrorMessage(String msg) {
-		setMessageWithColor(getCartLabel(), msg, Color.RED);
+		SwingUtilities.invokeLater(() -> setMessageWithColor(getCartLabel(), msg, Color.RED));
 	}
-
 
 	private JLabel getShoppingLabel() {
 		return getShoppingPane().getLblMessage();
 	}
 
-	
 	@Override
 	@ExcludeGeneratedFromCoverage
 	public String getOrderId() {
@@ -249,17 +252,20 @@ public class TotemSwingView extends JFrame implements TotemView {
 
 	@Override
 	public void resetView() {
-		getShoppingPane().getListProductsModel().removeAllElements();
-		getCartPane().getListOrderItemsModel().removeAllElements();
-		this.showShoppingMessage(" ");
-		this.showCartMessage(" ");
+		SwingUtilities.invokeLater(() -> {
+			getShoppingPane().getListProductsModel().removeAllElements();
+			getCartPane().getListOrderItemsModel().removeAllElements();
+			this.showShoppingMessage(" ");
+			this.showCartMessage(" ");
+		});
 	}
 
 	@Override
 	public void showAllOrderItems(List<OrderItem> allOrderItems) {
-		
-		getCartPane().getListOrderItemsModel().removeAllElements();
-		allOrderItems.stream().forEach(getCartPane().getListOrderItemsModel()::addElement);
+		SwingUtilities.invokeLater(() -> {
+			getCartPane().getListOrderItemsModel().removeAllElements();
+			allOrderItems.stream().forEach(getCartPane().getListOrderItemsModel()::addElement);
+		});
 	}
 
 }
