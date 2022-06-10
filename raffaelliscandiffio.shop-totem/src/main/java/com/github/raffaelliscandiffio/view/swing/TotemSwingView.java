@@ -5,8 +5,6 @@ import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
-import java.util.stream.IntStream;
-import java.util.stream.Collectors;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
@@ -110,49 +108,36 @@ public class TotemSwingView extends JFrame implements TotemView {
 	}
 
 	private void removeItemAction() {
-		SwingUtilities.invokeLater(() -> {
-			this.totemController.removeItem(getCartPane().getListOrderItems().getSelectedValue());
-		});
+		SwingUtilities.invokeLater(
+				() -> this.totemController.removeItem(getCartPane().getListOrderItems().getSelectedValue()));
 	}
 
 	private void confirmOrderAction() {
-		SwingUtilities.invokeLater(() -> {
-			this.totemController.checkout(this.getOrderId());
-		});
+		SwingUtilities.invokeLater(() -> this.totemController.checkout(this.getOrderId()));
 	}
 
 	private void startShoppingAction() {
-		SwingUtilities.invokeLater(() -> {
-			this.totemController.startShopping();
-		});
+		SwingUtilities.invokeLater(() -> this.totemController.startShopping());
 	}
 
 	private void openShoppingAction() {
-		SwingUtilities.invokeLater(() -> {
-			this.totemController.openShopping();
-		});
+		SwingUtilities.invokeLater(() -> this.totemController.openShopping());
 	}
 
 	private void closeShoppingAction() {
-		SwingUtilities.invokeLater(() -> {
-			this.totemController.cancelShopping(this.getOrderId());
-		});
+		SwingUtilities.invokeLater(() -> this.totemController.cancelShopping(this.getOrderId()));
 
 	}
 
 	private void openCartAction() {
-		SwingUtilities.invokeLater(() -> {
-			this.totemController.openOrder();
-		});
+		SwingUtilities.invokeLater(() -> this.totemController.openOrder());
 
 	}
 
 	private void buyProductAction() {
-		SwingUtilities.invokeLater(() -> {
-			this.totemController.buyProduct(this.getOrderId(),
-					getShoppingPane().getListProducts().getSelectedValue().getId(),
-					(Integer) getShoppingPane().getQuantitySpinner().getValue());
-		});
+		SwingUtilities.invokeLater(() -> this.totemController.buyProduct(this.getOrderId(),
+				getShoppingPane().getListProducts().getSelectedValue().getId(),
+				(Integer) getShoppingPane().getQuantitySpinner().getValue()));
 	}
 
 	ShoppingPanel getShoppingPane() {
