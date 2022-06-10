@@ -69,68 +69,90 @@ public class TotemSwingView extends JFrame implements TotemView {
 
 		shoppingPane.addActionListener(e -> {
 			String command = e.getActionCommand();
+			Thread t;
 			if ("cancelShopping".equals(command))
-				closeShoppingAction();
+				t = new Thread(TotemSwingView.this::closeShoppingAction);
 			else
-				openCartAction();
+				t = new Thread(TotemSwingView.this::openCartAction);
+			t.start();
 		});
 
 		cartPane.getBtnReturnQuantity().addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				returnProductAction();
+				Thread t = new Thread(TotemSwingView.this::returnProductAction);
+				t.start();
 			}
 		});
 
 		cartPane.addActionListener(e -> {
 			String command = e.getActionCommand();
+			Thread t;
 			if ("openShopping".equals(command))
-				openShoppingAction();
+				t = new Thread(TotemSwingView.this::openShoppingAction);
 			else if ("cancelShopping".equals(command))
-				closeShoppingAction();
+				t = new Thread(TotemSwingView.this::closeShoppingAction);
 			else if ("checkout".equals(command))
-				confirmOrderAction();
+				t = new Thread(TotemSwingView.this::confirmOrderAction);
 			else
-				removeItemAction();
-
+				t = new Thread(TotemSwingView.this::removeItemAction);
+			t.start();
 		});
 
 		goodbyePane.addActionListener(e -> startShoppingAction());
 	}
 
 	private void returnProductAction() {
-		int spinnerValue = ((Integer) cartPane.getSpinner().getValue()).intValue();
-		this.totemController.returnItem(cartPane.getListOrderItems().getSelectedValue(), spinnerValue);
+		SwingUtilities.invokeLater(() -> {
+			int spinnerValue = ((Integer) cartPane.getSpinner().getValue()).intValue();
+			this.totemController.returnItem(cartPane.getListOrderItems().getSelectedValue(), spinnerValue);
+		});
 	}
 
 	private void removeItemAction() {
-		this.totemController.removeItem(getCartPane().getListOrderItems().getSelectedValue());
+		SwingUtilities.invokeLater(() -> {
+			this.totemController.removeItem(getCartPane().getListOrderItems().getSelectedValue());
+		});
 	}
 
 	private void confirmOrderAction() {
-		this.totemController.checkout(this.getOrderId());
+		SwingUtilities.invokeLater(() -> {
+			this.totemController.checkout(this.getOrderId());
+		});
 	}
 
 	private void startShoppingAction() {
-		this.totemController.startShopping();
+		SwingUtilities.invokeLater(() -> {
+			this.totemController.startShopping();
+		});
 	}
 
 	private void openShoppingAction() {
-		this.totemController.openShopping();
+		SwingUtilities.invokeLater(() -> {
+			this.totemController.openShopping();
+		});
 	}
 
 	private void closeShoppingAction() {
-		this.totemController.cancelShopping(this.getOrderId());
+		SwingUtilities.invokeLater(() -> {
+			this.totemController.cancelShopping(this.getOrderId());
+		});
+
 	}
 
 	private void openCartAction() {
-		this.totemController.openOrder();
+		SwingUtilities.invokeLater(() -> {
+			this.totemController.openOrder();
+		});
+
 	}
 
 	private void buyProductAction() {
-		this.totemController.buyProduct(this.getOrderId(),
-				getShoppingPane().getListProducts().getSelectedValue().getId(),
-				(Integer) getShoppingPane().getQuantitySpinner().getValue());
+		SwingUtilities.invokeLater(() -> {
+			this.totemController.buyProduct(this.getOrderId(),
+					getShoppingPane().getListProducts().getSelectedValue().getId(),
+					(Integer) getShoppingPane().getQuantitySpinner().getValue());
+		});
 	}
 
 	ShoppingPanel getShoppingPane() {
@@ -255,8 +277,8 @@ public class TotemSwingView extends JFrame implements TotemView {
 			getCartPane().getListOrderItemsModel().removeAllElements();
 		});
 	}
-	
-	@Override 
+
+	@Override
 	public void resetLabels() {
 		SwingUtilities.invokeLater(() -> {
 			this.showShoppingMessage(" ");
