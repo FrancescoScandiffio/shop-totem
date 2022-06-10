@@ -116,9 +116,9 @@ public class TotemController {
 		}
 	}
 	
-	public void checkout(String orderId, List<OrderItem> orderItems) {
+	public void checkout(String orderId) {
 		try {
-			shoppingService.closeOrder(orderId, orderItems);
+			shoppingService.closeOrder(orderId);
 			totemView.setOrderId(null);
 			totemView.resetView();
 			totemView.resetLabels();

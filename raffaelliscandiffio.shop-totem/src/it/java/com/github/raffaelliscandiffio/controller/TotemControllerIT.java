@@ -536,7 +536,7 @@ class TotemControllerIT {
 		Product product = new Product("Pasta", price);
 		OrderItem orderItem = new OrderItem(product, new Order(OrderStatus.OPEN), quantity);
 		String errorMessage = "Error Message";
-		doThrow(new TransactionException(errorMessage)).when(shoppingService).closeOrder(orderId, asList(orderItem));
+		doThrow(new TransactionException(errorMessage)).when(shoppingService).closeOrder(orderId);
 
 		totemView.setOrderId(orderId);
 		GuiActionRunner.execute(() -> {

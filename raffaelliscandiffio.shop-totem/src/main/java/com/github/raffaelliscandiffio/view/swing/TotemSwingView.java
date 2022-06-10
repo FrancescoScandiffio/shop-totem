@@ -108,9 +108,7 @@ public class TotemSwingView extends JFrame implements TotemView {
 	}
 
 	private void confirmOrderAction() {
-		List<OrderItem> orderItemList = IntStream.range(0, getCartPane().getListOrderItemsModel().size())
-				.mapToObj(getCartPane().getListOrderItemsModel()::get).collect(Collectors.toList());
-		this.totemController.checkout(this.getOrderId(), orderItemList);
+		this.totemController.checkout(this.getOrderId());
 	}
 
 	private void startShoppingAction() {

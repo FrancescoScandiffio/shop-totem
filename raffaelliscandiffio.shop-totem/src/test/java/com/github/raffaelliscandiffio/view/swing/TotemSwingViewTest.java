@@ -656,22 +656,19 @@ class TotemSwingViewTest {
 			}
 
 			@Test
-			@DisplayName("Button 'Checkout' should delegate to TotemController 'confirmOrder' with OrderId and OrderItems")
+			@DisplayName("Button 'Checkout' should delegate to TotemController 'confirmOrder' with OrderId")
 			void testCheckoutButtonShouldDelegateToTotemControllerConfirmOrder() {
 				String orderId = "2";
 				JButtonFixture checkoutButton = window.button(JButtonMatcher.withText("Checkout"));
 				DefaultListModel<OrderItem> itemsModel = totemSwingView.getCartPane().getListOrderItemsModel();
 				OrderItem orderItem1 = new OrderItem(new Product("Product1", 3.0), new Order(OrderStatus.OPEN), 5);
-				OrderItem orderItem2 = new OrderItem(new Product("Product2", 3.0), new Order(OrderStatus.OPEN), 5);
 				totemSwingView.setOrderId(orderId);
 				GuiActionRunner.execute(() -> {
 					itemsModel.addElement(orderItem1);
-					itemsModel.addElement(orderItem2);
 				});
 
-				GuiActionRunner.execute(() -> checkoutButton.target().setEnabled(true));
 				checkoutButton.click();
-				verify(totemController).checkout(orderId, Arrays.asList(orderItem1, orderItem2));
+				verify(totemController).checkout(orderId);
 			}
 		}
 
@@ -991,9 +988,10 @@ class TotemSwingViewTest {
 				window.list("cartList").clearSelection();
 				window.label("cartMessageLabel").requireText(" ");
 			}
-
+			
+	
 			@ParameterizedTest
-			@ValueSource(strings = { "-1", "0", "01", " ", "a", "1.1" })
+			@ValueSource(strings = { "0", "01", " ", "a", "1.1" })
 			@DisplayName("Show error message when the content of the spinner is not a positive integer or starts with zero")
 			void testShowErrorMessageWhenTheContentOfTheSpinnerIsNotPositiveIntegerOrStartsWithZero(String input) {
 				GuiActionRunner.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel()

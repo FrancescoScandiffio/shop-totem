@@ -187,15 +187,14 @@ class TotemControllerTest {
 		}
 		
 		@Test
-		@DisplayName("'checkout' should call closeOrder on shopping service giving the order id, list of order items, reset view, show goodbye page")
+		@DisplayName("'checkout' should call closeOrder on shopping service giving the order id, reset view, show goodbye page")
 		void testCheckoutShouldCallCloseOrderOnServiceLayerWithIdAndOrderItemsListAndResetViewAndShowGoodbye() {
 			String orderId = "3";
-			List<OrderItem> orderItems = Arrays.asList(new OrderItem(new Product("Product", 3.0), new Order(OrderStatus.OPEN), 5));
 			InOrder inOrder = Mockito.inOrder(shoppingService, totemView);
 			
-			totemController.checkout(orderId, orderItems);
+			totemController.checkout(orderId);
 			
-			inOrder.verify(shoppingService, times(1)).closeOrder(orderId, orderItems);
+			inOrder.verify(shoppingService, times(1)).closeOrder(orderId);
 			inOrder.verify(totemView, times(1)).setOrderId(null);
 			inOrder.verify(totemView, times(1)).resetView();
 			inOrder.verify(totemView, times(1)).resetLabels();
@@ -208,14 +207,13 @@ class TotemControllerTest {
 			
 			String errorMessage = "Error message";
 			String orderId = "3";
-			List<OrderItem> orderItems = Arrays.asList(new OrderItem(new Product("Product", 3.0), new Order(OrderStatus.OPEN), 5));
 
-			doThrow(new TransactionException(errorMessage)).when(shoppingService).closeOrder(any(String.class), any());
+			doThrow(new TransactionException(errorMessage)).when(shoppingService).closeOrder(any(String.class));
 			
-			totemController.checkout(orderId, orderItems);
+			totemController.checkout(orderId);
 			
 			InOrder inOrder = Mockito.inOrder(shoppingService, totemView);
-			inOrder.verify(shoppingService, times(1)).closeOrder(orderId, orderItems);
+			inOrder.verify(shoppingService, times(1)).closeOrder(orderId);
 			inOrder.verify(totemView, times(1)).showCartErrorMessage(errorMessage);
 			verifyNoMoreInteractions(shoppingService, totemView);
 			
