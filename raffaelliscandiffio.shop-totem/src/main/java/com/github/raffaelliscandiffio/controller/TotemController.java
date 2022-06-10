@@ -84,16 +84,7 @@ public class TotemController {
 			totemView.itemRemoved(orderItem);
 			totemView.showCartMessage("Removed all " + orderItem.getProduct().getName());
 		} catch(TransactionException e) {
-			totemView.resetView();
-			try {
-				List<Product> allProducts = shoppingService.getAllProducts();
-				List<OrderItem> allOrderItems = shoppingService.getOrderItems(totemView.getOrderId());
-				totemView.showAllProducts(allProducts);
-				totemView.showAllOrderItems(allOrderItems);
-				totemView.showCartErrorMessage(e.getMessage());
-			}catch(TransactionException ee) {
-				totemView.showCartErrorMessage(ee.getMessage());
-			}
+			handleDeleteError(e);
 		}
 	}
 	
@@ -103,16 +94,20 @@ public class TotemController {
 			totemView.itemModified(itemToReturn, modifiedItem);
 			totemView.showCartMessage("Removed " + quantity + " " + modifiedItem.getProduct().getName());
 		}catch(TransactionException e) {
-			totemView.resetView();
-			try {
-				List<Product> allProducts = shoppingService.getAllProducts();
-				List<OrderItem> allOrderItems = shoppingService.getOrderItems(totemView.getOrderId());
-				totemView.showAllProducts(allProducts);
-				totemView.showAllOrderItems(allOrderItems);
-				totemView.showCartErrorMessage(e.getMessage());
-			}catch(TransactionException ee) {
-				totemView.showCartErrorMessage(ee.getMessage());
-			}
+			handleDeleteError(e);
+		}
+	}
+
+	private void handleDeleteError(TransactionException e) {
+		totemView.resetView();
+		try {
+			List<Product> allProducts = shoppingService.getAllProducts();
+			List<OrderItem> allOrderItems = shoppingService.getOrderItems(totemView.getOrderId());
+			totemView.showAllProducts(allProducts);
+			totemView.showAllOrderItems(allOrderItems);
+			totemView.showCartErrorMessage(e.getMessage());
+		}catch(TransactionException ee) {
+			totemView.showCartErrorMessage(ee.getMessage());
 		}
 	}
 	
