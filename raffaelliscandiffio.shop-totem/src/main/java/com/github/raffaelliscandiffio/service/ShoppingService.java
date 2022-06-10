@@ -6,13 +6,12 @@ import com.github.raffaelliscandiffio.model.Order;
 import com.github.raffaelliscandiffio.model.OrderItem;
 import com.github.raffaelliscandiffio.model.Product;
 
-public interface ShoppingService  {
-	
-	
+public interface ShoppingService {
+
 	public List<Product> getAllProducts();
-	
-	public Order saveOrder(Order order);
-	
+
+	public Order openNewOrder();
+
 	public void deleteOrder(String orderId);
 
 	public void closeOrder(String orderId);
@@ -20,9 +19,9 @@ public interface ShoppingService  {
 	public void deleteItem(OrderItem orderItem);
 
 	public OrderItem returnItem(OrderItem orderItem, int quantityReturned);
-	
+
 	public List<OrderItem> getOrderItems(String orderId);
 
 	public OrderItem buyProduct(String orderId, String productId, int quantity);
-	
+
 }
