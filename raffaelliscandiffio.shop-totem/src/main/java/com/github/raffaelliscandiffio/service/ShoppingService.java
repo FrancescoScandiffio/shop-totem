@@ -15,7 +15,7 @@ public interface ShoppingService  {
 	
 	public void deleteOrder(String orderId);
 
-	public void closeOrder(String orderId, List<OrderItem> orderItems);
+	public void closeOrder(String orderId);
 
 	public void deleteItem(OrderItem orderItem);
 

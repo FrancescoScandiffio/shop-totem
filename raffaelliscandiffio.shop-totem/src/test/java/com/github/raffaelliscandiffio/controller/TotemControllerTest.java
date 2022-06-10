@@ -72,7 +72,9 @@ class TotemControllerTest {
 
 			inOrder.verify(shoppingService, times(1)).saveOrder(orderCaptorShoppingService.capture());
 			assertThat(orderCaptorShoppingService.getValue().getStatus()).isEqualTo(OrderStatus.OPEN);
-
+			
+			inOrder.verify(totemView, times(1)).resetView();
+			inOrder.verify(totemView, times(1)).resetLabels();
 			inOrder.verify(totemView, times(1)).setOrderId(idReturned);
 			inOrder.verify(totemView, times(1)).showShopping();
 			inOrder.verify(totemView, times(1)).showAllProducts(productList);
@@ -89,6 +91,7 @@ class TotemControllerTest {
 			totemController.startShopping();
 
 			InOrder inOrder = Mockito.inOrder(totemView);
+			inOrder.verify(totemView, times(1)).resetView();
 			inOrder.verify(totemView, times(1)).showShopping();
 			inOrder.verify(totemView, times(1)).showShoppingErrorMessage(errorMessage);
 
@@ -106,6 +109,7 @@ class TotemControllerTest {
 			totemController.startShopping();
 
 			InOrder inOrder = Mockito.inOrder(totemView);
+			inOrder.verify(totemView, times(1)).resetView();
 			inOrder.verify(totemView, times(1)).showShopping();
 			inOrder.verify(totemView, times(1)).showShoppingErrorMessage(errorMessage);
 
@@ -163,21 +167,37 @@ class TotemControllerTest {
 			
 			inOrder.verify(shoppingService, times(1)).deleteOrder(orderId);
 			inOrder.verify(totemView, times(1)).resetView();
+			inOrder.verify(totemView, times(1)).resetLabels();
 			inOrder.verify(totemView, times(1)).setOrderId(null);
 			inOrder.verify(totemView, times(1)).showWelcome();
 		}
 		
 		@Test
-		@DisplayName("'checkout' should call closeOrder on shopping service giving the order id, list of order items, reset view, show goodbye page")
+		@DisplayName("'cancelShopping' should show error when deleteOrder throws")
+		void testCancelShoppingShouldShowErrorWhenDeleteOrderThrows() {
+			String orderId = "3";
+			InOrder inOrder = Mockito.inOrder(shoppingService, totemView);
+			String errorMessage = "Error message";
+			doThrow(new TransactionException(errorMessage)).when(shoppingService).deleteOrder(orderId);
+			
+			totemController.cancelShopping(orderId);
+			
+			inOrder.verify(totemView, times(1)).showCartErrorMessage(errorMessage);
+			verifyNoMoreInteractions(shoppingService, totemView);
+		}
+		
+		@Test
+		@DisplayName("'checkout' should call closeOrder on shopping service giving the order id, reset view, show goodbye page")
 		void testCheckoutShouldCallCloseOrderOnServiceLayerWithIdAndOrderItemsListAndResetViewAndShowGoodbye() {
 			String orderId = "3";
-			List<OrderItem> orderItems = Arrays.asList(new OrderItem(new Product("Product", 3.0), new Order(OrderStatus.OPEN), 5));
 			InOrder inOrder = Mockito.inOrder(shoppingService, totemView);
 			
-			totemController.checkout(orderId, orderItems);
+			totemController.checkout(orderId);
 			
-			inOrder.verify(shoppingService, times(1)).closeOrder(orderId, orderItems);
+			inOrder.verify(shoppingService, times(1)).closeOrder(orderId);
+			inOrder.verify(totemView, times(1)).setOrderId(null);
 			inOrder.verify(totemView, times(1)).resetView();
+			inOrder.verify(totemView, times(1)).resetLabels();
 			inOrder.verify(totemView, times(1)).showGoodbye();
 		}
 		
@@ -187,14 +207,13 @@ class TotemControllerTest {
 			
 			String errorMessage = "Error message";
 			String orderId = "3";
-			List<OrderItem> orderItems = Arrays.asList(new OrderItem(new Product("Product", 3.0), new Order(OrderStatus.OPEN), 5));
 
-			doThrow(new TransactionException(errorMessage)).when(shoppingService).closeOrder(any(String.class), any());
+			doThrow(new TransactionException(errorMessage)).when(shoppingService).closeOrder(any(String.class));
 			
-			totemController.checkout(orderId, orderItems);
+			totemController.checkout(orderId);
 			
 			InOrder inOrder = Mockito.inOrder(shoppingService, totemView);
-			inOrder.verify(shoppingService, times(1)).closeOrder(orderId, orderItems);
+			inOrder.verify(shoppingService, times(1)).closeOrder(orderId);
 			inOrder.verify(totemView, times(1)).showCartErrorMessage(errorMessage);
 			verifyNoMoreInteractions(shoppingService, totemView);
 			
@@ -232,15 +251,63 @@ class TotemControllerTest {
 		@Test
 		@DisplayName("'removeItem' when deleteItem throws should set error message and not delete orderItem from view")
 		void testRemoveItemShouldSetErrorMessageAndNotRemoveItemFromViewWhenDeleteItemThrows() {
+			String orderId = "1";
+			List<Product> productList = Arrays.asList(new Product("pizza", 3));
+			List<OrderItem> orderItemList = Arrays.asList(orderItem);
 			
 			doThrow(new TransactionException(errorMessage)).when(shoppingService).deleteItem(any(OrderItem.class));
+			when(shoppingService.getAllProducts()).thenReturn(productList);
+			when(shoppingService.getOrderItems(orderId)).thenReturn(orderItemList);
+			when(totemView.getOrderId()).thenReturn(orderId);
 			InOrder inOrder = Mockito.inOrder(shoppingService, totemView);
 			
 			totemController.removeItem(orderItem);
 			
 			inOrder.verify(shoppingService, times(1)).deleteItem(orderItem);
+			inOrder.verify(totemView, times(1)).resetView();
+			inOrder.verify(shoppingService, times(1)).getAllProducts();
+			inOrder.verify(shoppingService, times(1)).getOrderItems(orderId);
+			inOrder.verify(totemView, times(1)).showAllProducts(productList);
+			inOrder.verify(totemView, times(1)).showAllOrderItems(orderItemList);
 			inOrder.verify(totemView, times(1)).showCartErrorMessage(errorMessage);
 			verifyNoMoreInteractions(totemView);
+		}
+		
+		@Test
+		@DisplayName("'removeItem' should resetView and set error message when deleteItem throws and getAllProducts throws")
+		void testRemoveItemShouldResetViewAndSetErrorMessageWhenDeleteItemAndGetAllProductsThrows() {
+
+			doThrow(new TransactionException(errorMessage)).when(shoppingService).deleteItem(any(OrderItem.class));
+			doThrow(new TransactionException(errorMessage)).when(shoppingService).getAllProducts();
+			
+			totemController.removeItem(orderItem);
+			
+			InOrder inOrder = Mockito.inOrder(shoppingService, totemView);
+			inOrder.verify(totemView, times(1)).resetView();
+			inOrder.verify(shoppingService, times(1)).getAllProducts();
+			inOrder.verify(totemView, times(1)).showCartErrorMessage(errorMessage);
+			verifyNoMoreInteractions(totemView, shoppingService);
+		}
+		
+		@Test
+		@DisplayName("'removeItem' should resetView and set error message when deleteItem throws and getOrderItems throws")
+		void testRemoveItemShouldResetViewAndSetErrorMessageWhenDeleteItemAndGetOrderItemsThrows() {
+
+			String orderId = "1";
+			
+			doThrow(new TransactionException(errorMessage)).when(shoppingService).deleteItem(any(OrderItem.class));
+			doThrow(new TransactionException(errorMessage)).when(shoppingService).getOrderItems(orderId);
+			when(totemView.getOrderId()).thenReturn(orderId);
+
+			InOrder inOrder = Mockito.inOrder(shoppingService, totemView);
+			
+			totemController.removeItem(orderItem);
+			
+			inOrder.verify(totemView, times(1)).resetView();
+			inOrder.verify(shoppingService, times(1)).getAllProducts();
+			inOrder.verify(shoppingService, times(1)).getOrderItems(orderId);
+			inOrder.verify(totemView, times(1)).showCartErrorMessage(errorMessage);
+			verifyNoMoreInteractions(totemView, shoppingService);
 		}
 		
 		@Test

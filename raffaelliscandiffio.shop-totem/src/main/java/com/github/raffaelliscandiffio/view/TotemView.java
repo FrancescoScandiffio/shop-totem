@@ -38,5 +38,7 @@ public interface TotemView {
 	String getOrderId();
 
 	void resetView();
+	
+	void resetLabels();
 
 }

@@ -5,12 +5,11 @@ import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
-import java.util.stream.IntStream;
-import java.util.stream.Collectors;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 
 import com.github.raffaelliscandiffio.controller.TotemController;
 import com.github.raffaelliscandiffio.model.OrderItem;
@@ -48,86 +47,97 @@ public class TotemSwingView extends JFrame implements TotemView {
 		cartPane = new CartPanel();
 		goodbyePane = new GoodbyePanel();
 		getContentPane().add(welcomePane, "welcome");
+		welcomePane.setName("welcomePane");
 		getContentPane().add(shoppingPane, "shopping");
 		shoppingPane.setName("shoppingPane");
 		getContentPane().add(cartPane, "cart");
+		cartPane.setName("cartPane");
 		getContentPane().add(goodbyePane, "bye");
+		goodbyePane.setName("byePane");
 
 		welcomePane.addActionListener(e -> startShoppingAction());
 
 		shoppingPane.getAddProductButton().addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				buyProductAction();
+				Thread t = new Thread(TotemSwingView.this::buyProductAction);
+				t.start();
 			}
 		});
 
 		shoppingPane.addActionListener(e -> {
 			String command = e.getActionCommand();
+			Thread t;
 			if ("cancelShopping".equals(command))
-				closeShoppingAction();
+				t = new Thread(TotemSwingView.this::closeShoppingAction);
 			else
-				openCartAction();
+				t = new Thread(TotemSwingView.this::openCartAction);
+			t.start();
 		});
 
 		cartPane.getBtnReturnQuantity().addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				returnProductAction();
+				Thread t = new Thread(TotemSwingView.this::returnProductAction);
+				t.start();
 			}
 		});
 
 		cartPane.addActionListener(e -> {
 			String command = e.getActionCommand();
+			Thread t;
 			if ("openShopping".equals(command))
-				openShoppingAction();
+				t = new Thread(TotemSwingView.this::openShoppingAction);
 			else if ("cancelShopping".equals(command))
-				closeShoppingAction();
+				t = new Thread(TotemSwingView.this::closeShoppingAction);
 			else if ("checkout".equals(command))
-				confirmOrderAction();
+				t = new Thread(TotemSwingView.this::confirmOrderAction);
 			else
-				removeItemAction();
-
+				t = new Thread(TotemSwingView.this::removeItemAction);
+			t.start();
 		});
 
 		goodbyePane.addActionListener(e -> startShoppingAction());
 	}
 
 	private void returnProductAction() {
-		int spinnerValue = ((Integer) cartPane.getSpinner().getValue()).intValue();
-		this.totemController.returnItem(cartPane.getListOrderItems().getSelectedValue(), spinnerValue);
+		SwingUtilities.invokeLater(() -> {
+			int spinnerValue = ((Integer) cartPane.getSpinner().getValue()).intValue();
+			this.totemController.returnItem(cartPane.getListOrderItems().getSelectedValue(), spinnerValue);
+		});
 	}
 
 	private void removeItemAction() {
-		this.totemController.removeItem(getCartPane().getListOrderItems().getSelectedValue());
+		SwingUtilities.invokeLater(
+				() -> this.totemController.removeItem(getCartPane().getListOrderItems().getSelectedValue()));
 	}
 
 	private void confirmOrderAction() {
-		List<OrderItem> orderItemList = IntStream.range(0, getCartPane().getListOrderItemsModel().size())
-				.mapToObj(getCartPane().getListOrderItemsModel()::get).collect(Collectors.toList());
-		this.totemController.checkout(this.getOrderId(), orderItemList);
+		SwingUtilities.invokeLater(() -> this.totemController.checkout(this.getOrderId()));
 	}
 
 	private void startShoppingAction() {
-		this.totemController.startShopping();
+		SwingUtilities.invokeLater(() -> this.totemController.startShopping());
 	}
 
 	private void openShoppingAction() {
-		this.totemController.openShopping();
+		SwingUtilities.invokeLater(() -> this.totemController.openShopping());
 	}
 
 	private void closeShoppingAction() {
-		this.totemController.cancelShopping(this.getOrderId());
+		SwingUtilities.invokeLater(() -> this.totemController.cancelShopping(this.getOrderId()));
+
 	}
-	
 
 	private void openCartAction() {
-		this.totemController.openOrder();
+		SwingUtilities.invokeLater(() -> this.totemController.openOrder());
+
 	}
 
 	private void buyProductAction() {
-		this.totemController.buyProduct(this.getOrderId(), getShoppingPane().getListProducts().getSelectedValue().getId(),
-				(Integer) getShoppingPane().getQuantitySpinner().getValue());
+		SwingUtilities.invokeLater(() -> this.totemController.buyProduct(this.getOrderId(),
+				getShoppingPane().getListProducts().getSelectedValue().getId(),
+				(Integer) getShoppingPane().getQuantitySpinner().getValue()));
 	}
 
 	ShoppingPanel getShoppingPane() {
@@ -148,8 +158,10 @@ public class TotemSwingView extends JFrame implements TotemView {
 
 	@Override
 	public void showAllProducts(List<Product> products) {
-		getShoppingPane().getListProductsModel().removeAllElements();
-		products.stream().forEach(getShoppingPane().getListProductsModel()::addElement);
+		SwingUtilities.invokeLater(() -> {
+			getShoppingPane().getListProductsModel().removeAllElements();
+			products.stream().forEach(getShoppingPane().getListProductsModel()::addElement);
+		});
 	}
 
 	@Override
@@ -178,47 +190,46 @@ public class TotemSwingView extends JFrame implements TotemView {
 
 	@Override
 	public void itemModified(OrderItem storedItem, OrderItem modifiedItem) {
-		final DefaultListModel<OrderItem> listOrderItemsModel = getCartPane().getListOrderItemsModel();
-		listOrderItemsModel.setElementAt(modifiedItem, listOrderItemsModel.indexOf(storedItem));
+		SwingUtilities.invokeLater(() -> {
+			final DefaultListModel<OrderItem> listOrderItemsModel = getCartPane().getListOrderItemsModel();
+			listOrderItemsModel.setElementAt(modifiedItem, listOrderItemsModel.indexOf(storedItem));
+		});
 	}
 
 	@Override
 	public void itemAdded(OrderItem newItem) {
-		getCartPane().getListOrderItemsModel().addElement(newItem);
+		SwingUtilities.invokeLater(() -> getCartPane().getListOrderItemsModel().addElement(newItem));
 	}
 
 	@Override
 	public void itemRemoved(OrderItem item) {
-		getCartPane().getListOrderItemsModel().removeElement(item);
-
+		SwingUtilities.invokeLater(() -> getCartPane().getListOrderItemsModel().removeElement(item));
 	}
 
 	@Override
 	public void showShoppingMessage(String msg) {
-		setMessageWithColor(getShoppingLabel(), msg, Color.BLACK);
+		SwingUtilities.invokeLater(() -> setMessageWithColor(getShoppingLabel(), msg, Color.BLACK));
 	}
 
 	@Override
 	public void showCartMessage(String msg) {
-		setMessageWithColor(getCartLabel(), msg, Color.BLACK);
+		SwingUtilities.invokeLater(() -> setMessageWithColor(getCartLabel(), msg, Color.BLACK));
 	}
 
 	@Override
 	public void showShoppingErrorMessage(String msg) {
-		setMessageWithColor(getShoppingLabel(), msg, Color.RED);
+		SwingUtilities.invokeLater(() -> setMessageWithColor(getShoppingLabel(), msg, Color.RED));
 	}
 
 	@Override
 	public void showCartErrorMessage(String msg) {
-		setMessageWithColor(getCartLabel(), msg, Color.RED);
+		SwingUtilities.invokeLater(() -> setMessageWithColor(getCartLabel(), msg, Color.RED));
 	}
-
 
 	private JLabel getShoppingLabel() {
 		return getShoppingPane().getLblMessage();
 	}
 
-	
 	@Override
 	@ExcludeGeneratedFromCoverage
 	public String getOrderId() {
@@ -246,17 +257,26 @@ public class TotemSwingView extends JFrame implements TotemView {
 
 	@Override
 	public void resetView() {
-		getShoppingPane().getListProductsModel().removeAllElements();
-		getCartPane().getListOrderItemsModel().removeAllElements();
-		this.showShoppingMessage(" ");
-		this.showCartMessage(" ");
+		SwingUtilities.invokeLater(() -> {
+			getShoppingPane().getListProductsModel().removeAllElements();
+			getCartPane().getListOrderItemsModel().removeAllElements();
+		});
+	}
+
+	@Override
+	public void resetLabels() {
+		SwingUtilities.invokeLater(() -> {
+			this.showShoppingMessage(" ");
+			this.showCartMessage(" ");
+		});
 	}
 
 	@Override
 	public void showAllOrderItems(List<OrderItem> allOrderItems) {
-		
-		getCartPane().getListOrderItemsModel().removeAllElements();
-		allOrderItems.stream().forEach(getCartPane().getListOrderItemsModel()::addElement);
+		SwingUtilities.invokeLater(() -> {
+			getCartPane().getListOrderItemsModel().removeAllElements();
+			allOrderItems.stream().forEach(getCartPane().getListOrderItemsModel()::addElement);
+		});
 	}
 
 }
