@@ -74,6 +74,7 @@ class TotemControllerTest {
 			assertThat(orderCaptorShoppingService.getValue().getStatus()).isEqualTo(OrderStatus.OPEN);
 			
 			inOrder.verify(totemView, times(1)).resetView();
+			inOrder.verify(totemView, times(1)).resetLabels();
 			inOrder.verify(totemView, times(1)).setOrderId(idReturned);
 			inOrder.verify(totemView, times(1)).showShopping();
 			inOrder.verify(totemView, times(1)).showAllProducts(productList);
@@ -166,6 +167,7 @@ class TotemControllerTest {
 			
 			inOrder.verify(shoppingService, times(1)).deleteOrder(orderId);
 			inOrder.verify(totemView, times(1)).resetView();
+			inOrder.verify(totemView, times(1)).resetLabels();
 			inOrder.verify(totemView, times(1)).setOrderId(null);
 			inOrder.verify(totemView, times(1)).showWelcome();
 		}
@@ -196,6 +198,7 @@ class TotemControllerTest {
 			inOrder.verify(shoppingService, times(1)).closeOrder(orderId, orderItems);
 			inOrder.verify(totemView, times(1)).setOrderId(null);
 			inOrder.verify(totemView, times(1)).resetView();
+			inOrder.verify(totemView, times(1)).resetLabels();
 			inOrder.verify(totemView, times(1)).showGoodbye();
 		}
 		

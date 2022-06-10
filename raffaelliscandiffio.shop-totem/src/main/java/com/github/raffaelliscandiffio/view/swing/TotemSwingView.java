@@ -255,6 +255,12 @@ public class TotemSwingView extends JFrame implements TotemView {
 		SwingUtilities.invokeLater(() -> {
 			getShoppingPane().getListProductsModel().removeAllElements();
 			getCartPane().getListOrderItemsModel().removeAllElements();
+		});
+	}
+	
+	@Override 
+	public void resetLabels() {
+		SwingUtilities.invokeLater(() -> {
 			this.showShoppingMessage(" ");
 			this.showCartMessage(" ");
 		});

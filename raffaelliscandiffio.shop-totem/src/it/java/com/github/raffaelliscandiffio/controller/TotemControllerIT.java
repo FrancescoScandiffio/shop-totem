@@ -7,7 +7,9 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.awaitility.Awaitility.await;
 
+import java.util.concurrent.TimeUnit;
 import java.util.Arrays;
 
 import org.assertj.core.api.SoftAssertions;
@@ -34,6 +36,8 @@ import com.github.raffaelliscandiffio.view.swing.TotemSwingView;
 
 @ExtendWith(GUITestExtension.class)
 class TotemControllerIT {
+
+	private static final int TIMEOUT = 5;
 
 	private TotemController totemController;
 
@@ -85,14 +89,16 @@ class TotemControllerIT {
 		when(shoppingService.getAllProducts()).thenReturn(Arrays.asList(new Product("Pasta", 2.5)));
 
 		window.button("welcomeStartShopping").click();
-		
-		window.panel("shoppingPane").requireVisible();
-		softly.assertThat(totemView.getOrderId()).isEqualTo(orderId);
-		softly.assertThat(window.list("productList").contents()).containsExactly("Pasta - Price: 2.5 €");
-		GuiActionRunner.execute(() -> totemView.showOrder());
-		softly.assertThat(window.list("cartList").contents()).isEmpty();
 
-		softly.assertAll();
+		await().atMost(TIMEOUT, TimeUnit.SECONDS).untilAsserted(() -> {
+			window.panel("shoppingPane").requireVisible();
+			softly.assertThat(totemView.getOrderId()).isEqualTo(orderId);
+			softly.assertThat(window.list("productList").contents()).containsExactly("Pasta - Price: 2.5 €");
+			GuiActionRunner.execute(() -> totemView.showOrder());
+			softly.assertThat(window.list("cartList").contents()).isEmpty();
+
+			softly.assertAll();
+		});
 	}
 
 	@Test
@@ -105,13 +111,15 @@ class TotemControllerIT {
 
 		window.button("welcomeStartShopping").click();
 
-		window.panel("shoppingPane").requireVisible();
-		softly.assertThat(window.list("productList").contents()).isEmpty();
-		window.label("messageLabel").requireText(errorMessage);
-		GuiActionRunner.execute(() -> totemView.showOrder());
-		softly.assertThat(window.list("cartList").contents()).isEmpty();
+		await().atMost(TIMEOUT, TimeUnit.SECONDS).untilAsserted(() -> {
+			window.panel("shoppingPane").requireVisible();
+			softly.assertThat(window.list("productList").contents()).isEmpty();
+			window.label("messageLabel").requireText(errorMessage);
+			GuiActionRunner.execute(() -> totemView.showOrder());
+			softly.assertThat(window.list("cartList").contents()).isEmpty();
 
-		softly.assertAll();
+			softly.assertAll();
+		});
 	}
 
 	@Test
@@ -124,8 +132,11 @@ class TotemControllerIT {
 
 		window.button(JButtonMatcher.withText("Continue Shopping")).click();
 
-		assertThat(window.list("productList").contents()).containsExactly("Pasta - Price: 2.5 €");
-		window.panel("shoppingPane").requireVisible();
+		await().atMost(TIMEOUT, TimeUnit.SECONDS).untilAsserted(() -> {
+			assertThat(window.list("productList").contents()).containsExactly("Pasta - Price: 2.5 €");
+			window.panel("shoppingPane").requireVisible();
+		});
+
 	}
 
 	@Test
@@ -138,10 +149,12 @@ class TotemControllerIT {
 		doThrow(new TransactionException(errorMessage)).when(shoppingService).getAllProducts();
 
 		window.button(JButtonMatcher.withText("Continue Shopping")).click();
+		await().atMost(TIMEOUT, TimeUnit.SECONDS).untilAsserted(() -> {
+			assertThat(window.list("productList").contents()).isEmpty();
+			window.label("messageLabel").requireText(errorMessage);
+			window.panel("shoppingPane").requireVisible();
+		});
 
-		assertThat(window.list("productList").contents()).isEmpty();
-		window.label("messageLabel").requireText(errorMessage);
-		window.panel("shoppingPane").requireVisible();
 	}
 
 	@Test
@@ -161,14 +174,17 @@ class TotemControllerIT {
 
 		window.button("cartBtnCancelShopping").click();
 
-		window.panel("welcomePane").requireVisible();
-		softly.assertThat(totemView.getOrderId()).isEqualTo(null);
-		GuiActionRunner.execute(() -> totemView.showShopping());
-		softly.assertThat(window.list("productList").contents()).isEmpty();
-		GuiActionRunner.execute(() -> totemView.showOrder());
-		softly.assertThat(window.list("cartList").contents()).isEmpty();
+		await().atMost(TIMEOUT, TimeUnit.SECONDS).untilAsserted(() -> {
+			window.panel("welcomePane").requireVisible();
+			softly.assertThat(totemView.getOrderId()).isEqualTo(null);
+			GuiActionRunner.execute(() -> totemView.showShopping());
+			softly.assertThat(window.list("productList").contents()).isEmpty();
+			GuiActionRunner.execute(() -> totemView.showOrder());
+			softly.assertThat(window.list("cartList").contents()).isEmpty();
 
-		softly.assertAll();
+			softly.assertAll();
+		});
+
 	}
 
 	@Test
@@ -191,16 +207,19 @@ class TotemControllerIT {
 		totemView.setOrderId(orderId);
 
 		window.button("cartBtnCancelShopping").click();
-		window.label("cartMessageLabel").requireText(errorMessage);
-		window.panel("cartPane").requireVisible();
-		softly.assertThat(totemView.getOrderId()).isEqualTo(orderId);
-		GuiActionRunner.execute(() -> totemView.showShopping());
-		assertThat(window.list("productList").contents()).containsExactly("Pasta - Price: 2.5 €");
-		GuiActionRunner.execute(() -> totemView.showOrder());
-		assertThat(window.list("cartList").contents())
-				.containsExactly("Pasta - Quantity: 4 - Price: 2.5 € - Subtotal: 10.0 €");
+		await().atMost(TIMEOUT, TimeUnit.SECONDS).untilAsserted(() -> {
+			window.label("cartMessageLabel").requireText(errorMessage);
+			window.panel("cartPane").requireVisible();
+			softly.assertThat(totemView.getOrderId()).isEqualTo(orderId);
+			GuiActionRunner.execute(() -> totemView.showShopping());
+			assertThat(window.list("productList").contents()).containsExactly("Pasta - Price: 2.5 €");
+			GuiActionRunner.execute(() -> totemView.showOrder());
+			assertThat(window.list("cartList").contents())
+					.containsExactly("Pasta - Quantity: 4 - Price: 2.5 € - Subtotal: 10.0 €");
 
-		softly.assertAll();
+			softly.assertAll();
+		});
+
 	}
 
 	@Test
@@ -210,8 +229,10 @@ class TotemControllerIT {
 		GuiActionRunner.execute(() -> totemView.showShopping());
 
 		window.button(JButtonMatcher.withText("Cart")).click();
+		await().atMost(TIMEOUT, TimeUnit.SECONDS).untilAsserted(() -> {
+			window.panel("cartPane").requireVisible();
+		});
 
-		window.panel("cartPane").requireVisible();
 	}
 
 	@Test
@@ -233,11 +254,14 @@ class TotemControllerIT {
 		window.spinner("quantitySpinner").enterText(String.valueOf(quantity));
 		window.button(JButtonMatcher.withText("Add")).click();
 
-		window.label("messageLabel").requireText("Added 3 Pasta");
+		await().atMost(TIMEOUT, TimeUnit.SECONDS).untilAsserted(() -> {
+			window.label("messageLabel").requireText("Added 3 Pasta");
 
-		GuiActionRunner.execute(() -> totemView.showOrder());
-		assertThat(window.list("cartList").contents())
-				.containsExactly("Pasta - Quantity: 3 - Price: 2.0 € - Subtotal: 6.0 €");
+			GuiActionRunner.execute(() -> totemView.showOrder());
+			assertThat(window.list("cartList").contents())
+					.containsExactly("Pasta - Quantity: 3 - Price: 2.0 € - Subtotal: 6.0 €");
+		});
+
 	}
 
 	@Test
@@ -260,10 +284,13 @@ class TotemControllerIT {
 		window.spinner("quantitySpinner").enterText(String.valueOf(quantity));
 		window.button(JButtonMatcher.withText("Add")).click();
 
-		window.label("messageLabel").requireText(errorMessage);
+		await().atMost(TIMEOUT, TimeUnit.SECONDS).untilAsserted(() -> {
+			window.label("messageLabel").requireText(errorMessage);
 
-		GuiActionRunner.execute(() -> totemView.showOrder());
-		assertThat(window.list("cartList").contents()).isEmpty();
+			GuiActionRunner.execute(() -> totemView.showOrder());
+			assertThat(window.list("cartList").contents()).isEmpty();
+		});
+
 	}
 
 	@Test
@@ -279,8 +306,11 @@ class TotemControllerIT {
 		window.list("cartList").selectItem(0);
 		window.button(JButtonMatcher.withText("Remove selected")).click();
 
-		window.label("cartMessageLabel").requireText("Removed all Pasta");
-		assertThat(window.list("cartList").contents()).isEmpty();
+		await().atMost(TIMEOUT, TimeUnit.SECONDS).untilAsserted(() -> {
+			window.label("cartMessageLabel").requireText("Removed all Pasta");
+			assertThat(window.list("cartList").contents()).isEmpty();
+		});
+
 	}
 
 	@Test
@@ -308,14 +338,17 @@ class TotemControllerIT {
 		window.list("cartList").selectItem(0);
 		window.button(JButtonMatcher.withText("Remove selected")).click();
 
-		window.label("cartMessageLabel").requireText(errorMessage);
-		GuiActionRunner.execute(() -> totemView.showShopping());
-		softly.assertThat(window.list("productList").contents()).containsExactly("Pasta - Price: 2.0 €");
-		GuiActionRunner.execute(() -> totemView.showOrder());
-		softly.assertThat(window.list("cartList").contents())
-				.containsExactly("Pasta - Quantity: 3 - Price: 2.0 € - Subtotal: 6.0 €");
+		await().atMost(TIMEOUT, TimeUnit.SECONDS).untilAsserted(() -> {
+			window.label("cartMessageLabel").requireText(errorMessage);
+			GuiActionRunner.execute(() -> totemView.showShopping());
+			softly.assertThat(window.list("productList").contents()).containsExactly("Pasta - Price: 2.0 €");
+			GuiActionRunner.execute(() -> totemView.showOrder());
+			softly.assertThat(window.list("cartList").contents())
+					.containsExactly("Pasta - Quantity: 3 - Price: 2.0 € - Subtotal: 6.0 €");
 
-		softly.assertAll();
+			softly.assertAll();
+		});
+
 	}
 
 	@Test
@@ -342,14 +375,17 @@ class TotemControllerIT {
 		window.list("cartList").selectItem(0);
 		window.button(JButtonMatcher.withText("Remove selected")).click();
 
-		window.label("cartMessageLabel").requireText(errorMessage);
-		GuiActionRunner.execute(() -> totemView.showShopping());
-		softly.assertThat(window.list("productList").contents()).isEmpty();
-		;
-		GuiActionRunner.execute(() -> totemView.showOrder());
-		softly.assertThat(window.list("cartList").contents()).isEmpty();
+		await().atMost(TIMEOUT, TimeUnit.SECONDS).untilAsserted(() -> {
+			window.label("cartMessageLabel").requireText(errorMessage);
+			GuiActionRunner.execute(() -> totemView.showShopping());
+			softly.assertThat(window.list("productList").contents()).isEmpty();
+			;
+			GuiActionRunner.execute(() -> totemView.showOrder());
+			softly.assertThat(window.list("cartList").contents()).isEmpty();
 
-		softly.assertAll();
+			softly.assertAll();
+		});
+
 	}
 
 	@Test
@@ -371,10 +407,12 @@ class TotemControllerIT {
 		window.spinner("cartReturnSpinner").enterText(String.valueOf(quantityToRemove));
 		window.button(JButtonMatcher.withText("Return quantity")).click();
 
-		window.label("cartMessageLabel").requireText("Removed 2 Pasta");
+		await().atMost(TIMEOUT, TimeUnit.SECONDS).untilAsserted(() -> {
+			window.label("cartMessageLabel").requireText("Removed 2 Pasta");
 
-		assertThat(window.list("cartList").contents())
-				.containsExactly("Pasta - Quantity: 1 - Price: 2.0 € - Subtotal: 2.0 €");
+			assertThat(window.list("cartList").contents())
+					.containsExactly("Pasta - Quantity: 1 - Price: 2.0 € - Subtotal: 2.0 €");
+		});
 	}
 
 	@Test
@@ -395,24 +433,25 @@ class TotemControllerIT {
 		when(shoppingService.getOrderItems(orderId)).thenReturn(Arrays.asList(orderItem));
 
 		totemView.setOrderId(orderId);
-		GuiActionRunner.execute(() -> {
-			totemView.showOrder();
-			totemView.showAllProducts(asList(product));
-			totemView.showAllOrderItems(asList(orderItem));
-		});
+		GuiActionRunner.execute(() -> totemView.showOrder());
+		totemView.showAllProducts(asList(product));
+		totemView.showAllOrderItems(asList(orderItem));
 
 		window.list("cartList").selectItem(0);
 		window.spinner("cartReturnSpinner").enterText(String.valueOf(quantityToRemove));
 		window.button(JButtonMatcher.withText("Return quantity")).click();
+		
+		await().atMost(TIMEOUT, TimeUnit.SECONDS).untilAsserted(() -> {
+			window.label("cartMessageLabel").requireText(errorMessage);
+			
+			GuiActionRunner.execute(() -> totemView.showShopping());
+			softly.assertThat(window.list("productList").contents()).containsExactly("Pasta - Price: 2.0 €");
+			GuiActionRunner.execute(() -> totemView.showOrder());
+			softly.assertThat(window.list("cartList").contents())
+					.containsExactly("Pasta - Quantity: 3 - Price: 2.0 € - Subtotal: 6.0 €");
+			softly.assertAll();
+		});
 
-		window.label("cartMessageLabel").requireText(errorMessage);
-		GuiActionRunner.execute(() -> totemView.showShopping());
-		softly.assertThat(window.list("productList").contents()).containsExactly("Pasta - Price: 2.0 €");
-		GuiActionRunner.execute(() -> totemView.showOrder());
-		softly.assertThat(window.list("cartList").contents())
-				.containsExactly("Pasta - Quantity: 3 - Price: 2.0 € - Subtotal: 6.0 €");
-
-		softly.assertAll();
 	}
 
 	@Test
@@ -442,14 +481,17 @@ class TotemControllerIT {
 		window.spinner("cartReturnSpinner").enterText(String.valueOf(quantityToRemove));
 		window.button(JButtonMatcher.withText("Return quantity")).click();
 
-		window.label("cartMessageLabel").requireText(errorMessage);
-		GuiActionRunner.execute(() -> totemView.showShopping());
-		softly.assertThat(window.list("productList").contents()).isEmpty();
-		;
-		GuiActionRunner.execute(() -> totemView.showOrder());
-		softly.assertThat(window.list("cartList").contents()).isEmpty();
+		await().atMost(TIMEOUT, TimeUnit.SECONDS).untilAsserted(() -> {
+			window.label("cartMessageLabel").requireText(errorMessage);
+			GuiActionRunner.execute(() -> totemView.showShopping());
+			softly.assertThat(window.list("productList").contents()).isEmpty();
 
-		softly.assertAll();
+			GuiActionRunner.execute(() -> totemView.showOrder());
+			softly.assertThat(window.list("cartList").contents()).isEmpty();
+
+			softly.assertAll();
+		});
+
 	}
 
 	@Test
@@ -469,15 +511,17 @@ class TotemControllerIT {
 		});
 
 		window.button(JButtonMatcher.withText("Checkout")).click();
+		await().atMost(TIMEOUT, TimeUnit.SECONDS).untilAsserted(() -> {
+			window.panel("byePane").requireVisible();
+			GuiActionRunner.execute(() -> totemView.showShopping());
+			softly.assertThat(window.list("productList").contents()).isEmpty();
 
-		window.panel("byePane").requireVisible();
-		GuiActionRunner.execute(() -> totemView.showShopping());
-		softly.assertThat(window.list("productList").contents()).isEmpty();
-		;
-		GuiActionRunner.execute(() -> totemView.showOrder());
-		softly.assertThat(window.list("cartList").contents()).isEmpty();
-		softly.assertThat(totemView.getOrderId()).isNull();
-		softly.assertAll();
+			GuiActionRunner.execute(() -> totemView.showOrder());
+			softly.assertThat(window.list("cartList").contents()).isEmpty();
+			softly.assertThat(totemView.getOrderId()).isNull();
+			softly.assertAll();
+		});
+
 	}
 
 	@Test
@@ -503,16 +547,19 @@ class TotemControllerIT {
 
 		window.button(JButtonMatcher.withText("Checkout")).click();
 
-		window.panel("cartPane").requireVisible();
-		GuiActionRunner.execute(() -> totemView.showShopping());
-		softly.assertThat(window.list("productList").contents()).containsExactly("Pasta - Price: 2.0 €");
-		GuiActionRunner.execute(() -> totemView.showOrder());
-		softly.assertThat(window.list("cartList").contents())
-				.containsExactly("Pasta - Quantity: 3 - Price: 2.0 € - Subtotal: 6.0 €");
-		softly.assertThat(totemView.getOrderId()).isEqualTo(orderId);
-		softly.assertAll();
+		await().atMost(TIMEOUT, TimeUnit.SECONDS).untilAsserted(() -> {
+			window.panel("cartPane").requireVisible();
+			GuiActionRunner.execute(() -> totemView.showShopping());
+			softly.assertThat(window.list("productList").contents()).containsExactly("Pasta - Price: 2.0 €");
+			GuiActionRunner.execute(() -> totemView.showOrder());
+			softly.assertThat(window.list("cartList").contents())
+					.containsExactly("Pasta - Quantity: 3 - Price: 2.0 € - Subtotal: 6.0 €");
+			softly.assertThat(totemView.getOrderId()).isEqualTo(orderId);
+			softly.assertAll();
+		});
+
 	}
-	
+
 	@Test
 	@GUITest
 	@DisplayName("'Start Shopping' button in goodbye should set orderId, open shopping panel, show products and reset orderItems")
@@ -523,7 +570,7 @@ class TotemControllerIT {
 		int quantity = 3;
 		Order order = new Order(OrderStatus.OPEN);
 		order.setId(orderId);
-		
+
 		Product product = new Product("Pizza", price);
 		OrderItem orderItem = new OrderItem(product, new Order(OrderStatus.OPEN), quantity);
 		GuiActionRunner.execute(() -> {
@@ -534,14 +581,16 @@ class TotemControllerIT {
 		when(shoppingService.getAllProducts()).thenReturn(Arrays.asList(new Product("Pasta", 2.5)));
 
 		window.button("goodbyeStartShopping").click();
+		await().atMost(TIMEOUT, TimeUnit.SECONDS).untilAsserted(() -> {
+			window.panel("shoppingPane").requireVisible();
+			softly.assertThat(totemView.getOrderId()).isEqualTo(orderId);
+			softly.assertThat(window.list("productList").contents()).containsExactly("Pasta - Price: 2.5 €");
+			GuiActionRunner.execute(() -> totemView.showOrder());
+			softly.assertThat(window.list("cartList").contents()).isEmpty();
 
-		window.panel("shoppingPane").requireVisible();
-		softly.assertThat(totemView.getOrderId()).isEqualTo(orderId);
-		softly.assertThat(window.list("productList").contents()).containsExactly("Pasta - Price: 2.5 €");
-		GuiActionRunner.execute(() -> totemView.showOrder());
-		softly.assertThat(window.list("cartList").contents()).isEmpty();
+			softly.assertAll();
+		});
 
-		softly.assertAll();
 	}
 
 	@Test
@@ -555,12 +604,15 @@ class TotemControllerIT {
 
 		window.button("goodbyeStartShopping").click();
 
-		softly.assertThat(window.list("productList").contents()).isEmpty();
-		window.label("messageLabel").requireText(errorMessage);
-		window.panel("shoppingPane").requireVisible();
-		GuiActionRunner.execute(() -> totemView.showOrder());
-		softly.assertThat(window.list("cartList").contents()).isEmpty();
+		await().atMost(TIMEOUT, TimeUnit.SECONDS).untilAsserted(() -> {
+			softly.assertThat(window.list("productList").contents()).isEmpty();
+			window.label("messageLabel").requireText(errorMessage);
+			window.panel("shoppingPane").requireVisible();
+			GuiActionRunner.execute(() -> totemView.showOrder());
+			softly.assertThat(window.list("cartList").contents()).isEmpty();
 
-		softly.assertAll();
+			softly.assertAll();
+		});
+
 	}
 }

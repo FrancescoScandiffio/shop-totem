@@ -28,6 +28,7 @@ public class TotemController {
 			List<Product> allProducts = shoppingService.getAllProducts();
 			
 			totemView.resetView();
+			totemView.resetLabels();
 			totemView.setOrderId(order.getId());
 			totemView.showShopping();
 			totemView.showAllProducts(allProducts);
@@ -54,6 +55,7 @@ public class TotemController {
 		try {
 			shoppingService.deleteOrder(orderId);
 			totemView.resetView();
+			totemView.resetLabels();
 			totemView.setOrderId(null);
 			totemView.showWelcome();
 		}catch(TransactionException e) {
@@ -119,6 +121,7 @@ public class TotemController {
 			shoppingService.closeOrder(orderId, orderItems);
 			totemView.setOrderId(null);
 			totemView.resetView();
+			totemView.resetLabels();
 			totemView.showGoodbye();
 		} catch(TransactionException e) {
 			totemView.showCartErrorMessage(e.getMessage());
