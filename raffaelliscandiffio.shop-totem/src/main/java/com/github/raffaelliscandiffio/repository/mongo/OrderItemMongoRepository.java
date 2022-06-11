@@ -1,9 +1,13 @@
 package com.github.raffaelliscandiffio.repository.mongo;
 
+import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Updates.set;
 
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -14,8 +18,8 @@ import com.github.raffaelliscandiffio.model.OrderItem;
 import com.github.raffaelliscandiffio.model.OrderStatus;
 import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.repository.OrderItemRepository;
-import com.mongodb.client.MongoClient;
 import com.mongodb.client.ClientSession;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.result.UpdateResult;
 
@@ -65,17 +69,7 @@ public class OrderItemMongoRepository implements OrderItemRepository {
 		Document itemDocument = orderItemCollection.find(session, eqFilter(id)).first();
 		if (itemDocument == null)
 			return null;
-		String productId = itemDocument.getString(FIELD_PRODUCT);
-		String orderId = itemDocument.getString(FIELD_ORDER);
-		Document productDocument = productCollection.find(session, eqFilter(productId)).first();
-		Document orderDocument = orderCollection.find(session, eqFilter(orderId)).first();
-		Product product = new Product(productDocument.getString(FIELD_NAME), productDocument.getDouble(FIELD_PRICE));
-		product.setId(productId);
-		Order order = new Order(OrderStatus.valueOf(orderDocument.getString(FIELD_STATUS)));
-		order.setId(orderId);
-		OrderItem orderItem = new OrderItem(product, order, itemDocument.getInteger(FIELD_QUANTITY));
-		orderItem.setId(id);
-		return orderItem;
+		return fromDocumentToItem(itemDocument);
 	}
 
 	@Override
@@ -94,8 +88,38 @@ public class OrderItemMongoRepository implements OrderItemRepository {
 
 	}
 
+	@Override
+	public List<OrderItem> getListByOrderId(String orderId) {
+		return StreamSupport.stream(orderItemCollection.find(session, eq(FIELD_ORDER, orderId)).spliterator(), false)
+				.map(this::fromDocumentToItem).collect(Collectors.toList());
+
+	}
+
+	@Override
+	public OrderItem findByProductAndOrderId(String productId, String orderId) {
+		Document itemDocument = orderItemCollection
+				.find(session, and(eq(FIELD_PRODUCT, productId), eq(FIELD_ORDER, orderId))).first();
+		if (itemDocument == null)
+			return null;
+		return fromDocumentToItem(itemDocument);
+	}
+
 	private Bson eqFilter(String id) {
 		return eq(FIELD_ID, new ObjectId(id));
+	}
+
+	private OrderItem fromDocumentToItem(Document itemDocument) {
+		String productId = itemDocument.getString(FIELD_PRODUCT);
+		String orderId = itemDocument.getString(FIELD_ORDER);
+		Document productDocument = productCollection.find(session, eqFilter(productId)).first();
+		Document orderDocument = orderCollection.find(session, eqFilter(orderId)).first();
+		Product product = new Product(productDocument.getString(FIELD_NAME), productDocument.getDouble(FIELD_PRICE));
+		product.setId(productId);
+		Order order = new Order(OrderStatus.valueOf(orderDocument.getString(FIELD_STATUS)));
+		order.setId(orderId);
+		OrderItem orderItem = new OrderItem(product, order, itemDocument.getInteger(FIELD_QUANTITY));
+		orderItem.setId(itemDocument.get("_id").toString());
+		return orderItem;
 	}
 
 }

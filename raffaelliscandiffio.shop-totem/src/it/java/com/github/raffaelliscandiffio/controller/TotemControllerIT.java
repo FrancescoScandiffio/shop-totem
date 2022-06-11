@@ -2,15 +2,15 @@ package com.github.raffaelliscandiffio.controller;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.awaitility.Awaitility.await;
 
-import java.util.concurrent.TimeUnit;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.swing.annotation.GUITest;
@@ -85,7 +85,7 @@ class TotemControllerIT {
 		Order order = new Order(OrderStatus.OPEN);
 		order.setId(orderId);
 
-		when(shoppingService.saveOrder(any(Order.class))).thenReturn(order);
+		when(shoppingService.openNewOrder()).thenReturn(order);
 		when(shoppingService.getAllProducts()).thenReturn(Arrays.asList(new Product("Pasta", 2.5)));
 
 		window.button("welcomeStartShopping").click();
@@ -107,7 +107,7 @@ class TotemControllerIT {
 	void testStartShoppingButtonInWelcomeShouldNotShowProductsAndShouldShowErrorWhenSaveOrderThrows() {
 
 		String errorMessage = "Error message";
-		doThrow(new TransactionException(errorMessage)).when(shoppingService).saveOrder(any(Order.class));
+		doThrow(new TransactionException(errorMessage)).when(shoppingService).openNewOrder();
 
 		window.button("welcomeStartShopping").click();
 
@@ -440,10 +440,10 @@ class TotemControllerIT {
 		window.list("cartList").selectItem(0);
 		window.spinner("cartReturnSpinner").enterText(String.valueOf(quantityToRemove));
 		window.button(JButtonMatcher.withText("Return quantity")).click();
-		
+
 		await().atMost(TIMEOUT, TimeUnit.SECONDS).untilAsserted(() -> {
 			window.label("cartMessageLabel").requireText(errorMessage);
-			
+
 			GuiActionRunner.execute(() -> totemView.showShopping());
 			softly.assertThat(window.list("productList").contents()).containsExactly("Pasta - Price: 2.0 €");
 			GuiActionRunner.execute(() -> totemView.showOrder());
@@ -577,7 +577,7 @@ class TotemControllerIT {
 			totemView.showAllProducts(asList(product));
 			totemView.showAllOrderItems(asList(orderItem));
 		});
-		when(shoppingService.saveOrder(any(Order.class))).thenReturn(order);
+		when(shoppingService.openNewOrder()).thenReturn(order);
 		when(shoppingService.getAllProducts()).thenReturn(Arrays.asList(new Product("Pasta", 2.5)));
 
 		window.button("goodbyeStartShopping").click();
@@ -600,7 +600,7 @@ class TotemControllerIT {
 		GuiActionRunner.execute(() -> totemView.showGoodbye());
 
 		String errorMessage = "Error message";
-		doThrow(new TransactionException(errorMessage)).when(shoppingService).saveOrder(any(Order.class));
+		doThrow(new TransactionException(errorMessage)).when(shoppingService).openNewOrder();
 
 		window.button("goodbyeStartShopping").click();
 

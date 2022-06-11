@@ -1,6 +1,7 @@
 package com.github.raffaelliscandiffio.repository.mysql;
 
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 
 import com.github.raffaelliscandiffio.model.Stock;
 import com.github.raffaelliscandiffio.repository.StockRepository;
@@ -27,5 +28,13 @@ public class StockMySqlRepository implements StockRepository {
 	public void update(Stock stock) {
 		entityManager.merge(stock);
 
+	}
+
+	@Override
+	public Stock findByProductId(String productId) {
+		TypedQuery<Stock> query = entityManager
+				.createQuery("SELECT s FROM Stock s WHERE s.product.id = :productId", Stock.class)
+				.setParameter("productId", productId);
+		return query.getResultList().stream().findFirst().orElse(null);
 	}
 }

@@ -9,4 +9,6 @@ public interface StockRepository {
 	public void save(Stock stock);
 
 	public void update(Stock stock);
+
+	public Stock findByProductId(String productId);
 }

@@ -39,7 +39,6 @@
 			**/model/Order.java,
 			**/model/OrderStatus.java,
 			**/utils/GUITestExtension.java,
-			**/controller/TotemController.java,
 			**/app/**/*
 		</sonar.coverage.exclusions>
 

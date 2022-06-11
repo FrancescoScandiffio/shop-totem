@@ -22,13 +22,11 @@ import com.github.raffaelliscandiffio.model.Order;
 import com.github.raffaelliscandiffio.model.OrderItem;
 import com.github.raffaelliscandiffio.model.OrderStatus;
 import com.github.raffaelliscandiffio.model.Product;
+import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-
-
 
 class OrderItemMongoRepositoryIT {
 
@@ -59,9 +57,9 @@ class OrderItemMongoRepositoryIT {
 
 	@BeforeEach
 	public void setup() {
-        String uri = "mongodb://localhost:27017,localhost:27018,localhost:27019/?replicaSet=rs0&readPreference=primary&ssl=false";
+		String uri = "mongodb://localhost:27017,localhost:27018,localhost:27019/?replicaSet=rs0&readPreference=primary&ssl=false";
 		client = MongoClients.create(uri);
-		
+
 		database = client.getDatabase(DATABASE_NAME);
 		database.drop();
 		database.createCollection(PRODUCT_COLLECTION_NAME);
@@ -71,7 +69,7 @@ class OrderItemMongoRepositoryIT {
 		productCollection = database.getCollection(PRODUCT_COLLECTION_NAME);
 		orderCollection = database.getCollection(ORDER_COLLECTION_NAME);
 		orderItemCollection = database.getCollection(ORDERITEM_COLLECTION_NAME);
-		
+
 		session = client.startSession();
 		orderItemRepository = new OrderItemMongoRepository(client, session, DATABASE_NAME, PRODUCT_COLLECTION_NAME,
 				ORDER_COLLECTION_NAME, ORDERITEM_COLLECTION_NAME);
@@ -104,7 +102,7 @@ class OrderItemMongoRepositoryIT {
 	@Test
 	@DisplayName("Method 'save' should throw when the product reference does not exist")
 	void testSaveOrderItemWhenTheProductReferenceDoesNotExistShouldThrow() {
-		productCollection.drop();
+		dropAndCreateCollection(productCollection);
 		OrderItem orderItem = new OrderItem(product_1, order_1, QUANTITY_1);
 		SoftAssertions softly = new SoftAssertions();
 		softly.assertThatThrownBy(() -> orderItemRepository.save(orderItem)).isInstanceOf(NoSuchElementException.class)
@@ -117,7 +115,7 @@ class OrderItemMongoRepositoryIT {
 	@Test
 	@DisplayName("Method 'save' should throw when the order reference does not exist")
 	void testSaveOrderItemWhenTheOrderReferenceDoesNotExistShouldThrow() {
-		orderCollection.drop();
+		dropAndCreateCollection(orderCollection);
 		OrderItem orderItem = new OrderItem(product_1, order_1, QUANTITY_1);
 		SoftAssertions softly = new SoftAssertions();
 		softly.assertThatThrownBy(() -> orderItemRepository.save(orderItem)).isInstanceOf(NoSuchElementException.class)
@@ -243,6 +241,86 @@ class OrderItemMongoRepositoryIT {
 		session.commitTransaction();
 	}
 
+	@Test
+	@DisplayName("Get list of OrderItems by order_id when there is exactly one match")
+	void testGetListByOrderIdWhenThereIsExactlyOneMatch() {
+		OrderItem match_1 = newOrderItemWithId(getNewStringId(), product_1, order_1, QUANTITY_1);
+		OrderItem match_2 = newOrderItemWithId(getNewStringId(), product_2, order_2, QUANTITY_1);
+		saveTestOrderItemToDatabase(match_1);
+		saveTestOrderItemToDatabase(match_2);
+
+		assertThat(orderItemRepository.getListByOrderId(order_1.getId())).containsExactly(match_1);
+	}
+
+	@Test
+	@DisplayName("Get list of OrderItems by order_id when there are multiple matches")
+	void testGetListByOrderIdWhenThereAreMultipleMatches() {
+		OrderItem match_1 = newOrderItemWithId(getNewStringId(), product_1, order_1, QUANTITY_1);
+		OrderItem match_2 = newOrderItemWithId(getNewStringId(), product_2, order_1, QUANTITY_1);
+		saveTestOrderItemToDatabase(match_1);
+		saveTestOrderItemToDatabase(match_2);
+		assertThat(orderItemRepository.getListByOrderId(order_1.getId())).containsExactlyInAnyOrder(match_1, match_2);
+	}
+
+	@Test
+	@DisplayName("Get list of OrderItems by order_id when there are 0 matches should return empty list")
+	void testGetListByOrderIdWhenThereIsNoMatchShouldReturnEmptyList() {
+		OrderItem match_1 = newOrderItemWithId(getNewStringId(), product_1, order_2, QUANTITY_1);
+		OrderItem match_2 = newOrderItemWithId(getNewStringId(), product_2, order_2, QUANTITY_1);
+		saveTestOrderItemToDatabase(match_1);
+		saveTestOrderItemToDatabase(match_2);
+		assertThat(orderItemRepository.getListByOrderId(order_1.getId())).isEmpty();
+	}
+
+	@Test
+	@DisplayName("Method 'getListByOrderId' should be bound to the repository session")
+	void testGetListByOrderIdShouldBeBoundToTheRepositorySession() {
+		dropAndCreateCollection(orderCollection);
+		session.startTransaction();
+		OrderItem match_1 = newOrderItemWithId(getNewStringId(), product_1, order_1, QUANTITY_1);
+		saveTestOrderToDatabaseWithSession(session, order_1);
+		saveTestOrderItemToDatabaseWithSession(session, match_1);
+		assertThat(orderItemRepository.getListByOrderId(order_1.getId())).containsExactly(match_1);
+		session.commitTransaction();
+	}
+
+	@Test
+	@DisplayName("Find OrderItem by order_id and product_id when there is a match on both fields")
+	void testFindOrderItemByOrderIdAndProductId() {
+		OrderItem match_1 = newOrderItemWithId(getNewStringId(), product_1, order_1, QUANTITY_1);
+		saveTestOrderItemToDatabase(match_1);
+
+		assertThat(orderItemRepository.findByProductAndOrderId(product_1.getId(), order_1.getId())).isEqualTo(match_1);
+	}
+
+	@Test
+	@DisplayName("Find OrderItem by order_id and product_id when there is no match on both fields should return null")
+	void testFindOrderItemByOrderIdAndProductIdWhenAtLeasOneFieldDoesNotMatchShouldReturnNull() {
+		OrderItem match_1 = newOrderItemWithId(getNewStringId(), product_1, order_1, QUANTITY_1);
+		OrderItem match_2 = newOrderItemWithId(getNewStringId(), product_2, order_2, QUANTITY_1);
+		saveTestOrderItemToDatabase(match_1);
+		saveTestOrderItemToDatabase(match_2);
+
+		SoftAssertions softly = new SoftAssertions();
+		softly.assertThat(orderItemRepository.findByProductAndOrderId(product_1.getId(), order_2.getId())).isNull();
+		softly.assertThat(orderItemRepository.findByProductAndOrderId(product_2.getId(), order_1.getId())).isNull();
+		softly.assertAll();
+	}
+
+	@Test
+	@DisplayName("Method 'findByProductAndOrderId' should be bound to the repository session")
+	void testFindOrderItemByOrderIdAndProductIdShouldBeBoundToTheRepositorySession() {
+		dropAndCreateCollection(orderCollection);
+		session.startTransaction();
+		saveTestOrderToDatabaseWithSession(session, order_1);
+		OrderItem match_1 = newOrderItemWithId(getNewStringId(), product_1, order_1, QUANTITY_1);
+		saveTestOrderItemToDatabaseWithSession(session, match_1);
+
+		assertThat(orderItemRepository.findByProductAndOrderId(product_1.getId(), order_1.getId())).isEqualTo(match_1);
+		session.commitTransaction();
+
+	}
+
 	// Private utility methods
 
 	private String getNewStringId() {
@@ -252,7 +330,7 @@ class OrderItemMongoRepositoryIT {
 	private ObjectId getObjectId(String id) {
 		return new ObjectId(id);
 	}
-	
+
 	private void dropAndCreateCollection(MongoCollection<Document> collection) {
 		String name = collection.getNamespace().getCollectionName();
 		collection.drop();

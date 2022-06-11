@@ -1,5 +1,7 @@
 package com.github.raffaelliscandiffio.repository;
 
+import java.util.List;
+
 import com.github.raffaelliscandiffio.model.OrderItem;
 
 public interface OrderItemRepository {
@@ -11,4 +13,9 @@ public interface OrderItemRepository {
 	void delete(String id);
 
 	void update(OrderItem orderItem);
+
+	List<OrderItem> getListByOrderId(String orderId);
+
+	OrderItem findByProductAndOrderId(String productId, String orderId);
+
 }

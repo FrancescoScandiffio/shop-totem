@@ -11,6 +11,6 @@
 			<generator class="uuid2"/>
 		</id>
 		<property name="quantity" column="quantity" type="int" access="field"/>
-		<one-to-one name="product" class="com.github.raffaelliscandiffio.model.Product" access="field"></one-to-one>
+		<many-to-one name="product" column="product_id" lazy="false" class="com.github.raffaelliscandiffio.model.Product" access="field"></many-to-one>
 	</class>
 </hibernate-mapping>
