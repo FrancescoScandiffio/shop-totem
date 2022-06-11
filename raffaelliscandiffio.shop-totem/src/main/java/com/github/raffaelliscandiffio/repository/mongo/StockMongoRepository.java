@@ -12,8 +12,8 @@ import org.bson.types.ObjectId;
 import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.model.Stock;
 import com.github.raffaelliscandiffio.repository.StockRepository;
-import com.mongodb.client.MongoClient;
 import com.mongodb.client.ClientSession;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.result.UpdateResult;
 
@@ -52,13 +52,7 @@ public class StockMongoRepository implements StockRepository {
 		Document stockDocument = stockCollection.find(session, eqFilter(id)).first();
 		if (stockDocument == null)
 			return null;
-		String productId = stockDocument.getString(FIELD_PRODUCT);
-		Document productDocument = findProductDocumentById(productId);
-		Product product = new Product(productDocument.getString(FIELD_NAME), productDocument.getDouble(FIELD_PRICE));
-		product.setId(productId);
-		Stock stock = new Stock(product, stockDocument.getInteger(FIELD_QUANTITY));
-		stock.setId(id);
-		return stock;
+		return fromDocumentToStock(stockDocument);
 	}
 
 	@Override
@@ -76,6 +70,24 @@ public class StockMongoRepository implements StockRepository {
 
 	private Document findProductDocumentById(String productId) {
 		return productCollection.find(session, eqFilter(productId)).first();
+	}
+
+	@Override
+	public Stock findByProductId(String productId) {
+		Document stockDocument = stockCollection.find(eq(FIELD_PRODUCT, productId)).first();
+		if (stockDocument == null)
+			return null;
+		return fromDocumentToStock(stockDocument);
+	}
+
+	private Stock fromDocumentToStock(Document stockDocument) {
+		String productId = stockDocument.getString(FIELD_PRODUCT);
+		Document productDocument = findProductDocumentById(productId);
+		Product product = new Product(productDocument.getString(FIELD_NAME), productDocument.getDouble(FIELD_PRICE));
+		product.setId(productId);
+		Stock stock = new Stock(product, stockDocument.getInteger(FIELD_QUANTITY));
+		stock.setId(stockDocument.get(FIELD_ID).toString());
+		return stock;
 	}
 
 }

@@ -19,13 +19,11 @@ import org.junit.jupiter.api.Test;
 
 import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.model.Stock;
+import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-
-
 
 class StockMongoRepositoryIT {
 
@@ -37,7 +35,6 @@ class StockMongoRepositoryIT {
 	private static final double PRICE = 3.0;
 	private static final int QUANTITY_1 = 1;
 	private static final int QUANTITY_2 = 2;
-
 
 	private MongoClient client;
 	private ClientSession session;
@@ -60,7 +57,7 @@ class StockMongoRepositoryIT {
 		database.drop();
 		database.createCollection(PRODUCT_COLLECTION_NAME);
 		database.createCollection(STOCK_COLLECTION_NAME);
-		
+
 		productCollection = database.getCollection(PRODUCT_COLLECTION_NAME);
 		stockCollection = database.getCollection(STOCK_COLLECTION_NAME);
 		product_1 = saveTestProductToDatabase(new Product(PRODUCT_NAME_1, PRICE));
@@ -138,7 +135,7 @@ class StockMongoRepositoryIT {
 		String idToFind = getNewStringId();
 		Stock stock_1 = newStockWithId(idToFind, product_1, QUANTITY_1);
 		Stock expectedResult = newStockWithId(idToFind, product_1, QUANTITY_1);
-		
+
 		saveTestStockToDatabaseWithSession(session, stock_1);
 		assertThat(stockRepository.findById(idToFind)).isEqualTo(expectedResult);
 		session.commitTransaction();
@@ -179,6 +176,34 @@ class StockMongoRepositoryIT {
 		session.startTransaction();
 		stockRepository.update(toUpdate);
 		assertThat(readAllStockFromDatabase()).containsExactly(notUpdated);
+		session.commitTransaction();
+	}
+
+	@Test
+	@DisplayName("Retrieve Stock by Product id")
+	void testFindByProductId() {
+		String productId = product_1.getId();
+		Stock storedStock = newStockWithId(getNewStringId(), product_1, QUANTITY_1);
+		saveTestStockToDatabase(storedStock);
+		assertThat(stockRepository.findByProductId(productId)).isEqualTo(storedStock);
+	}
+
+	@Test
+	@DisplayName("Method 'findByProductId' when not found should return null")
+	void testFindByProductIdWhenNotFoundShouldReturnNull() {
+		assertThat(stockRepository.findByProductId("missing_id")).isNull();
+	}
+
+	@Test
+	@DisplayName("Method 'findByProductId' should be bound to the repository session")
+	void testFindByProductIdShouldBeBoundToTheRepositorySession() {
+		dropAndCreateCollection(productCollection);
+		session.startTransaction();
+		saveTestProductToDatabaseWithSession(session, product_1);
+		String idToFind = getNewStringId();
+		Stock stock_1 = newStockWithId(idToFind, product_1, QUANTITY_1);
+		saveTestStockToDatabaseWithSession(session, stock_1);
+		assertThat(stockRepository.findById(idToFind)).isEqualTo(stock_1);
 		session.commitTransaction();
 	}
 
@@ -236,7 +261,7 @@ class StockMongoRepositoryIT {
 		productWithoutId.setId(doc.get("_id").toString());
 		return productWithoutId;
 	}
-	
+
 	private void dropAndCreateCollection(MongoCollection<Document> collection) {
 		String name = collection.getNamespace().getCollectionName();
 		collection.drop();
@@ -244,4 +269,3 @@ class StockMongoRepositoryIT {
 	}
 
 }
-

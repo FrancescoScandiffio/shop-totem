@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.model.Stock;
 
-
 class StockMySqlRepositoryIT {
 
 	private static final int STOCK_QUANTITY = 10;
@@ -32,10 +31,9 @@ class StockMySqlRepositoryIT {
 	private StockMySqlRepository stockRepository;
 	private static final String DATABASE_NAME = "totem";
 
-
 	@BeforeAll
 	public static void createEntityManagerFactory() {
-		System.setProperty("db.port", "3306");		
+		System.setProperty("db.port", "3306");
 		System.setProperty("db.name", DATABASE_NAME);
 		managerFactory = Persistence.createEntityManagerFactory("mysql-test");
 	}
@@ -107,6 +105,20 @@ class StockMySqlRepositoryIT {
 		entityManager.getTransaction().commit();
 		assertThat(readAllStocksFromDatabase())
 				.containsExactly(newStockWithId(assignedId, product_1, modifiedQuantity));
+	}
+
+	@Test
+	@DisplayName("Find stock by Product id")
+	void testFindStockByProductId() {
+		persistObjectToDatabase(product_1);
+		persistObjectToDatabase(stock_1);
+		assertThat(stockRepository.findByProductId(product_1.getId())).isEqualTo(stock_1);
+	}
+
+	@Test
+	@DisplayName("Find stock by Product id should return null when not found")
+	void testFindStockByProductIdWhenNotFoundShouldReturnNull() {
+		assertThat(stockRepository.findByProductId("missing_id")).isNull();
 	}
 
 	private void persistObjectToDatabase(Object object) {

@@ -5,12 +5,15 @@ import java.util.Objects;
 public class Stock {
 
 	private String id;
-	private final Product product;
+	private Product product;
 	private int quantity;
 
 	public Stock(Product product, int quantity) {
 		this.product = product;
 		this.quantity = quantity;
+	}
+
+	protected Stock() {
 	}
 
 	public String getId() {
