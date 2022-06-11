@@ -42,6 +42,8 @@ import com.github.raffaelliscandiffio.transaction.TransactionManager;
 @ExtendWith(MockitoExtension.class)
 class ShoppingServiceTest {
 
+	private static final String PRODUCT_NAME = "product_name";
+
 	private static final OrderStatus OPEN = OrderStatus.OPEN;
 
 	private static final String ORDER_ID = "order_id";
@@ -266,15 +268,15 @@ class ShoppingServiceTest {
 		}
 
 		@Test
-		@DisplayName("Delete OrderItem when not found should return without exception")
-		void testDeleteItemWhenNotFoundShouldReturnWithoutException() {
+		@DisplayName("Delete OrderItem when not found should throw exception")
+		void testDeleteItemWhenNotFoundShouldThrowException() {
 			Product product = newTestDefaultProductWithId(PRODUCT_ID_1);
 			Order storedOrder = newTestOrderWithId(ORDER_ID, OPEN);
 			OrderItem item = newTestOrderItemWithId(ITEM_ID_1, product, storedOrder, QUANTITY_1);
 			when(itemRepository.findById(ITEM_ID_1)).thenReturn(null);
 
-			shoppingService.deleteItem(item);
-
+			assertThatThrownBy(() -> shoppingService.deleteItem(item)).isInstanceOf(RepositoryException.class)
+					.hasMessage("Item not found: " + ITEM_ID_1);
 			verify(transactionManager, times(1)).runInTransaction(any());
 			verifyNoMoreInteractions(transactionManager, itemRepository);
 			verifyNoInteractions(stockRepository);
@@ -326,18 +328,19 @@ class ShoppingServiceTest {
 		}
 
 		@Test
-		@DisplayName("When the stock is not found should throw and not update")
-		void testReturnItemWhenStockIsNotFoundShouldThrow() {
+		@DisplayName("When the stock is not found should skip the restock phase and not throw")
+		void testReturnItemWhenStockIsNotFoundShouldSkipAndReturn() {
 			Product product = newTestDefaultProductWithId(PRODUCT_ID_1);
 			Order storedOrder = newTestOrderWithId(ORDER_ID, OPEN);
 			OrderItem item = newTestOrderItemWithId(ITEM_ID_1, product, storedOrder, MID_QUANTITY);
+			OrderItem updateItem = newTestOrderItemWithId(ITEM_ID_1, product, storedOrder, MID_QUANTITY - LOW_QUANTITY);
+
 			when(stockRepository.findByProductId(PRODUCT_ID_1)).thenReturn(null);
 			when(itemRepository.findById(ITEM_ID_1)).thenReturn(item);
 
-			assertThatThrownBy(() -> shoppingService.returnItem(item, LOW_QUANTITY))
-					.isInstanceOf(RepositoryException.class)
-					.hasMessage("Stock not found with product_id: " + PRODUCT_ID_1);
-			verify(itemRepository, never()).update(any());
+			shoppingService.returnItem(item, LOW_QUANTITY);
+
+			verify(itemRepository).update(updateItem);
 			verify(stockRepository, never()).update(any());
 		}
 
@@ -366,8 +369,7 @@ class ShoppingServiceTest {
 			when(itemRepository.findById(ITEM_ID_1)).thenReturn(null);
 
 			assertThatThrownBy(() -> shoppingService.returnItem(item, LOW_QUANTITY))
-					.isInstanceOf(RepositoryException.class)
-					.hasMessage("OrderItem with id " + ITEM_ID_1 + " not found.");
+					.isInstanceOf(RepositoryException.class).hasMessage("Item not found: " + ITEM_ID_1);
 			verify(itemRepository, never()).update(any());
 			verifyNoInteractions(stockRepository);
 		}
@@ -474,7 +476,7 @@ class ShoppingServiceTest {
 
 			assertThatThrownBy(() -> shoppingService.buyProduct(ORDER_ID, PRODUCT_ID_1, GREAT_QUANTITY))
 					.isInstanceOf(RepositoryException.class)
-					.hasMessage("Not enough quantity. Cannot buy product: " + PRODUCT_ID_1);
+					.hasMessage("Not enough quantity. Cannot buy product: " + PRODUCT_NAME);
 			verify(stockRepository, never()).update(any());
 			verify(transactionManager, times(1)).runInTransaction(any());
 			verifyNoInteractions(itemRepository);
@@ -542,7 +544,7 @@ class ShoppingServiceTest {
 	// Private utility methods
 
 	private Product newTestDefaultProductWithId(String id) {
-		Product p = new Product("default", 1.0);
+		Product p = new Product(PRODUCT_NAME, 1.0);
 		p.setId(id);
 		return p;
 	}
