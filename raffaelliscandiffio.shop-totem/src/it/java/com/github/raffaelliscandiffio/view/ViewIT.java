@@ -1,4 +1,4 @@
-package com.github.raffaelliscandiffio.controller;
+package com.github.raffaelliscandiffio.view;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,6 +25,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import com.github.raffaelliscandiffio.controller.TotemController;
 import com.github.raffaelliscandiffio.model.Order;
 import com.github.raffaelliscandiffio.model.OrderItem;
 import com.github.raffaelliscandiffio.model.OrderStatus;
@@ -35,7 +36,7 @@ import com.github.raffaelliscandiffio.utils.GUITestExtension;
 import com.github.raffaelliscandiffio.view.swing.TotemSwingView;
 
 @ExtendWith(GUITestExtension.class)
-class TotemControllerIT {
+class ViewIT {
 
 	private static final int TIMEOUT = 5;
 
