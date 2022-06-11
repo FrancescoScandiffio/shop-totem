@@ -95,6 +95,18 @@ public class TotemController {
 		}
 	}
 
+	public void checkout(String orderId) {
+		try {
+			shoppingService.closeOrder(orderId);
+			totemView.setOrderId(null);
+			totemView.resetView();
+			totemView.resetLabels();
+			totemView.showGoodbye();
+		} catch (TransactionException e) {
+			totemView.showCartErrorMessage(e.getMessage());
+		}
+	}
+
 	private void handleDeleteError(TransactionException e) {
 		totemView.resetView();
 		try {
@@ -105,18 +117,6 @@ public class TotemController {
 			totemView.showCartErrorMessage(e.getMessage());
 		} catch (TransactionException ee) {
 			totemView.showCartErrorMessage(ee.getMessage());
-		}
-	}
-
-	public void checkout(String orderId) {
-		try {
-			shoppingService.closeOrder(orderId);
-			totemView.setOrderId(null);
-			totemView.resetView();
-			totemView.resetLabels();
-			totemView.showGoodbye();
-		} catch (TransactionException e) {
-			totemView.showCartErrorMessage(e.getMessage());
 		}
 	}
 
