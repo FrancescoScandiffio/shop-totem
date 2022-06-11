@@ -16,4 +16,6 @@ public interface OrderItemRepository {
 
 	List<OrderItem> getListByOrderId(String orderId);
 
+	OrderItem findByProductAndOrderId(String productId, String orderId);
+
 }

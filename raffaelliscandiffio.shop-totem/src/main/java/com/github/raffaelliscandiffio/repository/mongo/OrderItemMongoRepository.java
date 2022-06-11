@@ -1,5 +1,6 @@
 package com.github.raffaelliscandiffio.repository.mongo;
 
+import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Updates.set;
 
@@ -92,6 +93,15 @@ public class OrderItemMongoRepository implements OrderItemRepository {
 		return StreamSupport.stream(orderItemCollection.find(session, eq(FIELD_ORDER, orderId)).spliterator(), false)
 				.map(this::fromDocumentToItem).collect(Collectors.toList());
 
+	}
+
+	@Override
+	public OrderItem findByProductAndOrderId(String productId, String orderId) {
+		Document itemDocument = orderItemCollection
+				.find(session, and(eq(FIELD_PRODUCT, productId), eq(FIELD_ORDER, orderId))).first();
+		if (itemDocument == null)
+			return null;
+		return fromDocumentToItem(itemDocument);
 	}
 
 	private Bson eqFilter(String id) {

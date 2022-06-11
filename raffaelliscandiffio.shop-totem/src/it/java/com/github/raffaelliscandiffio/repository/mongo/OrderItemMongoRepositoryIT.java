@@ -102,7 +102,7 @@ class OrderItemMongoRepositoryIT {
 	@Test
 	@DisplayName("Method 'save' should throw when the product reference does not exist")
 	void testSaveOrderItemWhenTheProductReferenceDoesNotExistShouldThrow() {
-		productCollection.drop();
+		dropAndCreateCollection(productCollection);
 		OrderItem orderItem = new OrderItem(product_1, order_1, QUANTITY_1);
 		SoftAssertions softly = new SoftAssertions();
 		softly.assertThatThrownBy(() -> orderItemRepository.save(orderItem)).isInstanceOf(NoSuchElementException.class)
@@ -115,7 +115,7 @@ class OrderItemMongoRepositoryIT {
 	@Test
 	@DisplayName("Method 'save' should throw when the order reference does not exist")
 	void testSaveOrderItemWhenTheOrderReferenceDoesNotExistShouldThrow() {
-		orderCollection.drop();
+		dropAndCreateCollection(orderCollection);
 		OrderItem orderItem = new OrderItem(product_1, order_1, QUANTITY_1);
 		SoftAssertions softly = new SoftAssertions();
 		softly.assertThatThrownBy(() -> orderItemRepository.save(orderItem)).isInstanceOf(NoSuchElementException.class)
@@ -281,6 +281,42 @@ class OrderItemMongoRepositoryIT {
 		saveTestOrderToDatabaseWithSession(session, order_1);
 		saveTestOrderItemToDatabaseWithSession(session, match_1);
 		assertThat(orderItemRepository.getListByOrderId(order_1.getId())).containsExactly(match_1);
+		session.commitTransaction();
+	}
+
+	@Test
+	@DisplayName("Find OrderItem by order_id and product_id when there is a match on both fields")
+	void testFindOrderItemByOrderIdAndProductId() {
+		OrderItem match_1 = newOrderItemWithId(getNewStringId(), product_1, order_1, QUANTITY_1);
+		saveTestOrderItemToDatabase(match_1);
+
+		assertThat(orderItemRepository.findByProductAndOrderId(product_1.getId(), order_1.getId())).isEqualTo(match_1);
+	}
+
+	@Test
+	@DisplayName("Find OrderItem by order_id and product_id when there is no match on both fields should return null")
+	void testFindOrderItemByOrderIdAndProductIdWhenAtLeasOneFieldDoesNotMatchShouldReturnNull() {
+		OrderItem match_1 = newOrderItemWithId(getNewStringId(), product_1, order_1, QUANTITY_1);
+		OrderItem match_2 = newOrderItemWithId(getNewStringId(), product_2, order_2, QUANTITY_1);
+		saveTestOrderItemToDatabase(match_1);
+		saveTestOrderItemToDatabase(match_2);
+
+		SoftAssertions softly = new SoftAssertions();
+		softly.assertThat(orderItemRepository.findByProductAndOrderId(product_1.getId(), order_2.getId())).isNull();
+		softly.assertThat(orderItemRepository.findByProductAndOrderId(product_2.getId(), order_1.getId())).isNull();
+		softly.assertAll();
+	}
+
+	@Test
+	@DisplayName("Method 'findByProductAndOrderId' should be bound to the repository session")
+	void testFindOrderItemByOrderIdAndProductIdShouldBeBoundToTheRepositorySession() {
+		dropAndCreateCollection(orderCollection);
+		session.startTransaction();
+		saveTestOrderToDatabaseWithSession(session, order_1);
+		OrderItem match_1 = newOrderItemWithId(getNewStringId(), product_1, order_1, QUANTITY_1);
+		saveTestOrderItemToDatabaseWithSession(session, match_1);
+
+		assertThat(orderItemRepository.findByProductAndOrderId(product_1.getId(), order_1.getId())).isEqualTo(match_1);
 		session.commitTransaction();
 
 	}

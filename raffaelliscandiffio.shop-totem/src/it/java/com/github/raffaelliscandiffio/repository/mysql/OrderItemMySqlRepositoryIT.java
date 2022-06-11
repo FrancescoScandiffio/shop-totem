@@ -8,6 +8,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -159,6 +160,27 @@ class OrderItemMySqlRepositoryIT {
 		persistObjectToDatabase(match_1);
 		persistObjectToDatabase(match_2);
 		assertThat(orderItemRepository.getListByOrderId(order_1.getId())).isEmpty();
+	}
+
+	@Test
+	@DisplayName("Find OrderItem by order_id and product_id when there is a match on both fields")
+	void testFindOrderItemByOrderIdAndProductId() {
+		OrderItem match_1 = new OrderItem(product_1, order_1, QUANTITY_1);
+		persistObjectToDatabase(match_1);
+		assertThat(orderItemRepository.findByProductAndOrderId(product_1.getId(), order_1.getId())).isEqualTo(match_1);
+	}
+
+	@Test
+	@DisplayName("Find OrderItem by order_id and product_id when there is no match on both fields should return null")
+	void testFindOrderItemByOrderIdAndProductIdWhenAtLeasOneFieldDoesNotMatchShouldReturnNull() {
+		OrderItem match_1 = new OrderItem(product_1, order_1, QUANTITY_1);
+		OrderItem match_2 = new OrderItem(product_2, order_2, QUANTITY_1);
+		persistObjectToDatabase(match_1);
+		persistObjectToDatabase(match_2);
+		SoftAssertions softly = new SoftAssertions();
+		softly.assertThat(orderItemRepository.findByProductAndOrderId(product_1.getId(), order_2.getId())).isNull();
+		softly.assertThat(orderItemRepository.findByProductAndOrderId(product_2.getId(), order_1.getId())).isNull();
+		softly.assertAll();
 	}
 
 	private void persistObjectToDatabase(Object object) {

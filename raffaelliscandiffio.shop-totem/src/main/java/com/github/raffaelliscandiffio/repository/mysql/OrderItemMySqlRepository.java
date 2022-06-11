@@ -45,4 +45,12 @@ public class OrderItemMySqlRepository implements OrderItemRepository {
 		return query.getResultList();
 	}
 
+	@Override
+	public OrderItem findByProductAndOrderId(String productId, String orderId) {
+		TypedQuery<OrderItem> query = entityManager.createQuery(
+				"SELECT item FROM OrderItem item WHERE item.product.id= :productId AND item.order.id = :orderId",
+				OrderItem.class).setParameter("productId", productId).setParameter("orderId", orderId);
+		return query.getResultList().stream().findFirst().orElse(null);
+	}
+
 }
