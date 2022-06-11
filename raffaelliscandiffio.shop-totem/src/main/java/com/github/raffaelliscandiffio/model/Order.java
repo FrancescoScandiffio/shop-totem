@@ -11,6 +11,9 @@ public class Order {
 		this.status = status;
 	}
 
+	protected Order() {
+	}
+
 	public String getId() {
 		return id;
 	}

@@ -20,7 +20,6 @@ import com.github.raffaelliscandiffio.model.OrderItem;
 import com.github.raffaelliscandiffio.model.OrderStatus;
 import com.github.raffaelliscandiffio.model.Product;
 
-
 class OrderItemMySqlRepositoryIT {
 
 	private static final String DATABASE_NAME = "totem";
@@ -34,7 +33,6 @@ class OrderItemMySqlRepositoryIT {
 	private Product product_2;
 	private Order order_1;
 	private Order order_2;
-
 
 	@BeforeAll
 	public static void createEntityManagerFactory() {
@@ -131,6 +129,36 @@ class OrderItemMySqlRepositoryIT {
 		orderItemRepository.delete(idToDelete);
 		entityManager.getTransaction().commit();
 		assertThat(readAllOrderItemsFromDatabase()).containsExactly(item);
+	}
+
+	@Test
+	@DisplayName("Get list of OrderItems by order_id when there is exactly one match")
+	void testGetListByOrderIdWhenThereIsExactlyOneMatch() {
+		OrderItem match_1 = new OrderItem(product_1, order_1, QUANTITY_1);
+		OrderItem match_2 = new OrderItem(product_2, order_2, QUANTITY_1);
+		persistObjectToDatabase(match_1);
+		persistObjectToDatabase(match_2);
+		assertThat(orderItemRepository.getListByOrderId(order_1.getId())).containsExactly(match_1);
+	}
+
+	@Test
+	@DisplayName("Get list of OrderItems by order_id when there are multiple matches")
+	void testGetListByOrderIdWhenThereAreMultipleMatches() {
+		OrderItem match_1 = new OrderItem(product_1, order_1, QUANTITY_1);
+		OrderItem match_2 = new OrderItem(product_2, order_1, QUANTITY_1);
+		persistObjectToDatabase(match_1);
+		persistObjectToDatabase(match_2);
+		assertThat(orderItemRepository.getListByOrderId(order_1.getId())).containsExactlyInAnyOrder(match_1, match_2);
+	}
+
+	@Test
+	@DisplayName("Get list of OrderItems by order_id when there are 0 matches should return empty list")
+	void testGetListByOrderIdWhenThereIsNoMatchShouldReturnEmptyList() {
+		OrderItem match_1 = new OrderItem(product_1, order_2, QUANTITY_1);
+		OrderItem match_2 = new OrderItem(product_2, order_2, QUANTITY_1);
+		persistObjectToDatabase(match_1);
+		persistObjectToDatabase(match_2);
+		assertThat(orderItemRepository.getListByOrderId(order_1.getId())).isEmpty();
 	}
 
 	private void persistObjectToDatabase(Object object) {

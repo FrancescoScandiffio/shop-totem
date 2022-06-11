@@ -17,6 +17,9 @@ public class OrderItem {
 		this.subTotal = quantity * product.getPrice();
 	}
 
+	protected OrderItem() {
+	}
+
 	public String getId() {
 		return id;
 	}
