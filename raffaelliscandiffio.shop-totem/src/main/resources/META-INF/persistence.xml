@@ -11,20 +11,29 @@
 		<mapping-file>/META-INF/Stock.hbm.xml</mapping-file>
 		<mapping-file>/META-INF/Order.hbm.xml</mapping-file>
 		<mapping-file>/META-INF/OrderItem.hbm.xml</mapping-file>
-		
+
 		<class>com.github.raffaelliscandiffio.model.Product</class>
 		<class>com.github.raffaelliscandiffio.model.Stock</class>
 		<class>com.github.raffaelliscandiffio.model.Order</class>
 		<class>com.github.raffaelliscandiffio.model.OrderItem</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
-		
 		<properties>
-		<property name="javax.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
-            <property name="hibernate.show_sql" value="false"/>
-            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect"/>
-            <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
-            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/totem"/>
-            <property name="javax.persistence.jdbc.user" value="root"/>
+
+			<property name="javax.persistence.jdbc.driver"
+				value="com.mysql.cj.jdbc.Driver" />
+			<property name="javax.persistence.jdbc.user" value="root" />
+			<property name="javax.persistence.jdbc.password" value="" />
+
+			<property name="javax.persistence.jdbc.url"
+				value="jdbc:mysql://localhost:${db.port}/totem" />
+			<property name="hibernate.dialect"
+				value="org.hibernate.dialect.MySQL8Dialect" />
+
+			<property
+				name="javax.persistence.schema-generation.database.action"
+				value="drop-and-create" />
+
+
 		</properties>
 	</persistence-unit>
 </persistence>
