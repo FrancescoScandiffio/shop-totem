@@ -312,7 +312,6 @@ class TotemControllerTest {
 
 			totemController.returnItem(orderItem, QUANTITY);
 
-			inOrder.verify(shoppingService, times(1)).returnItem(orderItem, QUANTITY);
 			inOrder.verify(totemView, times(1)).itemModified(orderItem, orderItemModified);
 			inOrder.verify(totemView, times(1)).showCartMessage("Removed 1 pizza");
 		}
@@ -400,16 +399,20 @@ class TotemControllerTest {
 		@Test
 		@DisplayName("should call buyProduct on shopping service and call itemAdded with returned orderItem and show ok message")
 		void testBuyProductShouldCallBuyProductOnShoppingServiceAndCallItemAddedWithReturnedOrderItemAndShowOkMessage() {
-
+			
 			OrderItem orderItem = new OrderItem(new Product("pizza", 3.0), new Order(OrderStatus.OPEN), 5);
+			List<OrderItem> orderItemList = Arrays.asList(orderItem);
 
-			when(shoppingService.buyProduct(anyString(), anyString(), anyInt())).thenReturn(orderItem);
-
+			when(shoppingService.buyProduct(ORDER_ID, PRODUCT_ID, QUANTITY)).thenReturn(orderItem);
+			when(shoppingService.getOrderItems(ORDER_ID)).thenReturn(orderItemList);
+			when(totemView.getOrderId()).thenReturn(ORDER_ID);
+			
 			totemController.buyProduct(ORDER_ID, PRODUCT_ID, QUANTITY);
 
 			InOrder inOrder = Mockito.inOrder(shoppingService, totemView);
-			inOrder.verify(shoppingService, times(1)).buyProduct(ORDER_ID, PRODUCT_ID, QUANTITY);
-			inOrder.verify(totemView, times(1)).itemAdded(orderItem);
+			inOrder.verify(shoppingService, times(1)).getOrderItems(ORDER_ID);
+			inOrder.verify(totemView, times(1)).showAllOrderItems(orderItemList);
+
 			inOrder.verify(totemView, times(1)).showShoppingMessage("Added 2 pizza");
 		}
 
@@ -421,6 +424,24 @@ class TotemControllerTest {
 
 			doThrow(new TransactionException(errorMessage)).when(shoppingService).buyProduct(anyString(), anyString(),
 					anyInt());
+
+			totemController.buyProduct(ORDER_ID, PRODUCT_ID, QUANTITY);
+
+			InOrder inOrder = Mockito.inOrder(shoppingService, totemView);
+			inOrder.verify(totemView, times(1)).showShoppingErrorMessage(errorMessage);
+			verifyNoMoreInteractions(totemView);
+		}
+		
+		@Test
+		@DisplayName("should call buyProduct on shopping service and call show error message when getOrderItems throws")
+		void testBuyProductShouldShowErrorMessageWhenGetOrderItemsThrows() {
+
+			String errorMessage = "Error message";
+			OrderItem orderItem = new OrderItem(new Product("pizza", 3.0), new Order(OrderStatus.OPEN), 5);
+
+			when(shoppingService.buyProduct(ORDER_ID, PRODUCT_ID, QUANTITY)).thenReturn(orderItem);
+			when(totemView.getOrderId()).thenReturn(ORDER_ID);
+			doThrow(new TransactionException(errorMessage)).when(shoppingService).getOrderItems(ORDER_ID);
 
 			totemController.buyProduct(ORDER_ID, PRODUCT_ID, QUANTITY);
 
