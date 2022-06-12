@@ -140,6 +140,7 @@ public class ShoppingPanel extends JPanel {
 		btnAddButton = new JButton("Add");
 		btnAddButton.setEnabled(false);
 		btnAddButton.setFocusPainted(false);
+		btnAddButton.setName("addButton");
 
 		GridBagConstraints gbc_btnAddButton = new GridBagConstraints();
 		gbc_btnAddButton.insets = new Insets(0, 0, 5, 0);
