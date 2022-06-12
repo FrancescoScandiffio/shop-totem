@@ -140,4 +140,22 @@ public class ShoppingService {
 				});
 	}
 
+	public void saveProductAndStock(String productName, double price, int quantity) {
+		transactionManager.runInTransaction((productRepository, stockRepository, orderRepository, itemRepository) -> {
+			if (productName == null)
+				throw new NullPointerException("The Product name cannot be null");
+			if (price <= 0)
+				throw new IllegalArgumentException("Price must be positive. Received: " + price);
+			if (quantity <= 0)
+				throw new IllegalArgumentException("Quantity must be positive. Received: " + quantity);
+
+			Product product = new Product(productName, price);
+			Stock stock = new Stock(product, quantity);
+			productRepository.save(product);
+			stockRepository.save(stock);
+			return null;
+		});
+
+	}
+
 }
