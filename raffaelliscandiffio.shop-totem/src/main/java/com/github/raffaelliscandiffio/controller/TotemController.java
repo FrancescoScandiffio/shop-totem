@@ -64,11 +64,15 @@ public class TotemController {
 		totemView.showOrder();
 	}
 
+
 	public void buyProduct(String orderId, String productId, int quantity) {
 
 		try {
 			OrderItem orderItem = shoppingService.buyProduct(orderId, productId, quantity);
-			totemView.itemAdded(orderItem);
+			
+			List<OrderItem> allOrderItems = shoppingService.getOrderItems(totemView.getOrderId());
+			totemView.showAllOrderItems(allOrderItems);
+			
 			totemView.showShoppingMessage("Added " + quantity + " " + orderItem.getProduct().getName());
 		} catch (TransactionException e) {
 			totemView.showShoppingErrorMessage(e.getMessage());
