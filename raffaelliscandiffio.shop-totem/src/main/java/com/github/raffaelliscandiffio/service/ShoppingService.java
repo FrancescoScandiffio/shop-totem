@@ -69,9 +69,9 @@ public class ShoppingService {
 					stock.setQuantity(stock.getQuantity() + repositoryItem.getQuantity());
 					stockRepository.update(stock);
 				}
-				itemRepository.delete(orderItem.getId()); // RICONTROLLA QUESTO NEI TEST. devo fare il test se sono
-															// diversi
-			}
+				itemRepository.delete(orderItem.getId());
+			} else
+				throw new RepositoryException("Item not found: " + orderItem.getId());
 			return null;
 		});
 	}
@@ -81,21 +81,21 @@ public class ShoppingService {
 				.runInTransaction((productRepository, stockRepository, orderRepository, itemRepository) -> {
 					String itemId = orderItem.getId();
 					OrderItem repositoryItem = itemRepository.findById(itemId);
+
 					if (repositoryItem == null)
-						throw new RepositoryException("OrderItem with id " + itemId + " not found.");
-					if (repositoryItem != orderItem)
+						throw new RepositoryException("Item not found: " + itemId);
+					if (!repositoryItem.equals(orderItem))
 						throw new RepositoryException("Stale data detected in OrderItem with id " + itemId);
 
 					String productId = orderItem.getProduct().getId();
 					Stock stock = stockRepository.findByProductId(productId);
-					if (stock == null)
-						throw new RepositoryException("Stock not found with product_id: " + productId);
 
 					orderItem.setQuantity(orderItem.getQuantity() - quantityToReturn);
 					itemRepository.update(orderItem);
-
-					stock.setQuantity(stock.getQuantity() + quantityToReturn);
-					stockRepository.update(stock);
+					if (stock != null) {
+						stock.setQuantity(stock.getQuantity() + quantityToReturn);
+						stockRepository.update(stock);
+					}
 					return orderItem;
 				});
 
@@ -123,7 +123,7 @@ public class ShoppingService {
 					if (stock == null)
 						throw new RepositoryException("Stock not found. Query by product: " + productId);
 					if (purchaseQuantity > stock.getQuantity())
-						throw new RepositoryException("Not enough quantity. Cannot buy product: " + productId);
+						throw new RepositoryException("Not enough quantity. Cannot buy product: " + product.getName());
 
 					stock.setQuantity(stock.getQuantity() - purchaseQuantity);
 					stockRepository.update(stock);
