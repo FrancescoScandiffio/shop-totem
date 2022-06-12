@@ -32,6 +32,8 @@
 		<picocli.version>4.6.2</picocli.version>
 		<awaitility.version>4.1.1</awaitility.version>
 
+		<jbehave.version>5.0</jbehave.version>
+
 		<sonar.coverage.exclusions>
 			**/model/Product.java,
 			**/model/Stock.java,
@@ -171,11 +173,18 @@
 			<artifactId>picocli</artifactId>
 			<version>${picocli.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.awaitility</groupId>
 			<artifactId>awaitility</artifactId>
 			<version>${awaitility.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jbehave</groupId>
+			<artifactId>jbehave-core</artifactId>
+			<version>${jbehave.version}</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -199,8 +208,8 @@
 					<artifactId>maven-site-plugin</artifactId>
 					<version>3.9.1</version>
 				</plugin>
-				
-				<!--  Configuring code coverage  -->
+
+				<!-- Configuring code coverage -->
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
@@ -259,7 +268,22 @@
 						<configuration>
 							<sources>
 								<source>src/it/java</source>
+								<source>src/bdd/java</source>
 							</sources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>add-test-resource</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>add-test-resource</goal>
+						</goals>
+						<configuration>
+							<resources>
+								<resource>
+									<directory>src/bdd/resources</directory>
+								</resource>
+							</resources>
 						</configuration>
 					</execution>
 				</executions>
@@ -280,6 +304,21 @@
 						<configuration>
 							<includes>
 								<include>**/*IT.java</include>
+							</includes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>bdd-tests</id>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+						<configuration>
+							<excludes>
+								<exclude>**/*IT.java</exclude>
+							</excludes>
+							<includes>
+								<include>**/*BDD.java</include>
 							</includes>
 						</configuration>
 					</execution>
