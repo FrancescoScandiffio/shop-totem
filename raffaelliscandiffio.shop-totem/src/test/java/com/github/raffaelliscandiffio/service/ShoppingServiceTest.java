@@ -21,6 +21,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -540,6 +542,68 @@ class ShoppingServiceTest {
 		}
 
 	}
+
+	@Nested
+	@DisplayName("Test cases for 'saveNewProductAndStock'")
+	class SaveProductAndStockTests {
+
+		private static final double POSITIVE_PRICE = 3.0;
+		private static final int POSITIVE_QUANTITY = 5;
+
+		@Test
+		@DisplayName("Save new product and new stock in the same transaction")
+		void testSaveProductAndStock() {
+			Product productToStore = new Product(PRODUCT_NAME, POSITIVE_PRICE);
+			Stock stockToStore = new Stock(productToStore, POSITIVE_QUANTITY);
+
+			shoppingService.saveProductAndStock(PRODUCT_NAME, POSITIVE_PRICE, POSITIVE_QUANTITY);
+
+			InOrder inOrder = inOrder(productRepository, stockRepository);
+			inOrder.verify(productRepository).save(productToStore);
+			inOrder.verify(stockRepository).save(stockToStore);
+			verify(transactionManager, times(1)).runInTransaction(any());
+		}
+
+		@Nested
+		@DisplayName("Exceptional cases")
+		class ExceptionTests {
+			@Test
+			@DisplayName("When the name is null, do not save and throw exception")
+			void testSaveProductAndStockWhenNameIsNullShouldThrow() {
+
+				assertThatThrownBy(() -> shoppingService.saveProductAndStock(null, POSITIVE_PRICE, POSITIVE_QUANTITY))
+						.isInstanceOf(NullPointerException.class).hasMessage("The Product name cannot be null");
+				verifyNoInteractions(productRepository, stockRepository);
+			}
+
+			@ParameterizedTest
+			@ValueSource(doubles = { 0.0, -0.1 })
+			@DisplayName("When the price is not positive, do not save and throw exception")
+			void testSaveProductAndStockWhenPriceIsNotPositiveShouldThrow(double price) {
+
+				assertThatThrownBy(() -> shoppingService.saveProductAndStock(PRODUCT_NAME, price, POSITIVE_QUANTITY))
+						.isInstanceOf(IllegalArgumentException.class)
+						.hasMessage("Price must be positive. Received: " + price);
+				verifyNoInteractions(productRepository, stockRepository);
+
+			}
+
+			@ParameterizedTest
+			@ValueSource(ints = { 0, -1 })
+			@DisplayName("When the quantity is not positive, do not save and throw exception")
+			void testSaveProductAndStockWhenQuantityIsNotPositiveShouldThrow(int quantity) {
+
+				assertThatThrownBy(() -> shoppingService.saveProductAndStock(PRODUCT_NAME, POSITIVE_PRICE, quantity))
+						.isInstanceOf(IllegalArgumentException.class)
+						.hasMessage("Quantity must be positive. Received: " + quantity);
+				verifyNoInteractions(productRepository, stockRepository);
+
+			}
+		}
+
+	}
+
+	// Private utility methods
 
 	// Private utility methods
 
