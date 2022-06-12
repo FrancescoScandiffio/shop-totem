@@ -64,14 +64,6 @@ public class StockMongoRepository implements StockRepository {
 			throw new NoSuchElementException("Stock with id " + id + " not found.");
 	}
 
-	private Bson eqFilter(String id) {
-		return eq(FIELD_ID, new ObjectId(id));
-	}
-
-	private Document findProductDocumentById(String productId) {
-		return productCollection.find(session, eqFilter(productId)).first();
-	}
-
 	@Override
 	public Stock findByProductId(String productId) {
 		Document stockDocument = stockCollection.find(eq(FIELD_PRODUCT, productId)).first();
@@ -88,6 +80,14 @@ public class StockMongoRepository implements StockRepository {
 		Stock stock = new Stock(product, stockDocument.getInteger(FIELD_QUANTITY));
 		stock.setId(stockDocument.get(FIELD_ID).toString());
 		return stock;
+	}
+
+	private Bson eqFilter(String id) {
+		return eq(FIELD_ID, new ObjectId(id));
+	}
+
+	private Document findProductDocumentById(String productId) {
+		return productCollection.find(session, eqFilter(productId)).first();
 	}
 
 }

@@ -29,23 +29,25 @@ import com.github.raffaelliscandiffio.service.ShoppingService;
 import com.github.raffaelliscandiffio.transaction.mysql.TransactionManagerMySql;
 import com.github.raffaelliscandiffio.view.swing.TotemSwingView;
 
-public class ControllerMysqlIT {
+class ControllerMysqlIT {
 
-	private static final OrderStatus OPEN = OrderStatus.OPEN;
-	private static final double PRICE = 2.0;
 	private static final String DATABASE_NAME = "totem";
+
 	private static final String PRODUCT_NAME_1 = "product_1";
 	private static final String PRODUCT_NAME_2 = "product_2";
 	private static final int LOW_QUANTITY = 2;
 	private static final int MID_QUANTITY = 4;
 	private static final int GREAT_QUANTITY = 10;
+	private static final double PRICE = 2.0;
+	private static final OrderStatus ORDER_OPEN = OrderStatus.OPEN;
+	private static final OrderStatus ORDER_CLOSED = OrderStatus.CLOSED;
 
 	private static EntityManagerFactory managerFactory;
 	private EntityManager entityManager;
-	private TotemSwingView view;
-	private ShoppingService serviceLayer;
-	private TransactionManagerMySql transactionManager;
 
+	private TransactionManagerMySql transactionManager;
+	private ShoppingService serviceLayer;
+	private TotemSwingView view;
 	private TotemController controller;
 
 	@BeforeAll
@@ -61,7 +63,7 @@ public class ControllerMysqlIT {
 	}
 
 	@BeforeEach()
-	void setup() {
+	public void setup() {
 		entityManager = managerFactory.createEntityManager();
 		entityManager.getTransaction().begin();
 		entityManager.createQuery("DELETE FROM OrderItem").executeUpdate();
@@ -77,7 +79,7 @@ public class ControllerMysqlIT {
 	}
 
 	@AfterEach
-	void tearDown() {
+	public void tearDown() {
 		if (entityManager.isOpen())
 			entityManager.close();
 	}
@@ -87,7 +89,8 @@ public class ControllerMysqlIT {
 		controller.startShopping();
 
 		List<Order> orders = getAllOrders();
-		assertThat(orders).singleElement().usingRecursiveComparison().ignoringFields("id").isEqualTo(new Order(OPEN));
+		assertThat(orders).singleElement().usingRecursiveComparison().ignoringFields("id")
+				.isEqualTo(new Order(ORDER_OPEN));
 
 		verify(view).setOrderId(orders.get(0).getId());
 		verify(view).showAllProducts(getAllProducts());
@@ -111,8 +114,8 @@ public class ControllerMysqlIT {
 		Product product_2 = new Product(PRODUCT_NAME_2, PRICE);
 		Stock stock_1 = new Stock(product_1, MID_QUANTITY);
 		Stock stock_2 = new Stock(product_2, MID_QUANTITY);
-		Order order_1 = new Order(OrderStatus.CLOSED);
-		Order order_2 = new Order(OPEN);
+		Order order_1 = new Order(ORDER_CLOSED);
+		Order order_2 = new Order(ORDER_OPEN);
 		OrderItem item_1 = new OrderItem(product_1, order_1, MID_QUANTITY);
 		OrderItem item_2 = new OrderItem(product_1, order_2, LOW_QUANTITY);
 		OrderItem item_3 = new OrderItem(product_2, order_2, GREAT_QUANTITY);
@@ -133,7 +136,7 @@ public class ControllerMysqlIT {
 	void testBuyProductIT() {
 		Product product = new Product(PRODUCT_NAME_1, PRICE);
 		Stock stock = new Stock(product, GREAT_QUANTITY);
-		Order order = new Order(OrderStatus.CLOSED);
+		Order order = new Order(ORDER_OPEN);
 		persistObjects(asList(product, stock, order));
 		String orderToModify = order.getId();
 		String productToBuy = product.getId();
@@ -154,7 +157,7 @@ public class ControllerMysqlIT {
 	void testBuyProductWhenItemExistsIT() {
 		Product product = new Product(PRODUCT_NAME_1, PRICE);
 		Stock stock = new Stock(product, GREAT_QUANTITY);
-		Order order = new Order(OrderStatus.CLOSED);
+		Order order = new Order(ORDER_OPEN);
 		OrderItem item = new OrderItem(product, order, LOW_QUANTITY);
 		persistObjects(asList(product, stock, order, item));
 		String orderToModify = order.getId();
@@ -175,7 +178,7 @@ public class ControllerMysqlIT {
 	void testBuyProductWhenExceptionIsThrownIT() {
 		Product product = new Product(PRODUCT_NAME_1, PRICE);
 		Stock stock = new Stock(product, MID_QUANTITY);
-		Order order = new Order(OrderStatus.CLOSED);
+		Order order = new Order(ORDER_OPEN);
 		OrderItem item = new OrderItem(product, order, MID_QUANTITY);
 		persistObjects(asList(product, stock, order, item));
 		String orderToModify = order.getId();
@@ -193,7 +196,7 @@ public class ControllerMysqlIT {
 		Product product_1 = new Product(PRODUCT_NAME_1, PRICE);
 		Product product_2 = new Product(PRODUCT_NAME_2, PRICE);
 		Stock stock = new Stock(product_1, MID_QUANTITY);
-		Order order = new Order(OPEN);
+		Order order = new Order(ORDER_OPEN);
 		OrderItem item_1 = new OrderItem(product_1, order, MID_QUANTITY);
 		OrderItem item_2 = new OrderItem(product_2, order, MID_QUANTITY);
 
@@ -210,7 +213,7 @@ public class ControllerMysqlIT {
 	void testRemoveItemWhenExceptionIsThrownIT() {
 		Product product = new Product(PRODUCT_NAME_1, PRICE);
 		Stock stock = new Stock(product, MID_QUANTITY);
-		Order order = new Order(OPEN);
+		Order order = new Order(ORDER_OPEN);
 		OrderItem item = new OrderItem(product, order, MID_QUANTITY);
 		String fakeId = "fake_id";
 		item.setId(fakeId);
@@ -232,7 +235,7 @@ public class ControllerMysqlIT {
 	void testReturnItemIT() {
 		Product product = new Product(PRODUCT_NAME_1, PRICE);
 		Stock stock = new Stock(product, MID_QUANTITY);
-		Order order = new Order(OPEN);
+		Order order = new Order(ORDER_OPEN);
 		OrderItem item = new OrderItem(product, order, GREAT_QUANTITY);
 		persistObjects(asList(product, stock, order, item));
 
@@ -253,7 +256,7 @@ public class ControllerMysqlIT {
 	void testReturnItemWhenExceptionIsThrownIT() {
 		Product product = new Product(PRODUCT_NAME_1, PRICE);
 		Stock stock = new Stock(product, MID_QUANTITY);
-		Order order = new Order(OPEN);
+		Order order = new Order(ORDER_OPEN);
 		OrderItem item = new OrderItem(product, order, GREAT_QUANTITY);
 		String fakeId = "fake_id";
 		item.setId(fakeId);
@@ -274,11 +277,11 @@ public class ControllerMysqlIT {
 	void testCheckoutIT() {
 		Product product = new Product(PRODUCT_NAME_1, PRICE);
 		Stock stock = new Stock(product, MID_QUANTITY);
-		Order order = new Order(OPEN);
+		Order order = new Order(ORDER_OPEN);
 		OrderItem item = new OrderItem(product, order, GREAT_QUANTITY);
 		persistObjects(asList(product, stock, order, item));
 		String orderToCheckout = order.getId();
-		Order confirmedOrder = new Order(OrderStatus.CLOSED);
+		Order confirmedOrder = new Order(ORDER_CLOSED);
 		confirmedOrder.setId(orderToCheckout);
 
 		controller.checkout(orderToCheckout);
@@ -291,15 +294,12 @@ public class ControllerMysqlIT {
 	void testCheckoutWhenExceptionIsThrownIT() {
 		Product product = new Product(PRODUCT_NAME_1, PRICE);
 		Stock stock = new Stock(product, MID_QUANTITY);
-		Order order = new Order(OPEN);
+		Order order = new Order(ORDER_OPEN);
 		String fakeId = "fake_id";
 		order.setId(fakeId);
-		entityManager.getTransaction().begin();
-		entityManager.persist(product);
-		entityManager.persist(stock);
-		entityManager.getTransaction().commit();
+		persistObjects(asList(product, stock));
 		String orderToCheckout = order.getId();
-		Order confirmedOrder = new Order(OrderStatus.CLOSED);
+		Order confirmedOrder = new Order(ORDER_CLOSED);
 		confirmedOrder.setId(orderToCheckout);
 
 		controller.checkout(orderToCheckout);
