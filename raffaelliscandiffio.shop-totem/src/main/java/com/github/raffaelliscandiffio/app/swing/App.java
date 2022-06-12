@@ -25,7 +25,7 @@ public class App implements Callable<Void> {
 	private static final Logger LOGGER = LogManager.getLogger(App.class);
 
 	@Option(names = { "--database" }, description = "Either 'mongo' or 'mysql'")
-	private String databaseType = "mongo";
+	private String databaseType = "mysql";
 
 	public static void main(String[] args) {
 		new CommandLine(new App()).execute(args);
@@ -58,6 +58,11 @@ public class App implements Callable<Void> {
 				TotemSwingView totemView = new TotemSwingView();
 				ShoppingService shoppingService = new ShoppingService(transactionManager);
 				TotemController totemController = new TotemController(shoppingService, totemView);
+				shoppingService.saveProductAndStock("Bread", 1.40, 100);
+				shoppingService.saveProductAndStock("Pizza", 2.20, 100);
+				shoppingService.saveProductAndStock("Spaghetti", 0.80, 100);
+				shoppingService.saveProductAndStock("Ice cream", 4, 100);
+
 				totemView.setTotemController(totemController);
 				totemView.setVisible(true);
 
