@@ -1,13 +1,19 @@
 package com.github.raffaelliscandiffio.app.swing;
 
 import java.awt.EventQueue;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.github.raffaelliscandiffio.app.dbinit.DBInitializer;
+
 import com.github.raffaelliscandiffio.app.dbinit.MongoInitializer;
 import com.github.raffaelliscandiffio.app.dbinit.MySqlInitializer;
 import com.github.raffaelliscandiffio.controller.TotemController;
@@ -21,6 +27,24 @@ import picocli.CommandLine.Option;
 
 @Command(mixinStandardHelpOptions = true)
 public class App implements Callable<Void> {
+	
+	private static EntityManagerFactory entityManagerFactory = null;
+    private static EntityManager entityManager = null;
+
+    public static EntityManager getEntityManager(Map<String, String> settings) {
+        if (entityManagerFactory == null) {
+            entityManagerFactory = Persistence.createEntityManagerFactory("mysql-production", settings);
+            entityManager = entityManagerFactory.createEntityManager();
+        }
+        return entityManager;
+    }
+
+    public static void closeConnection() {
+        if (entityManagerFactory != null) {
+            entityManager.close();
+            entityManagerFactory.close();
+        }
+    }
 
 	private static final Logger LOGGER = LogManager.getLogger(App.class);
 
@@ -31,29 +55,60 @@ public class App implements Callable<Void> {
 		new CommandLine(new App()).execute(args);
 	}
 
-	TransactionManager transactionManager;
-	DBInitializer dbInitializer;
+	TransactionManager transactionManager = null;
+	
+	// MySQL
+	MySqlInitializer mySqlInitializer = null;
+	EntityManager em = null;
+	
+	// Mongo
+	MongoInitializer mongoInitializer = null;
+	
+	
 
 	@Override
 	public Void call() throws Exception {
+		switch (databaseType) {
+		case "mysql":
+			Map<String, String> settings = new HashMap<>();
+	        settings.put("javax.persistence.jdbc.url", "jdbc:mysql://" + "localhost" + ":" + 3306 + "/" + "totem");
+	        settings.put("javax.persistence.jdbc.user", "root");
+	        settings.put("javax.persistence.jdbc.password", "");
+
+	        em = App.getEntityManager(settings);
+	        
+			break;
+		case "mongo":
+			
+			break;
+
+		default:
+			LOGGER.log(Level.ERROR, "--database must be either 'mysql' or 'mongo'");
+			System.exit(1);
+		}
+		
 
 		EventQueue.invokeLater(() -> {
 			try {
 
 				switch (databaseType) {
 				case "mysql":
-					dbInitializer = new MySqlInitializer();
+					mySqlInitializer = new MySqlInitializer();
+			        mySqlInitializer.setEntityManager(em);
+			        mySqlInitializer.startDbConnection();
+			        transactionManager = mySqlInitializer.getTransactionManager();
 					break;
 				case "mongo":
-					dbInitializer = new MongoInitializer();
+					mongoInitializer = new MongoInitializer();
+					mongoInitializer.startDbConnection();
+					transactionManager = mongoInitializer.getTransactionManager();
 					break;
 
 				default:
 					LOGGER.log(Level.ERROR, "--database must be either 'mysql' or 'mongo'");
 					System.exit(1);
 				}
-				dbInitializer.startDbConnection();
-				transactionManager = dbInitializer.getTransactionManager();
+
 
 				TotemSwingView totemView = new TotemSwingView();
 				ShoppingService shoppingService = new ShoppingService(transactionManager);
@@ -71,12 +126,7 @@ public class App implements Callable<Void> {
 			}
 		});
 
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			@Override
-			public void run() {
-				dbInitializer.closeDbConnection();
-			}
-		});
+		Runtime.getRuntime().addShutdownHook(new Thread(App::closeConnection));
 		return null;
 	}
 

@@ -1,5 +1,6 @@
 package com.github.raffaelliscandiffio.app.dbinit;
 
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,7 +11,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 
-public class MongoInitializer implements DBInitializer {
+public class MongoInitializer {
 
 	private MongoClient client;
 	private static final String DATABASE_NAME = "totem";
@@ -23,7 +24,7 @@ public class MongoInitializer implements DBInitializer {
 
 	private final Logger logger = LogManager.getLogger(MongoInitializer.class);
 
-	@Override
+
 	public void startDbConnection() {
 
 		try {
@@ -46,15 +47,16 @@ public class MongoInitializer implements DBInitializer {
 		}
 	}
 
-	@Override
+
 	public void closeDbConnection() {
 		logger.log(Level.INFO, "Close mongo client");
 		client.close();
 	}
 
-	@Override
+
 	public TransactionManager getTransactionManager() {
 		return transactionManager;
 	}
+
 
 }

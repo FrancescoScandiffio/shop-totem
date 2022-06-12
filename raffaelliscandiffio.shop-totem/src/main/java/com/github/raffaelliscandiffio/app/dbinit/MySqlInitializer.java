@@ -1,9 +1,7 @@
 package com.github.raffaelliscandiffio.app.dbinit;
 
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -14,19 +12,16 @@ import com.github.raffaelliscandiffio.transaction.mysql.TransactionManagerMySql;
 
 
 
-public class MySqlInitializer implements DBInitializer {
+public class MySqlInitializer{
 	private EntityManagerFactory emf;
 	private EntityManager entityManager;
 	private TransactionManager transactionManager;
 	
 	private final Logger logger = LogManager.getLogger(MySqlInitializer.class);
 	
-	@Override
+
 	public void startDbConnection() {
 		try {
-			emf = Persistence.createEntityManagerFactory("mysql-production");
-			entityManager = emf.createEntityManager();
-
 			transactionManager = new TransactionManagerMySql(entityManager);
 
 		} catch (Exception e) {
@@ -34,7 +29,7 @@ public class MySqlInitializer implements DBInitializer {
 		}
 	}
 	
-	@Override
+
 	public void closeDbConnection() {
 		if (emf != null) {
 			entityManager.close();
@@ -43,9 +38,15 @@ public class MySqlInitializer implements DBInitializer {
 		}
 	}
 	
-	@Override
+
 	public TransactionManager getTransactionManager() {
 		return transactionManager;
+	}
+
+
+	public void setEntityManager(EntityManager em) {
+		entityManager = em;
+		
 	}
 
 }
