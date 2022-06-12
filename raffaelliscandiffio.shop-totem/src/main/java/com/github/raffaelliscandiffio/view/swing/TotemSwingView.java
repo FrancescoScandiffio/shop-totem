@@ -101,10 +101,12 @@ public class TotemSwingView extends JFrame implements TotemView {
 	}
 
 	private void returnProductAction() {
-		SwingUtilities.invokeLater(() -> {
-			int spinnerValue = ((Integer) cartPane.getSpinner().getValue()).intValue();
-			this.totemController.returnItem(cartPane.getListOrderItems().getSelectedValue(), spinnerValue);
-		});
+		if (cartPane.getBtnReturnQuantity().isEnabled()){
+			SwingUtilities.invokeLater(() -> {
+				int spinnerValue = ((Integer) cartPane.getSpinner().getValue()).intValue();
+				this.totemController.returnItem(cartPane.getListOrderItems().getSelectedValue(), spinnerValue);
+			});
+		}
 	}
 
 	private void removeItemAction() {
@@ -135,9 +137,11 @@ public class TotemSwingView extends JFrame implements TotemView {
 	}
 
 	private void buyProductAction() {
+		if (shoppingPane.getAddProductButton().isEnabled()){
 		SwingUtilities.invokeLater(() -> this.totemController.buyProduct(this.getOrderId(),
 				getShoppingPane().getListProducts().getSelectedValue().getId(),
 				(Integer) getShoppingPane().getQuantitySpinner().getValue()));
+		}
 	}
 
 	ShoppingPanel getShoppingPane() {
