@@ -10,6 +10,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.assertj.core.api.SoftAssertions;
@@ -241,28 +242,33 @@ class ViewIT {
 	@DisplayName("'Add' button should add product with quantity to cart")
 	void testAddButtonInShopping() {
 		String orderId = "5";
-		int quantity = 3;
+		int newQuantity = 5;
+		int requestedQuantity = 3;
+		double price = 2;
 		totemView.setOrderId(orderId);
+		Product product = new Product("Pasta", price);
+		OrderItem orderItem = new OrderItem(product, new Order(OrderStatus.OPEN), newQuantity);
+		List<OrderItem> orderItemList = Arrays.asList(orderItem);
 
 		GuiActionRunner.execute(() -> totemView.showShopping());
-		Product product = new Product("Pasta", 2);
 		GuiActionRunner.execute(() -> totemView.showAllProducts(Arrays.asList(product)));
 
-		when(shoppingService.buyProduct(orderId, product.getId(), quantity))
-				.thenReturn(new OrderItem(product, new Order(OrderStatus.OPEN), quantity));
+		when(shoppingService.buyProduct(orderId, product.getId(), requestedQuantity)).thenReturn(orderItem);
+		when(shoppingService.getOrderItems(orderId)).thenReturn(orderItemList);
 
 		window.list("productList").selectItem(0);
-		window.spinner("quantitySpinner").enterText(String.valueOf(quantity));
+		window.spinner("quantitySpinner").enterText(String.valueOf(requestedQuantity));
 		window.button(JButtonMatcher.withText("Add")).click();
 
 		await().atMost(TIMEOUT, TimeUnit.SECONDS).untilAsserted(() -> {
 			window.label("messageLabel").requireText("Added 3 Pasta");
 
+		});
+		await().atMost(TIMEOUT, TimeUnit.SECONDS).untilAsserted(() -> {
 			GuiActionRunner.execute(() -> totemView.showOrder());
 			assertThat(window.list("cartList").contents())
-					.containsExactly("Pasta - Quantity: 3 - Price: 2.0 € - Subtotal: 6.0 €");
+					.containsExactly("Pasta - Quantity: 5 - Price: 2.0 € - Subtotal: 10.0 €");
 		});
-
 	}
 
 	@Test
@@ -287,8 +293,10 @@ class ViewIT {
 
 		await().atMost(TIMEOUT, TimeUnit.SECONDS).untilAsserted(() -> {
 			window.label("messageLabel").requireText(errorMessage);
-
-			GuiActionRunner.execute(() -> totemView.showOrder());
+		});
+		GuiActionRunner.execute(() -> totemView.showOrder());
+		
+		await().atMost(TIMEOUT, TimeUnit.SECONDS).untilAsserted(() -> {
 			assertThat(window.list("cartList").contents()).isEmpty();
 		});
 
