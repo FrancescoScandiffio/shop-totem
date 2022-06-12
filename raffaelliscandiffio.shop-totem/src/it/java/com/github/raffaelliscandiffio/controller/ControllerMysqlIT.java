@@ -141,6 +141,7 @@ class ControllerMysqlIT {
 		String orderToModify = order.getId();
 		String productToBuy = product.getId();
 		Stock modifiedStock = newStockWithId(stock.getId(), product, GREAT_QUANTITY - MID_QUANTITY);
+		when(view.getOrderId()).thenReturn(orderToModify);
 
 		controller.buyProduct(orderToModify, productToBuy, MID_QUANTITY);
 
@@ -148,7 +149,7 @@ class ControllerMysqlIT {
 		assertThat(items).singleElement().usingRecursiveComparison().ignoringFields("id")
 				.isEqualTo(new OrderItem(product, order, MID_QUANTITY));
 		assertThat(getAllStocks()).containsExactly(modifiedStock);
-		verify(view).itemAdded(items.get(0));
+		verify(view).showAllOrderItems(asList(items.get(0)));
 		verify(view).showShoppingMessage("Added " + MID_QUANTITY + " " + PRODUCT_NAME_1);
 		verify(view, never()).showShoppingErrorMessage(any());
 	}
@@ -164,12 +165,14 @@ class ControllerMysqlIT {
 		String productToBuy = product.getId();
 		OrderItem modifiedItem = newItemWithId(item.getId(), product, order, LOW_QUANTITY + MID_QUANTITY);
 		Stock modifiedStock = newStockWithId(stock.getId(), product, GREAT_QUANTITY - MID_QUANTITY);
+		
+		when(view.getOrderId()).thenReturn(orderToModify);
 
 		controller.buyProduct(orderToModify, productToBuy, MID_QUANTITY);
-
+		
 		assertThat(getAllItems()).containsExactly(modifiedItem);
 		assertThat(getAllStocks()).containsExactly(modifiedStock);
-		verify(view).itemAdded(modifiedItem);
+		verify(view).showAllOrderItems(asList(modifiedItem));
 		verify(view).showShoppingMessage("Added " + MID_QUANTITY + " " + PRODUCT_NAME_1);
 		verify(view, never()).showShoppingErrorMessage(any());
 	}
