@@ -1,15 +1,6 @@
 name: Java CI with Maven on ubuntu-latest
 
-on:
-    workflow_dispatch:
-    inputs:
-      logLevel:
-        description: 'Log level'     
-        required: true
-        default: 'warning'
-      tags:
-        description: 'Test scenario tags' 
-        
+on:      
   push:
     paths-ignore:
       - '**/README.md'
@@ -22,6 +13,8 @@ on:
       - '**/README.md'
       - '**/.github/workflows/**'
       - '**/LICENSE'
+      
+  workflow_dispatch:
 
 jobs:
   build:
