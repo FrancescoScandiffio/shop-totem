@@ -6,6 +6,7 @@ on:
       - '**/README.md'
       - '**/.github/workflows/**'
       - '**/LICENSE'
+      - '**/bdd/**'
       
   pull_request:
       paths-ignore:
