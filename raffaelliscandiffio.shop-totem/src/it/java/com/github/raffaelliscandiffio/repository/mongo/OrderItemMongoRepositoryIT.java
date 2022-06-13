@@ -107,7 +107,7 @@ class OrderItemMongoRepositoryIT {
 		SoftAssertions softly = new SoftAssertions();
 		softly.assertThatThrownBy(() -> orderItemRepository.save(orderItem)).isInstanceOf(NoSuchElementException.class)
 				.hasMessage(
-						"Reference error, cannot save OrderItem: Product with " + product_1.getId() + " not found.");
+						"Reference error, cannot save OrderItem: Product with id " + product_1.getId() + " not found.");
 		softly.assertThat(readAllOrderItemFromDatabase()).isEmpty();
 		softly.assertAll();
 	}
@@ -119,7 +119,7 @@ class OrderItemMongoRepositoryIT {
 		OrderItem orderItem = new OrderItem(product_1, order_1, QUANTITY_1);
 		SoftAssertions softly = new SoftAssertions();
 		softly.assertThatThrownBy(() -> orderItemRepository.save(orderItem)).isInstanceOf(NoSuchElementException.class)
-				.hasMessage("Reference error, cannot save OrderItem: Order with " + order_1.getId() + " not found.");
+				.hasMessage("Reference error, cannot save OrderItem: Order with id " + order_1.getId() + " not found.");
 		softly.assertThat(readAllOrderItemFromDatabase()).isEmpty();
 		softly.assertAll();
 	}
