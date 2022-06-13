@@ -1,10 +1,11 @@
 package com.github.raffaelliscandiffio;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.swing.launcher.ApplicationLauncher.application;
+import static org.awaitility.Awaitility.await;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.persistence.EntityManager;
 import javax.swing.JFrame;
@@ -38,7 +39,6 @@ public class OperationsOnOrderMySqlSteps {
 	private final int productQuantity1 = 100;
 	private Product product1;
 	private Stock stock1;
-
 
 	@BeforeStories
 	public void setUpStories() {
@@ -76,18 +76,26 @@ public class OperationsOnOrderMySqlSteps {
 
 	@Given("The View is shown")
 	public void givenViewIsShown() {
-		application("com.github.raffaelliscandiffio.app.swing.App").start();
+		String[] args = { "--database", "mysql" };
+		App.main(args);
 		window = WindowFinder.findFrame(new GenericTypeMatcher<JFrame>(JFrame.class) {
 			@Override
 			protected boolean isMatching(JFrame frame) {
 				return "Totem".equals(frame.getTitle()) && frame.isShowing();
 			}
+
 		}).using(BasicRobot.robotWithCurrentAwtHierarchy());
+		await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+			window.requireVisible();
+		});
+
 	}
 
 	@Given("The Database starts empty")
 	public void givenDatabaseStartsEmpty() {
 		entityManager.getTransaction().begin();
+		entityManager.createQuery("DELETE FROM Order").executeUpdate();
+		entityManager.createQuery("DELETE FROM OrderItem").executeUpdate();
 		entityManager.createQuery("DELETE FROM Stock").executeUpdate();
 		entityManager.createQuery("DELETE FROM Product").executeUpdate();
 		entityManager.getTransaction().commit();
@@ -108,6 +116,13 @@ public class OperationsOnOrderMySqlSteps {
 	@When("The user clicks on product")
 	public void whenTheUserClicksOnProduct() {
 		window.list("productList").selectItem(0);
+	}
+
+	@When("The view $viewName is visible")
+	public void whenTheViewIsVisible(String viewName) {
+		await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+			window.panel(viewName).requireVisible();
+		});
 	}
 
 	@When("The user enters a quantity to buy")
@@ -137,7 +152,7 @@ public class OperationsOnOrderMySqlSteps {
 	public void whenTheUserEntersAQuantityToRemove() {
 		window.spinner("cartReturnSpinner").enterText(String.valueOf(toRemoveQuantity));
 	}
-	
+
 	@Then("Cart list is empty")
 	public void thenCartListIsEmpty() {
 		assertThat(window.list("cartList").contents()).isEmpty();
@@ -148,8 +163,6 @@ public class OperationsOnOrderMySqlSteps {
 		String content = createRowForProducts(product1, insertedQuantity - toRemoveQuantity);
 		assertThat(window.list("cartList").contents()).containsExactlyInAnyOrder(content);
 	}
-
-
 
 	private void addProductToDataBase(Product product) {
 		entityManager.getTransaction().begin();
@@ -162,7 +175,6 @@ public class OperationsOnOrderMySqlSteps {
 		entityManager.persist(stock);
 		entityManager.getTransaction().commit();
 	}
-
 
 	private String createRowForProducts(Product product, int quantity) {
 		return product1.getName() + " - Quantity: " + quantity + " - Price: " + product1.getPrice() + " € - Subtotal: "
