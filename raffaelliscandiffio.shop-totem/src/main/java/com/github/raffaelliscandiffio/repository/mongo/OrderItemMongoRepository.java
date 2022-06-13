@@ -51,12 +51,12 @@ public class OrderItemMongoRepository implements OrderItemRepository {
 		String productId = orderItem.getProduct().getId();
 		if (productCollection.find(eqFilter(productId)).first() == null)
 			throw new NoSuchElementException(
-					"Reference error, cannot save OrderItem: Product with " + productId + " not found.");
+					"Reference error, cannot save OrderItem: " + idNotFoundToString("Product", productId));
 
 		String orderId = orderItem.getOrder().getId();
 		if (orderCollection.find(session, eqFilter(orderId)).first() == null)
 			throw new NoSuchElementException(
-					"Reference error, cannot save OrderItem: Order with " + orderId + " not found.");
+					"Reference error, cannot save OrderItem: " + idNotFoundToString("Order", orderId));
 
 		Document doc = new Document().append(FIELD_PRODUCT, orderItem.getProduct().getId())
 				.append(FIELD_ORDER, orderItem.getOrder().getId()).append(FIELD_QUANTITY, orderItem.getQuantity());
@@ -84,7 +84,7 @@ public class OrderItemMongoRepository implements OrderItemRepository {
 		String id = orderItem.getId();
 		UpdateResult result = orderItemCollection.updateOne(session, eqFilter(id), update);
 		if (result.getMatchedCount() == 0)
-			throw new NoSuchElementException("OrderItem with id " + id + " not found.");
+			throw new NoSuchElementException(idNotFoundToString("OrderItem", id));
 
 	}
 
@@ -102,6 +102,10 @@ public class OrderItemMongoRepository implements OrderItemRepository {
 		if (itemDocument == null)
 			return null;
 		return fromDocumentToItem(itemDocument);
+	}
+
+	private String idNotFoundToString(String type, String id) {
+		return type + " with id " + id + " not found.";
 	}
 
 	private Bson eqFilter(String id) {

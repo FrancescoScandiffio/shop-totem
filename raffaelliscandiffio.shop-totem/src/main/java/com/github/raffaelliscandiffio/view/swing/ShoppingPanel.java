@@ -127,7 +127,7 @@ public class ShoppingPanel extends JPanel {
 		tf = ((JSpinner.DefaultEditor) editor).getTextField();
 		tf.setColumns(4);
 		tf.addCaretListener(e -> {
-			boolean isValueValid = tf.getText().matches("^[1-9][0-9]*");
+			boolean isValueValid = tf.getText().matches("^[1-9]\\d*");
 			btnAddButton.setEnabled(isValueValid && listProducts.getSelectedIndex() != -1);
 			if (!isValueValid) {
 				lblMessage.setText("Invalid quantity");
