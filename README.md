@@ -38,6 +38,8 @@ In case of MySQL it will only be necessary:
 docker run -d -p 3306:3306 -e MYSQL_DATABASE=" totem" -e MYSQL_ROOT_PASSWORD="" -e MYSQL_ALLOW_EMPTY_PASSWORD="yes" mysql :8.0.28
 ```
 
+Alternatively both containers can be launched with the `docker-compose up` command, using our configuration. 
+
 ## Startup exceptions
 
 When running the tests, the following [exception](https://jira.mongodb.org/browse/JAVA-2091) may occur:
