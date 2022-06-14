@@ -27,12 +27,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.github.raffaelliscandiffio.controller.TotemController;
+import com.github.raffaelliscandiffio.exception.TransactionException;
 import com.github.raffaelliscandiffio.model.Order;
 import com.github.raffaelliscandiffio.model.OrderItem;
 import com.github.raffaelliscandiffio.model.OrderStatus;
 import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.service.ShoppingService;
-import com.github.raffaelliscandiffio.transaction.TransactionException;
 import com.github.raffaelliscandiffio.utils.GUITestExtension;
 import com.github.raffaelliscandiffio.view.swing.TotemSwingView;
 

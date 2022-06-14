@@ -15,10 +15,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.github.raffaelliscandiffio.exception.TransactionException;
 import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.model.Stock;
 import com.github.raffaelliscandiffio.service.ShoppingService;
-import com.github.raffaelliscandiffio.transaction.TransactionException;
 import com.github.raffaelliscandiffio.transaction.mysql.TransactionManagerMySql;
 
 class ServiceMySqlIT {

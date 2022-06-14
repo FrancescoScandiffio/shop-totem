@@ -24,12 +24,12 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.github.raffaelliscandiffio.exception.TransactionException;
 import com.github.raffaelliscandiffio.model.Order;
 import com.github.raffaelliscandiffio.model.OrderItem;
 import com.github.raffaelliscandiffio.model.OrderStatus;
 import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.service.ShoppingService;
-import com.github.raffaelliscandiffio.transaction.TransactionException;
 import com.github.raffaelliscandiffio.view.TotemView;
 
 @ExtendWith(MockitoExtension.class)
