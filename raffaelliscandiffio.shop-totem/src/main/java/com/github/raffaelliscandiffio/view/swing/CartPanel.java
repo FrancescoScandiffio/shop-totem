@@ -58,6 +58,7 @@ public class CartPanel extends JPanel {
 
 		btnContinueShopping = new JButton("Continue Shopping");
 		btnContinueShopping.setActionCommand("openShopping");
+		btnContinueShopping.setName("continueShoppingButton");
 		btnContinueShopping.setFocusPainted(false);
 		GridBagConstraints gbc_btnBackToShopping = new GridBagConstraints();
 		gbc_btnBackToShopping.fill = GridBagConstraints.HORIZONTAL;
@@ -133,6 +134,7 @@ public class CartPanel extends JPanel {
 		horizontalBox.add(horizontalStrut);
 
 		btnReturnQuantity = new JButton("Return quantity");
+		btnReturnQuantity.setName("returnQuantityButton");
 		btnReturnQuantity.setEnabled(false);
 		btnReturnQuantity.setFocusPainted(false);
 		GridBagConstraints gbc_btnReturnQuantity = new GridBagConstraints();
@@ -178,6 +180,7 @@ public class CartPanel extends JPanel {
 
 		btnCheckout = new JButton("Checkout");
 		btnCheckout.setActionCommand("checkout");
+		btnCheckout.setName("checkoutButton");
 		btnCheckout.setEnabled(false);
 		btnCheckout.setFocusPainted(false);
 		GridBagConstraints gbc_btnCheckout = new GridBagConstraints();
@@ -188,6 +191,7 @@ public class CartPanel extends JPanel {
 		add(btnCheckout, gbc_btnCheckout);
 
 		btnRemoveSelected = new JButton("Remove selected");
+		btnRemoveSelected.setName("removeSelectedButton");
 		btnRemoveSelected.setEnabled(false);
 		btnRemoveSelected.setActionCommand("removeSelected");
 		btnRemoveSelected.setFocusPainted(false);

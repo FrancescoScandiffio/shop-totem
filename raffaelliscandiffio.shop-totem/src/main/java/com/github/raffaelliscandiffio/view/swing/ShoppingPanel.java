@@ -62,6 +62,7 @@ public class ShoppingPanel extends JPanel {
 		add(btnCancelButton, gbc_btnCancelButton);
 
 		btnCart = new JButton("Cart");
+		btnCart.setName("cartButton");
 		btnCart.setActionCommand("openCart");
 		btnCart.setFocusPainted(false);
 		GridBagConstraints gbc_btnCart = new GridBagConstraints();
@@ -140,6 +141,7 @@ public class ShoppingPanel extends JPanel {
 		btnAddButton = new JButton("Add");
 		btnAddButton.setEnabled(false);
 		btnAddButton.setFocusPainted(false);
+		btnAddButton.setName("addButton");
 
 		GridBagConstraints gbc_btnAddButton = new GridBagConstraints();
 		gbc_btnAddButton.insets = new Insets(0, 0, 5, 0);

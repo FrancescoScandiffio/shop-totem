@@ -1,6 +1,6 @@
 name: Java CI with Maven on ubuntu-latest
 
-on:
+on:      
   push:
     paths-ignore:
       - '**/README.md'
@@ -8,6 +8,7 @@ on:
       - '**/LICENSE'
       - '**.pdf'
       - '**.yml'
+      - '**/bdd/**'
       
   pull_request:
       paths-ignore:
@@ -16,6 +17,8 @@ on:
       - '**/LICENSE'
       - '**.pdf'
       - '**.yml'
+      
+  workflow_dispatch:
 
 jobs:
   build:
@@ -58,6 +61,7 @@ jobs:
        xvfb-run mvn verify
        org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
        -DskipUTs=true
+       -DskipBDDs=true
        -Dsonar.organization=francescoscandiffio-github
        -Dsonar.host.url=https://sonarcloud.io
        -Dsonar.projectKey=FrancescoScandiffio_shop-totem
