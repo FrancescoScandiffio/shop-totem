@@ -1,6 +1,7 @@
 package com.github.raffaelliscandiffio.repository.mysql;
 
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.TypedQuery;
 
 import com.github.raffaelliscandiffio.model.Stock;
@@ -34,7 +35,7 @@ public class StockMySqlRepository implements StockRepository {
 	public Stock findByProductId(String productId) {
 		TypedQuery<Stock> query = entityManager
 				.createQuery("SELECT s FROM Stock s WHERE s.product.id = :productId", Stock.class)
-				.setParameter("productId", productId);
+				.setParameter("productId", productId).setLockMode(LockModeType.PESSIMISTIC_WRITE);
 		Stock s = query.getResultList().stream().findFirst().orElse(null);
 		if (s != null)
 			entityManager.refresh(s);
