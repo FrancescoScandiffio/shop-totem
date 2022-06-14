@@ -6,6 +6,7 @@ Given The View is shown
 And The Database starts empty
 And The Database contains few products and stocks
 When The user clicks welcomeStartShopping button
+And The view shoppingPane is visible
 And The user clicks on product
 And The user enters a quantity to buy
 And The user clicks addButton button
