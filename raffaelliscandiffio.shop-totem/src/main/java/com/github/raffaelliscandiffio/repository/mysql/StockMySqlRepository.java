@@ -35,6 +35,9 @@ public class StockMySqlRepository implements StockRepository {
 		TypedQuery<Stock> query = entityManager
 				.createQuery("SELECT s FROM Stock s WHERE s.product.id = :productId", Stock.class)
 				.setParameter("productId", productId);
-		return query.getResultList().stream().findFirst().orElse(null);
+		Stock s = query.getResultList().stream().findFirst().orElse(null);
+		if (s != null)
+			entityManager.refresh(s);
+		return s;
 	}
 }
