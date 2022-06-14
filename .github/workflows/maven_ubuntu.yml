@@ -57,6 +57,7 @@ jobs:
        xvfb-run mvn verify
        org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
        -DskipUTs=true
+       -DskipBDDs=true
        -Dsonar.organization=francescoscandiffio-github
        -Dsonar.host.url=https://sonarcloud.io
        -Dsonar.projectKey=FrancescoScandiffio_shop-totem
