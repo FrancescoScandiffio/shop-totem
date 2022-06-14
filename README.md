@@ -15,7 +15,7 @@ The full Maven build can be obtained through the command:
 ```bash
 mvn clean verify
 ```
-With it, all unit, integration and E2E tests with BDD will be performed. It will also generate the JaCoCo code coverage report. 
+With it, all unit, integration and E2E tests with BDD will be performed. Also the required database Docker containers will be started and stopped automatically during the tests. It will also be generated the JaCoCo code coverage report. 
 
 ## Run in production
 
