@@ -118,8 +118,9 @@ public class OperationsOnOrderMongoSteps {
 		stockCollection = database.getCollection(STOCK_COLLECTION_NAME);
 	}
 
+	@When("The Database contains few products and stocks")
 	@Given("The Database contains few products and stocks")
-	public void givenDatabaseContainsFewProductsAndStocks() {
+	public void DatabaseContainsFewProductsAndStocks() {
 
 		addProductToDataBase(session, product1);
 		addStockToDataBase(session, stock1);
@@ -175,6 +176,12 @@ public class OperationsOnOrderMongoSteps {
 	public void thenCartListIsEmpty() {
 		assertThat(window.list("cartList").contents()).isEmpty();
 	}
+	
+	@Then("The shopping list contains products")
+	public void thenTheShoppingListContainsProducts() {
+		String content = shoppingRow(product1);
+		assertThat(window.list("productList").contents()).containsExactlyInAnyOrder(content);
+	}
 
 	@Then("Cart list contains item with removed quantity")
 	public void thenCartListContainsItemWithRemovedQuantity() {
@@ -206,6 +213,10 @@ public class OperationsOnOrderMongoSteps {
 	private String createRowForProducts(Product product, int quantity) {
 		return product1.getName() + " - Quantity: " + quantity + " - Price: " + product1.getPrice() + " € - Subtotal: "
 				+ quantity * product1.getPrice() + " €";
+	}
+	
+	private String shoppingRow(Product product) {
+		return product.getName() + " - Price: " + product.getPrice() + " €";
 	}
 
 }

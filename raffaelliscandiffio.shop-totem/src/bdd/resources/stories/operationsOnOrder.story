@@ -1,6 +1,15 @@
 Narrative:
 Stories to test The ShopTotem application
 
+
+Scenario: Shopping list is initialized correctly
+Given The View is shown
+And The Database starts empty
+When The Database contains few products and stocks
+And The user clicks welcomeStartShopping button
+Then The shopping list contains products
+
+
 Scenario: Buy product
 Given The View is shown
 And The Database starts empty

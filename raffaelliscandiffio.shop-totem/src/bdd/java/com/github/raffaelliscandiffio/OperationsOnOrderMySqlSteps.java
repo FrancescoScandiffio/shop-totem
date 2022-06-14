@@ -101,8 +101,9 @@ public class OperationsOnOrderMySqlSteps {
 		entityManager.getTransaction().commit();
 	}
 
+	@When("The Database contains few products and stocks")
 	@Given("The Database contains few products and stocks")
-	public void givenDatabaseContainsFewProductsAndStocks() {
+	public void databaseContainsFewProductsAndStocks() {
 
 		addProductToDataBase(product1);
 		addStockToDataBase(stock1);
@@ -164,6 +165,12 @@ public class OperationsOnOrderMySqlSteps {
 		String content = createRowForProducts(product1, insertedQuantity - toRemoveQuantity);
 		assertThat(window.list("cartList").contents()).containsExactlyInAnyOrder(content);
 	}
+	
+	@Then("The shopping list contains products")
+	public void thenTheShoppingListContainsProducts() {
+		String content = shoppingRow(product1);
+		assertThat(window.list("productList").contents()).containsExactlyInAnyOrder(content);
+	}
 
 	@Given("The Database contains a product out of stock")
 	public void thenDatabaseContainsAProductOutOfStock() {
@@ -188,6 +195,10 @@ public class OperationsOnOrderMySqlSteps {
 	private String createRowForProducts(Product product, int quantity) {
 		return product1.getName() + " - Quantity: " + quantity + " - Price: " + product1.getPrice() + " € - Subtotal: "
 				+ quantity * product1.getPrice() + " €";
+	}
+	
+	private String shoppingRow(Product product) {
+		return product.getName() + " - Price: " + product.getPrice() + " €";
 	}
 
 }
