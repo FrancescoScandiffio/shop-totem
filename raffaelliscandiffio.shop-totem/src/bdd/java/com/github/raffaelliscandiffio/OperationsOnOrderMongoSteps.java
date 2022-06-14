@@ -41,7 +41,6 @@ public class OperationsOnOrderMongoSteps {
 	private MongoCollection<Document> productCollection;
 	private MongoCollection<Document> stockCollection;
 
-
 	private FrameFixture window;
 
 	private final int insertedQuantity = 10;
@@ -71,7 +70,7 @@ public class OperationsOnOrderMongoSteps {
 		stockCollection = database.getCollection(STOCK_COLLECTION_NAME);
 
 		session = client.startSession();
-		
+
 		product1 = new Product(productName1, productPrice1);
 		stock1 = new Stock(product1, productQuantity1);
 	}
@@ -182,20 +181,26 @@ public class OperationsOnOrderMongoSteps {
 		assertThat(window.list("cartList").contents()).containsExactlyInAnyOrder(content);
 	}
 
-	
+	@Given("The Database contains a product out of stock")
+	public void thenDatabaseContainsAProductOutOfStock() {
+		addProductToDataBase(session, product1);
+		stock1.setQuantity(0);
+		addStockToDataBase(session, stock1);
+
+	}
+
 	private void addProductToDataBase(ClientSession session, Product product) {
 		Document productDocument = new Document().append("name", product.getName()).append("price", product.getPrice());
-		productCollection.insertOne( session, productDocument);
+		productCollection.insertOne(session, productDocument);
 		product.setId(productDocument.get("_id").toString());
 	}
 
 	private void addStockToDataBase(ClientSession client, Stock stock) {
-		Document stockDocument = new Document().append("product", stock.getProduct().getId()).append("quantity", stock.getQuantity());
+		Document stockDocument = new Document().append("product", stock.getProduct().getId()).append("quantity",
+				stock.getQuantity());
 		stockCollection.insertOne(session, stockDocument);
 		stock.setId(stockDocument.get("_id").toString());
 	}
-	
-	
 
 	private String createRowForProducts(Product product, int quantity) {
 		return product1.getName() + " - Quantity: " + quantity + " - Price: " + product1.getPrice() + " € - Subtotal: "

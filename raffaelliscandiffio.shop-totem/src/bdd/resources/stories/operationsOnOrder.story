@@ -62,3 +62,15 @@ And The user clicks returnQuantityButton button
 Then Cart list contains item with removed quantity
 
 
+Scenario: Do not buy a product out of stock
+Given The View is shown
+And The Database starts empty
+And The Database contains a product out of stock
+When The user clicks welcomeStartShopping button
+And The view shoppingPane is visible
+And The user clicks on product
+And The user enters a quantity to buy
+And The user clicks addButton button
+And The user clicks cartButton button
+And The view cartPane is visible
+Then Cart list is empty

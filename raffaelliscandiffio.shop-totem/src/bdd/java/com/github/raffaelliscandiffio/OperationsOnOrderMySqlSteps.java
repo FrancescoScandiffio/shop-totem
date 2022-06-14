@@ -164,6 +164,14 @@ public class OperationsOnOrderMySqlSteps {
 		assertThat(window.list("cartList").contents()).containsExactlyInAnyOrder(content);
 	}
 
+	@Given("The Database contains a product out of stock")
+	public void thenDatabaseContainsAProductOutOfStock() {
+		addProductToDataBase(product1);
+		stock1.setQuantity(0);
+		addStockToDataBase(stock1);
+
+	}
+
 	private void addProductToDataBase(Product product) {
 		entityManager.getTransaction().begin();
 		entityManager.persist(product);
