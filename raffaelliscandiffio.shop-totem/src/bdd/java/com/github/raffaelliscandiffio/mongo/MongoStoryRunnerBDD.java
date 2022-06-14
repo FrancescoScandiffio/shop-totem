@@ -1,4 +1,4 @@
-package com.github.raffaelliscandiffio;
+package com.github.raffaelliscandiffio.mongo;
 
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.configuration.MostUsefulConfiguration;
@@ -11,9 +11,9 @@ import org.jbehave.core.steps.InstanceStepsFactory;
 import java.util.Collections;
 import java.util.List;
 
-public class StoryRunnerMongoBDD extends JUnitStories {
+public class MongoStoryRunnerBDD extends JUnitStories {
     public List<String> storyPaths() {
-        return Collections.singletonList("stories/operationsOnOrder.story");
+        return Collections.singletonList("stories/mongoStory.story");
     }
 
     @Override
@@ -24,6 +24,6 @@ public class StoryRunnerMongoBDD extends JUnitStories {
 
     @Override
     public InjectableStepsFactory stepsFactory() {
-        return new InstanceStepsFactory(configuration(), new OperationsOnOrderMongoSteps());
+        return new InstanceStepsFactory(configuration(), new MongoStorySteps());
     }
 }

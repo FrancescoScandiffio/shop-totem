@@ -1,4 +1,4 @@
-package com.github.raffaelliscandiffio;
+package com.github.raffaelliscandiffio.mysql;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -26,7 +26,7 @@ import com.github.raffaelliscandiffio.app.swing.App;
 import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.model.Stock;
 
-public class OperationsOnOrderMySqlSteps {
+public class MySqlStorySteps {
 
 	private static EntityManager entityManager;
 

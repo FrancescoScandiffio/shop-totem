@@ -1,4 +1,4 @@
-package com.github.raffaelliscandiffio;
+package com.github.raffaelliscandiffio.mongo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -28,7 +28,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
-public class OperationsOnOrderMongoSteps {
+public class MongoStorySteps {
 
 	private static MongoClient client;
 	private static final String DATABASE_NAME = "totem";
