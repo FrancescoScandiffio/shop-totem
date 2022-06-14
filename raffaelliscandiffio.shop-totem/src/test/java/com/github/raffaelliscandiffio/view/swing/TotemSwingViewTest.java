@@ -2,6 +2,7 @@ package com.github.raffaelliscandiffio.view.swing;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.Arrays;
 
@@ -311,6 +312,23 @@ class TotemSwingViewTest {
 			window.button(JButtonMatcher.withText("Add")).click();
 
 			verify(totemController).buyProduct(orderId, product.getId(), 3);
+		}
+		
+		@Test
+		@DisplayName("Button 'Add' should not delegate to TotemController 'buyProduct' when disabled")
+		void testAddButtonShouldNotDelegateToTotemControllerBuyProductWhenDisabled() {
+			String orderId = "3";
+			Product product = new Product("Product1", 2);
+			totemSwingView.setOrderId(orderId);
+			JButtonFixture addButton = window.button(JButtonMatcher.withText("Add"));
+			GuiActionRunner.execute(() -> totemSwingView.getShoppingPane().getListProductsModel().addElement(product));
+
+			window.list("productList").selectItem(0);
+			window.spinner("quantitySpinner").enterText("3");
+			GuiActionRunner.execute(() -> addButton.target().setEnabled(false));
+			window.button(JButtonMatcher.withText("Add")).click();
+			
+			verifyNoInteractions(totemController);
 		}
 
 		@Test
@@ -881,6 +899,20 @@ class TotemSwingViewTest {
 				window.button(JButtonMatcher.withText("Return quantity")).click();
 				verify(totemController).returnItem(itemToReturn, 3);
 			}
+			
+			@Test
+			@DisplayName("Button 'return quantity' should not delegate to TotemController 'returnProduct' when not enabled")
+			void testButtonReturnQuantityShouldNotDelegateToTotemControllerReturnQuantityWhenNotEnabled() {
+				OrderItem itemToReturn = new OrderItem(new Product("Product", 3.0), new Order(OrderStatus.OPEN), 5);
+				GuiActionRunner
+						.execute(() -> totemSwingView.getCartPane().getListOrderItemsModel().addElement(itemToReturn));
+				window.list("cartList").selectItem(0);
+				window.spinner("cartReturnSpinner").enterTextAndCommit("3");
+				GuiActionRunner.execute(() -> window.button(JButtonMatcher.withText("Return quantity")).target().setEnabled(false));
+				window.button(JButtonMatcher.withText("Return quantity")).click();
+				verifyNoInteractions(totemController);
+			}
+			
 
 			@ParameterizedTest
 			@ValueSource(strings = { "5", "6" })

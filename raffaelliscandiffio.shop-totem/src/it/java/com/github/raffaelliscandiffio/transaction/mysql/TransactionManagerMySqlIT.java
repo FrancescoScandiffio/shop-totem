@@ -14,12 +14,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com.github.raffaelliscandiffio.exception.TransactionException;
 import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.repository.mysql.OrderItemMySqlRepository;
 import com.github.raffaelliscandiffio.repository.mysql.OrderMySqlRepository;
 import com.github.raffaelliscandiffio.repository.mysql.ProductMySqlRepository;
 import com.github.raffaelliscandiffio.repository.mysql.StockMySqlRepository;
-import com.github.raffaelliscandiffio.transaction.TransactionException;
 
 
 class TransactionManagerMySqlIT {

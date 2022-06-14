@@ -112,13 +112,19 @@ class StockMySqlRepositoryIT {
 	void testFindStockByProductId() {
 		persistObjectToDatabase(product_1);
 		persistObjectToDatabase(stock_1);
+		entityManager.getTransaction().begin();
 		assertThat(stockRepository.findByProductId(product_1.getId())).isEqualTo(stock_1);
+		entityManager.getTransaction().commit();
+
 	}
 
 	@Test
 	@DisplayName("Find stock by Product id should return null when not found")
 	void testFindStockByProductIdWhenNotFoundShouldReturnNull() {
+		entityManager.getTransaction().begin();
 		assertThat(stockRepository.findByProductId("missing_id")).isNull();
+		entityManager.getTransaction().commit();
+
 	}
 
 	private void persistObjectToDatabase(Object object) {

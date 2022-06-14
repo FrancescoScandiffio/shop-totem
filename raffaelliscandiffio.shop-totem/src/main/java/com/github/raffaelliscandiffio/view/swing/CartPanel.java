@@ -221,7 +221,7 @@ public class CartPanel extends JPanel {
 
 	private void validateSpinnerContent() {
 		final String text = spinnerTextField.getText();
-		final boolean isPositiveInteger = text.matches("^[1-9][0-9]*$");
+		final boolean isPositiveInteger = text.matches("^[1-9]\\d*$");
 		if (isPositiveInteger) {
 			if (!spinner.isEnabled()) {
 				messageLabel.setText(" ");

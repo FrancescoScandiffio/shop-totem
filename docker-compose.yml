@@ -1,0 +1,28 @@
+version: "2.0"
+
+services:
+  totem_sql_db:
+    container_name: "totem_sql_db"
+    image: "mysql:8.0.29"
+    restart: always
+    environment:
+      - MYSQL_DATABASE=totem
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true
+    ports:
+      - "3306:3306"
+
+  totem_mongo_db:
+    container_name: "totem_mongo_db"
+    image: "candis/mongo-replica-set"
+    restart: always
+    ports:
+      - "27017:27017"
+      - "27018:27018"
+      - "27019:27019"
+
+networks:
+    default:
+        driver: bridge

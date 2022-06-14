@@ -6,6 +6,8 @@ on:
       - '**/README.md'
       - '**/.github/workflows/**'
       - '**/LICENSE'
+      - '**.pdf'
+      - '**.yml'
       - '**/bdd/**'
       
   pull_request:
@@ -13,6 +15,8 @@ on:
       - '**/README.md'
       - '**/.github/workflows/**'
       - '**/LICENSE'
+      - '**.pdf'
+      - '**.yml'
       
   workflow_dispatch:
 
