@@ -41,3 +41,4 @@ Exception: Interrupted acquiring a permit to retrieve an item from the pool
 ```
 This can be thrown when Mongo requests to close the connection, but the thread has already been interrupted.
 
+We also noticed, in the CI, a warning regarding `An illegal reflective access operation`, that seems to be due to [the use of AssertJ Swing with Java11](https://github.com/assertj/assertj-swing/issues/226). And in particular by a reflective access done by `org.assertj.swing.dependency.fest_reflect`.
