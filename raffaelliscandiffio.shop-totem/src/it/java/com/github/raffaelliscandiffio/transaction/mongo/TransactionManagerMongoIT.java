@@ -11,12 +11,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com.github.raffaelliscandiffio.exception.TransactionException;
 import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.repository.mongo.OrderItemMongoRepository;
 import com.github.raffaelliscandiffio.repository.mongo.OrderMongoRepository;
 import com.github.raffaelliscandiffio.repository.mongo.ProductMongoRepository;
 import com.github.raffaelliscandiffio.repository.mongo.StockMongoRepository;
-import com.github.raffaelliscandiffio.transaction.TransactionException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClients;

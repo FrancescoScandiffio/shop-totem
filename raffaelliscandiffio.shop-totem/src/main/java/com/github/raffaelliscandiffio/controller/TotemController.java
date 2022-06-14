@@ -2,11 +2,11 @@ package com.github.raffaelliscandiffio.controller;
 
 import java.util.List;
 
+import com.github.raffaelliscandiffio.exception.TransactionException;
 import com.github.raffaelliscandiffio.model.Order;
 import com.github.raffaelliscandiffio.model.OrderItem;
 import com.github.raffaelliscandiffio.model.Product;
 import com.github.raffaelliscandiffio.service.ShoppingService;
-import com.github.raffaelliscandiffio.transaction.TransactionException;
 import com.github.raffaelliscandiffio.view.TotemView;
 
 public class TotemController {

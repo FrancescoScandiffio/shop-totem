@@ -1,4 +1,4 @@
-package com.github.raffaelliscandiffio.transaction;
+package com.github.raffaelliscandiffio.exception;
 
 public class TransactionException extends RuntimeException {
 
