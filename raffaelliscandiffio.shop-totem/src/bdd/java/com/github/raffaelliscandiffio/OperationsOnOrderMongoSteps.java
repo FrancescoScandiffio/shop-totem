@@ -136,6 +136,7 @@ public class OperationsOnOrderMongoSteps {
 	}
 
 	@When("The view $viewName is visible")
+	@Then("The view $viewName is visible")
 	public void whenTheViewIsVisible(String viewName) {
 		await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
 			window.panel(viewName).requireVisible();

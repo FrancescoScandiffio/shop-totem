@@ -74,3 +74,18 @@ And The user clicks addButton button
 And The user clicks cartButton button
 And The view cartPane is visible
 Then Cart list is empty
+
+
+Scenario: Cancel shopping in cartPanel
+Given The View is shown
+And The Database starts empty
+And The Database contains few products and stocks
+When The user clicks welcomeStartShopping button
+And The view shoppingPane is visible
+And The user clicks on product
+And The user enters a quantity to buy
+And The user clicks addButton button
+And The user clicks cartButton button
+And The view cartPane is visible
+And The user clicks cartBtnCancelShopping button
+Then The view welcomePane is visible
