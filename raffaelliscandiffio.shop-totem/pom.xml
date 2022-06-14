@@ -9,6 +9,8 @@
 	<properties>
 		<skipTests>false</skipTests>
 		<skipUTs>${skipTests}</skipUTs>
+		<skipITs>false</skipITs>
+		<skipBDDs>${skipITs}</skipBDDs>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
@@ -336,6 +338,9 @@
 							<includes>
 								<include>**/*IT.java</include>
 							</includes>
+							<excludes>
+								<exclude>**/*BDD.java</exclude>
+							</excludes>
 						</configuration>
 					</execution>
 					<execution>
@@ -345,6 +350,7 @@
 							<goal>verify</goal>
 						</goals>
 						<configuration>
+							<skipITs>${skipBDDs}</skipITs>
 							<excludes>
 								<exclude>**/*IT.java</exclude>
 							</excludes>
