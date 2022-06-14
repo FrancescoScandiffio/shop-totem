@@ -13,20 +13,23 @@
 
 Shop Totem is a desktop application that simulates a supermarket shopping system. The implementation replicates some real-world constraints, such as limiting the amount of products that can be bought based on the stock available in the warehouse (the database). It can also use either a relational database or a non-relational database, specifically MySQL and MongoDB, depending on the value of a command line parameter specified at startup.
 
+## Pre-requisites
+In order to run this project is required Java8 and Docker. Having Docker-compose is recommended in order to start databases easily, although it is not mandatory. The databases will try to connect to the ports:
+- MySQL: 3306
+- MongoDB: 27017, 27018 and 27019 (due to the replica set)
 
 ## Maven build
 The full Maven build can be obtained through the command:
 ```bash
 mvn clean verify
 ```
-Mutation testing is disabled by default. To
-With it, all unit, integration and E2E tests with BDD will be performed. Also the required database Docker containers will be started and stopped automatically during the tests. It will also be generated the JaCoCo code coverage report. 
-
+With it, all unit, integration and E2E tests with BDD will be performed. Also the required database Docker containers will be started and stopped automatically during the tests. It will also be generated the JaCoCo code coverage report. Mutation testing is disabled by default but can be executed with:
+```
+mvn org.pitest:pitest-maven:mutationCoverage
+```
 ## Run in production
 
-When running the application, it is necessary to specify the database of choice. This can be done by entering the parameter `--database`, with a value of choice between `mysql` (default) and `mongo`.
-
-However, before running the application it will be necessary to run the container for the chosen database. In the case of MongoDB, a Replica set must be launched, which is essential for running transactions. This can be done with the following command:
+Before running the application, it will be necessary to run the container for the chosen database. In case of MongoDB, a Replica set must be launched, which is essential for running transactions. This can be done with the following command:
 
 ```bash
 docker run -d -p 27017:27017 -p 27018:27018 -p 27019:27019 candis/mongo-replica-set
@@ -39,6 +42,9 @@ docker run -d -p 3306:3306 -e MYSQL_DATABASE=" totem" -e MYSQL_ROOT_PASSWORD="" 
 ```
 
 Alternatively both containers can be launched with the `docker-compose up` command, using our configuration. 
+
+After that, when running the application, it is necessary to specify the database to use. This can be done by entering the parameter `--database`, with a value of choice between `mysql` (default) and `mongo`.
+
 
 ## Startup exceptions
 
