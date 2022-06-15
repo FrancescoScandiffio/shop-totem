@@ -84,7 +84,10 @@ public class ShoppingService {
 
 					if (repositoryItem == null)
 						throw new RepositoryException("Item not found: " + itemId);
-					if (!repositoryItem.equals(orderItem))
+
+					if (orderItem.getQuantity() != repositoryItem.getQuantity()
+							|| !orderItem.getOrder().equals(repositoryItem.getOrder())
+							|| !orderItem.getProduct().equals(repositoryItem.getProduct()))
 						throw new RepositoryException("Stale data detected in OrderItem with id " + itemId);
 
 					String productId = orderItem.getProduct().getId();

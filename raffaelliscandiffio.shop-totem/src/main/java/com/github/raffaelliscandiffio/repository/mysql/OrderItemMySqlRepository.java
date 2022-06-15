@@ -23,7 +23,8 @@ public class OrderItemMySqlRepository implements OrderItemRepository {
 
 	@Override
 	public OrderItem findById(String id) {
-		return entityManager.find(OrderItem.class, id);
+		OrderItem item = entityManager.find(OrderItem.class, id);
+		return initializeSubtotal(item);
 	}
 
 	@Override
@@ -42,7 +43,10 @@ public class OrderItemMySqlRepository implements OrderItemRepository {
 		TypedQuery<OrderItem> query = entityManager
 				.createQuery("SELECT item FROM OrderItem item WHERE item.order.id = :orderId", OrderItem.class)
 				.setParameter("orderId", orderId);
-		return query.getResultList();
+		List<OrderItem> items = query.getResultList();
+		for (OrderItem item : items)
+			item.setSubTotal(item.getQuantity() * item.getProduct().getPrice());
+		return items;
 	}
 
 	@Override
@@ -50,7 +54,14 @@ public class OrderItemMySqlRepository implements OrderItemRepository {
 		TypedQuery<OrderItem> query = entityManager.createQuery(
 				"SELECT item FROM OrderItem item WHERE item.product.id= :productId AND item.order.id = :orderId",
 				OrderItem.class).setParameter("productId", productId).setParameter("orderId", orderId);
-		return query.getResultList().stream().findFirst().orElse(null);
+		OrderItem item = query.getResultList().stream().findFirst().orElse(null);
+		return initializeSubtotal(item);
+	}
+
+	private OrderItem initializeSubtotal(OrderItem item) {
+		if (item != null)
+			item.setSubTotal(item.getQuantity() * item.getProduct().getPrice());
+		return item;
 	}
 
 }

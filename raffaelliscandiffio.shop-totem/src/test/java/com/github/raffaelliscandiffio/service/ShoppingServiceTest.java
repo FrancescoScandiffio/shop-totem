@@ -347,12 +347,46 @@ class ShoppingServiceTest {
 		}
 
 		@Test
-		@DisplayName("When the given item is found by id but is not equal to the retrieved one, should throw and not update")
-		void testReturnItemWhenIsFoundButNotEqualToTheRetrievedOneShouldThrowException() {
+		@DisplayName("When the given item is found by id but has different quantity than the retrieved one, should throw and not update")
+		void testReturnItemWhenIsFoundButHasDifferentQuantityThanTheRetrievedOneShouldThrowException() {
 			Product product = newTestDefaultProductWithId(PRODUCT_ID_1);
 			Order storedOrder = newTestOrderWithId(ORDER_ID, OPEN);
 			OrderItem repositoryItem = newTestOrderItemWithId(ITEM_ID_1, product, storedOrder, MID_QUANTITY);
 			OrderItem viewItem = newTestOrderItemWithId(ITEM_ID_1, product, storedOrder, GREAT_QUANTITY);
+			when(itemRepository.findById(ITEM_ID_1)).thenReturn(repositoryItem);
+
+			assertThatThrownBy(() -> shoppingService.returnItem(viewItem, LOW_QUANTITY))
+					.isInstanceOf(RepositoryException.class)
+					.hasMessage("Stale data detected in OrderItem with id " + ITEM_ID_1);
+			verify(itemRepository, never()).update(any());
+			verifyNoInteractions(stockRepository);
+		}
+
+		@Test
+		@DisplayName("When the given item is found by id but has different product than the retrieved one, should throw and not update")
+		void testReturnItemWhenIsFoundButHasDifferentProductThanTheRetrievedOneShouldThrowException() {
+			Product product = newTestDefaultProductWithId(PRODUCT_ID_1);
+			Product product_2 = newTestDefaultProductWithId(PRODUCT_ID_1 + "foo");
+			Order storedOrder = newTestOrderWithId(ORDER_ID, OPEN);
+			OrderItem repositoryItem = newTestOrderItemWithId(ITEM_ID_1, product, storedOrder, MID_QUANTITY);
+			OrderItem viewItem = newTestOrderItemWithId(ITEM_ID_1, product_2, storedOrder, MID_QUANTITY);
+			when(itemRepository.findById(ITEM_ID_1)).thenReturn(repositoryItem);
+
+			assertThatThrownBy(() -> shoppingService.returnItem(viewItem, LOW_QUANTITY))
+					.isInstanceOf(RepositoryException.class)
+					.hasMessage("Stale data detected in OrderItem with id " + ITEM_ID_1);
+			verify(itemRepository, never()).update(any());
+			verifyNoInteractions(stockRepository);
+		}
+
+		@Test
+		@DisplayName("When the given item is found by id but has different order than the retrieved one, should throw and not update")
+		void testReturnItemWhenIsFoundButHasDifferentOrderThanTheRetrievedOneShouldThrowException() {
+			Product product = newTestDefaultProductWithId(PRODUCT_ID_1);
+			Order storedOrder = newTestOrderWithId(ORDER_ID, OPEN);
+			Order storedOrder_2 = newTestOrderWithId(ORDER_ID + "foo", OPEN);
+			OrderItem repositoryItem = newTestOrderItemWithId(ITEM_ID_1, product, storedOrder, MID_QUANTITY);
+			OrderItem viewItem = newTestOrderItemWithId(ITEM_ID_1, product, storedOrder_2, MID_QUANTITY);
 			when(itemRepository.findById(ITEM_ID_1)).thenReturn(repositoryItem);
 
 			assertThatThrownBy(() -> shoppingService.returnItem(viewItem, LOW_QUANTITY))

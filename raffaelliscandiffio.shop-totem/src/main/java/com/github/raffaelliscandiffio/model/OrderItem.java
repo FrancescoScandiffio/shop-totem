@@ -46,6 +46,10 @@ public class OrderItem {
 		return order;
 	}
 
+	public void setSubTotal(double subTotal) {
+		this.subTotal = subTotal;
+	}
+
 	public double getSubTotal() {
 		return subTotal;
 	}
