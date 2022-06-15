@@ -45,6 +45,8 @@ Alternatively both containers can be launched with the `docker-compose up` comma
 
 After that, when running the application, it is necessary to specify the database to use. This can be done by entering the parameter `--database`, with a value of choice between `mysql` (default) and `mongo`.
 
+It is also possible to run multiple instances of the application simultaneously. However, for convenience, at the start of each new application the databases are reset and repopulated. For this reason it is advised to open all the applications at once, to avoid resetting data already inserted. In any case, if this happens, without closing the application it is possible to cancel the order. After that, the application will automatically retrieve the data from the database and be ready to use again.
+
 
 ## Startup exceptions
 
