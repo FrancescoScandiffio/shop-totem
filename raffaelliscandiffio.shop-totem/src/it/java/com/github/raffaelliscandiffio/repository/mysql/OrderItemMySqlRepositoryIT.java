@@ -2,6 +2,7 @@ package com.github.raffaelliscandiffio.repository.mysql;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -87,13 +88,12 @@ class OrderItemMySqlRepositoryIT {
 	@Test
 	@DisplayName("Find OrderItem by id with 'findById' when the item exists")
 	void testFindByIdWhenIdIsFound() {
-		OrderItem item = new OrderItem(product_1, order_1, QUANTITY_1);
 		OrderItem toFind = new OrderItem(product_2, order_2, QUANTITY_1);
-		persistObjectToDatabase(item);
 		persistObjectToDatabase(toFind);
+		entityManager.detach(toFind);
 		String assignedId = toFind.getId();
 		OrderItem expectedResult = newOrderItemWithId(assignedId, product_2, order_2, QUANTITY_1);
-		assertThat(orderItemRepository.findById(assignedId)).isEqualTo(expectedResult);
+		assertThat(orderItemRepository.findById(assignedId)).usingRecursiveComparison().isEqualTo(expectedResult);
 	}
 
 	@Test
@@ -153,6 +153,23 @@ class OrderItemMySqlRepositoryIT {
 	}
 
 	@Test
+	@DisplayName("The retrieved items should have the transient field initialized")
+	void testGetListByOrderIdWhenThereAreMultipleMatchesShouldReturnItemsWithInitializedTransientField() {
+		OrderItem match_1 = new OrderItem(product_1, order_1, QUANTITY_1);
+		OrderItem match_2 = new OrderItem(product_2, order_1, QUANTITY_1);
+		persistObjectToDatabase(match_1);
+		persistObjectToDatabase(match_2);
+		entityManager.detach(match_1);
+		entityManager.detach(match_2);
+		List<OrderItem> items = new ArrayList<OrderItem>();
+		items.add(match_1);
+		items.add(match_2);
+		assertThat(orderItemRepository.getListByOrderId(order_1.getId())).usingRecursiveComparison()
+				.ignoringCollectionOrder().isEqualTo(items);
+
+	}
+
+	@Test
 	@DisplayName("Get list of OrderItems by order_id when there are 0 matches should return empty list")
 	void testGetListByOrderIdWhenThereIsNoMatchShouldReturnEmptyList() {
 		OrderItem match_1 = new OrderItem(product_1, order_2, QUANTITY_1);
@@ -167,7 +184,9 @@ class OrderItemMySqlRepositoryIT {
 	void testFindOrderItemByOrderIdAndProductId() {
 		OrderItem match_1 = new OrderItem(product_1, order_1, QUANTITY_1);
 		persistObjectToDatabase(match_1);
-		assertThat(orderItemRepository.findByProductAndOrderId(product_1.getId(), order_1.getId())).isEqualTo(match_1);
+		entityManager.detach(match_1);
+		assertThat(orderItemRepository.findByProductAndOrderId(product_1.getId(), order_1.getId()))
+				.usingRecursiveComparison().isEqualTo(match_1);
 	}
 
 	@Test
