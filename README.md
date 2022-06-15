@@ -29,19 +29,20 @@ mvn org.pitest:pitest-maven:mutationCoverage
 ```
 ## Run in production
 
-Before running the application, it will be necessary to run the container for the chosen database. In case of MongoDB, a Replica set must be launched, which is essential for running transactions. This can be done with the following command:
+Before running the application, it will be necessary to run the container for the chosen database. For simplicity both databases can be launched with the use of our docker-compose. That is, by simply running `docker-compose up`.  
+
+Alternatively only the singular containers can be launched. 
+In case of MongoDB, a Replica set must be run, which is essential for executing transactions. This can be done with the following command:
 
 ```bash
 docker run -d -p 27017:27017 -p 27018:27018 -p 27019:27019 candis/mongo-replica-set
 ```
 
-In case of MySQL it will only be necessary:
+In case of MySQL it will only be required:
 
 ```bash
 docker run -d -p 3306:3306 -e MYSQL_DATABASE=" totem" -e MYSQL_ROOT_PASSWORD="" -e MYSQL_ALLOW_EMPTY_PASSWORD="yes" mysql :8.0.28
 ```
-
-Alternatively both containers can be launched with the `docker-compose up` command, using our configuration. 
 
 After that, when running the application, it is necessary to specify the database to use. This can be done by entering the parameter `--database`, with a value of choice between `mysql` (default) and `mongo`.
 
