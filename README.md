@@ -47,14 +47,3 @@ docker run -d -p 3306:3306 -e MYSQL_DATABASE=" totem" -e MYSQL_ROOT_PASSWORD="" 
 After that, when running the application, it is necessary to specify the database to use. This can be done by entering the parameter `--database`, with a value of choice between `mysql` (default) and `mongo`.
 
 It is also possible to run multiple instances of the application simultaneously. However, for convenience, at the start of each new application the databases are reset and repopulated. For this reason it is advised to open all the applications at once, to avoid resetting data already inserted. In any case, if this happens, without closing the application it is possible to cancel the order. After that, the application will automatically retrieve the data from the database and be ready to use again.
-
-
-## Startup exceptions
-
-When running the tests, the following [exception](https://jira.mongodb.org/browse/JAVA-2091) may occur:
-```
-Exception: Interrupted acquiring a permit to retrieve an item from the pool
-```
-This can be thrown when Mongo requests to close the connection, but the thread has already been interrupted.
-
-We also noticed, in the CI, a warning regarding `An illegal reflective access operation`, that seems to be due to [the use of AssertJ Swing with Java11](https://github.com/assertj/assertj-swing/issues/226). And in particular by a reflective access done by `org.assertj.swing.dependency.fest_reflect`.
